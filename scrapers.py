@@ -176,44 +176,45 @@ async def get_tiktok_video_infos_aweme(username: str, ID: str) -> dict:
     except Exception as e:
         return None
 
-async def get_tiktok_video_infos(username: str, ID: str) -> dict:
-    """
-    Get Infos from the tiktok page and return a dict of relevant informations
-    """
+# async def get_tiktok_video_infos(username: str, ID: str) -> dict:
+#     """
+#     Get Infos from the tiktok page and return a dict of relevant informations.
+#     Tiktok broke this.
+#     """
 
-    infos = {}
+#     infos = {}
 
-    api_url = f"https://www.tiktok.com/node/share/video/{username}/{ID}"
+#     api_url = f"https://www.tiktok.com/node/share/video/{username}/{ID}"
 
-    user_agent = "Il bot di trifase: Emily"
-    headers = {"User-Agent": user_agent}
-    cookies = {
-        "msToken": "tuMSTmXuvazlmlyHVyAtVh_utFNvX8O5XgSYEoTMLKW_d__F7vAP0XM1ev9qxVq-WWKI4Ku8cDvoUiKJqOq7GfOpoAXEMnf_LxNtZymGd2LYslVfF8yFEyDZSK7W-SgHwKe_"
-    }
-
-
-    s = requests.Session()
-    r = s.get(api_url, headers=headers, cookies=cookies)
-    try:
-        data = r.json()
-    except Exception as e:
-        print(e)
-        return None
+#     user_agent = "Il bot di trifase: Emily"
+#     headers = {"User-Agent": user_agent}
+#     cookies = {
+#         "msToken": "tuMSTmXuvazlmlyHVyAtVh_utFNvX8O5XgSYEoTMLKW_d__F7vAP0XM1ev9qxVq-WWKI4Ku8cDvoUiKJqOq7GfOpoAXEMnf_LxNtZymGd2LYslVfF8yFEyDZSK7W-SgHwKe_"
+#     }
 
 
-    try:
-        video_url = data["itemInfo"]["itemStruct"]["video"]["downloadAddr"]
-        caption = f"<a href='https://www.tiktok.com/{username}'>{username}</a>\n"
-        caption += data["itemInfo"]["itemStruct"]["desc"]
-        infos["username"] = username
-        infos["video_id"] = ID
-        infos["video_url"] = video_url
-        infos["title"] = f"Tiktok Video from {username}"
-        infos["caption"] = caption
-        infos["thumbnail_url"] = data["itemInfo"]["itemStruct"]["video"]["cover"]
-        return infos
-    except Exception as e:
-        return None
+#     s = requests.Session()
+#     r = s.get(api_url, headers=headers, cookies=cookies)
+#     try:
+#         data = r.json()
+#     except Exception as e:
+#         print(e)
+#         return None
+
+
+#     try:
+#         video_url = data["itemInfo"]["itemStruct"]["video"]["downloadAddr"]
+#         caption = f"<a href='https://www.tiktok.com/{username}'>{username}</a>\n"
+#         caption += data["itemInfo"]["itemStruct"]["desc"]
+#         infos["username"] = username
+#         infos["video_id"] = ID
+#         infos["video_url"] = video_url
+#         infos["title"] = f"Tiktok Video from {username}"
+#         infos["caption"] = caption
+#         infos["thumbnail_url"] = data["itemInfo"]["itemStruct"]["video"]["cover"]
+#         return infos
+#     except Exception as e:
+#         return None
 
 # async def get_tiktok_video_infos_html(username: str, ID: str) -> dict:
 #     """

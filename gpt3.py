@@ -29,6 +29,10 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         # await update.effective_message.delete()
         return
 
+    model = 'text-davinci-003'
+    if update.effective_user.id == 214582784: # ChrisQQ
+        model = 'text-davinci-001'
+
     price_per_1k = 0.02
 
     try:
@@ -42,7 +46,7 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         data = {
             "prompt": f"{input}",
-            "model": "text-davinci-003",
+            "model": model,
             "temperature": 1,
             "max_tokens": 300,
             "top_p": 1,
@@ -53,7 +57,6 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         async with aiohttp.ClientSession() as session:
             async with session.post("https://api.openai.com/v1/completions", json=data, headers=headers) as r:
                 response = await r.json()
-
         output = response['choices'][0]['text'].strip()
 
         total_tkns = response['usage']['total_tokens']
