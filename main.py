@@ -30,7 +30,7 @@ from asphalto import azzurro, lurkers
 from banca import bot_get_saldo, bot_get_transazioni
 from best_timeline import scrape_tweet_bt, silenzia, deleta_if_channel, aoc_leaderboard
 from compleanni import compleanni_add, compleanni_list, compleanni_manual_check, compleanno_del
-from cron_jobs import check_reminders, check_compleanni, lotto_member_count, do_global_backup
+from cron_jobs import check_reminders, check_compleanni, lotto_member_count, do_global_backup, plot_boiler_stats
 from diochan import save_tensor, random_tensor, search_quote, add_quote, diochan, mon, ascendi
 from donazioni import donazioni, precheckout_callback, successful_payment_callback
 from games import sassocartaforbici
@@ -51,7 +51,7 @@ from scrapers import (tiktok, tiktok_long, new_instagram, instagram_stories,
     youtube_alts, ninofrassica, wikipedia, tiktok_inline, facebook_video, scrape_tweet_media,
     parse_reddit_link, twitch_clips)
 from sets import addset, deleteset, jukebox, listaset
-from smarthome import luci_status, toggle_light, get_light_label, consumo, purificatore
+from smarthome import luci_status, toggle_light, get_light_label, consumo, purificatore, riscaldamento_stats
 from space import solarsystem, launches
 from tarots import tarot, oroscopo, tarotschema
 from testing import test, getfile
@@ -87,6 +87,8 @@ def main():
     j = app.job_queue
 
     # j.run_repeating(check_reminders, interval=30.0, data=None, job_kwargs={'misfire_grace_time': 25})
+    j.run_repeating(plot_boiler_stats, interval=2600.0, data=None, job_kwargs={'misfire_grace_time': 25})
+
     # j.run_repeating(lotto_member_count, interval=300.0, data=None, job_kwargs={'misfire_grace_time': 25})
 
     j.run_daily(lotto_member_count, datetime.time(hour=9, minute=0, tzinfo=pytz.timezone('Europe/Rome')), data=None)
@@ -297,6 +299,8 @@ def main():
     app.add_handler(CommandHandler(['toggle', 'luce', 'toggla'], toggle_light, filters=~filters.UpdateType.EDITED))
     app.add_handler(CommandHandler(['consumo'], consumo, filters=~filters.UpdateType.EDITED))
     app.add_handler(CommandHandler(['purificatore', 'purifier'], purificatore, filters=~filters.UpdateType.EDITED))
+    app.add_handler(CommandHandler(['riscaldamento', 'boiler', 'caldaia'], riscaldamento_stats, filters=~filters.UpdateType.EDITED))
+    
 
 
     # space.py

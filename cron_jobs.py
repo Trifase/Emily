@@ -1,12 +1,20 @@
 import datetime
 import random
+
+import aiohttp
+import peewee
+
 from telegram.ext import CallbackContext, ContextTypes
 
-from utils import printlog, get_display_name, get_now
-import config
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+
 from rich import print
 from rich.progress import track
-import peewee
+
+import config
+from utils import printlog, get_display_name, get_now
+
 
 db = peewee.SqliteDatabase(config.DBPATH)
 
@@ -68,6 +76,175 @@ async def lotto_member_count(context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     else:
         return
+
+# Runs every hour
+async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
+
+    access_token = config.access_token
+    r_token = config.r_token
+    home_id = config.home_id
+    room_id = config.room_id
+    user_id = config.user_id
+    bridge_mac = config.bridge_mac
+    therm_mac = config.therm_mac
+
+    scale = ['30min', '1hour', '3hours', '1day', '1week', '1month']
+
+    async def refresh_token(refresh_token):
+        client_id = config.NETATMO_CLIENT_ID
+        client_secret = config.NETATMO_CLIENT_SECRET
+
+        data = {
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+            "client_id": client_id,
+            "client_secret": client_secret
+        }
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post("https://api.netatmo.com/oauth2/token", data=data) as resp:
+                response = resp.json()
+
+        return response
+
+    async def get_home_data(access_token):
+        headers = {
+            'accept': 'application/json',
+            'Authorization': f'Bearer {access_token}',
+        }
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get('https://api.netatmo.com/api/homesdata', headers=headers) as resp:
+                response = resp.json()
+
+        return response
+
+    async def get_home_status(access_token, home_id):
+        headers = {
+        'accept': 'application/json',
+        'Authorization': f'Bearer {access_token}',
+        }
+
+        params = {
+            'home_id': home_id,
+        }
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get('https://api.netatmo.com/api/homestatus', params=params, headers=headers) as resp:
+                response = resp.json()
+
+        return response
+
+    async def get_room_history(access_token, home_id, room_id, date_end='last', scale='1hour'):
+        headers = {
+            'accept': 'application/json',
+            'Authorization': f'Bearer {access_token}',
+        }
+
+        params = {
+            'home_id': home_id,
+            'room_id': room_id,
+            'scale': scale,
+            # 'date_end': date_end,
+            'type': 'temperature'
+            # 'type': [
+            #     'temperature',
+            #     'sp_temperature',
+            #     'min_temp',
+            #     'max_temp',
+            #     'date_min_temp',
+            #     'date_max_temp',
+            # ],
+            # 'optimize': 'true',
+            # 'real_time': 'false',
+        }
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get('https://api.netatmo.com/api/getroommeasure', params=params, headers=headers) as resp:
+                response = resp.json()
+
+        return response
+
+    # this returns the number of seconds the boiler was on in the time scale
+    async def get_boiler_history(access_token, bridge_mac, therm_mac, date_end='last', scale='1hour'):
+        headers = {
+            'accept': 'application/json',
+            'Authorization': f'Bearer {access_token}',
+        }
+
+        params = {
+            'device_id': bridge_mac,
+            'module_id': therm_mac,
+            'scale': scale,
+            # 'date_end': date_end,
+            'type': 'sum_boiler_on'
+            # 'type': [
+            #     'sum_boiler_on',
+            #     'boileron',
+            #     'boileroff',
+            #     'sum_boiler_off',
+            # ],
+            # 'optimize': 'true',
+            # 'real_time': 'false',
+        }
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get('https://api.netatmo.com/api/getmeasure', params=params, headers=headers) as resp:
+                response = resp.json()
+
+        return response
+
+
+
+    access_token = await refresh_token(r_token)['access_token']
+
+    home_status = await get_home_status(access_token, home_id)
+
+    current_temp = home_status['body']['home']['rooms'][0]['therm_measured_temperature']
+    set_temp = home_status['body']['home']['rooms'][0]['therm_setpoint_temperature']
+    is_boiler_active = home_status['body']['home']['modules'][-1]['boiler_status']
+
+    temp_history = await get_room_history(access_token, home_id, room_id)
+    temps = temp_history['body'][0]
+    boiler_history = await get_boiler_history(access_token, bridge_mac, therm_mac)
+    boiler = boiler_history['body'][0]
+
+
+    initial_timestamp = temps.get('beg_time')
+    step = temps.get('step_time')
+
+    list_timestamps = [initial_timestamp+(step*n) for n in range(len(temps.get('value')))]
+    list_timestamps = [datetime.datetime.fromtimestamp(x).strftime('%d-%m %H:00') for x in list_timestamps]
+    list_temps = [x[0] for x in temps['value']]
+    list_minutes = [x[0]//60 for x in boiler['value']]
+
+
+    N_HOURS = 48
+    px = 1/plt.rcParams['figure.dpi']
+
+    fig,ax = plt.subplots(figsize=(1280*px, 500*px))
+
+    ax.set_xlabel("Hours")
+    ax.set_ylabel("Temp in °C")
+    ax.set_title(f"Temperature and Boiler activity (last {N_HOURS}hrs)\nCurrent: {current_temp}°C - Desidered: {set_temp}°C · Boiler active: {is_boiler_active}")
+    ax.set_ylim(18, 22)
+    ax.yaxis.set_major_locator(ticker.LinearLocator(5))
+    ax.yaxis.set_minor_locator(ticker.LinearLocator(9))
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(6))
+    ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
+    ax.plot(list_timestamps[-N_HOURS:], list_temps[-N_HOURS:])
+    ax.grid(True)
+
+    ax2=ax.twinx()
+    ax2.set_ylabel("Boiler Acttive, Minutes per hour", color='red')
+    ax2.set_ylim(0, 60)
+    ax2.bar(list_timestamps[-N_HOURS:], list_minutes[-N_HOURS:], color='red')
+
+    plt.savefig("images/boiler48h.jpg")
+
+
+
+
 
 
 

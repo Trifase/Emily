@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 import config
 
 from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
+from cron_jobs import plot_boiler_stats
 
 
 def get_bulb(name: str):
@@ -170,7 +171,10 @@ async def purificatore(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message += f"Ore d'uso: {s.filter_hours_used}h - Aria purificati: {s.purify_volume} m³ - Filtro rimanente: {s.filter_life_remaining}%\n"
     await update.message.reply_html(message)
 
-
+async def riscaldamento_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id not in config.ADMINS:
+        return
+    await update.message.reply_photo(open('images/boiler48h.jpg', 'rb'))
 # await update.message.reply_html(f"<code>{tabulate(message_tab, tablefmt='pretty')}</code>")
 
 
