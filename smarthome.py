@@ -163,7 +163,7 @@ async def purificatore(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
     await printlog(update, "chiede lo status del purificatore d'aria")
     import miio
-    air = miio.AirPurifierMiot("192.168.1.84", "e8e5a8bb036e21662c4708b61a829c04")
+    air = miio.AirPurifierMiot("192.168.1.60", "e8e5a8bb036e21662c4708b61a829c04") # 54:48:E6:55:B3:72
     s = air.status()
     message = ""
     message += f"Purificatore d'aria Xiaomi Air Purifier 3H: {'Acceso' if s.is_on else 'Spento'}\n"
@@ -175,34 +175,3 @@ async def riscaldamento_stats(update: Update, context: ContextTypes.DEFAULT_TYPE
     if update.effective_user.id not in config.ADMINS:
         return
     await update.message.reply_photo(open('images/boiler48h.jpg', 'rb'))
-# await update.message.reply_html(f"<code>{tabulate(message_tab, tablefmt='pretty')}</code>")
-
-
-
-# print(message)
-# pprint.pprint(salotto.get_properties(["power"])[0])
-# pprint.pprint(pranzo.get_properties(["power"])[0])
-# pprint.pprint(cucina.get_properties(["power"])[0])
-
-# print(type(penisola))
-# print(type(salotto))
-
-
-# pprint.pprint(penisola.get_properties()['power'])
-
-
-
-
-
-# get_status(penisola)  
-
-
-
-
-# import miio
-# air = miio.AirPurifierMiot("192.168.1.84", "e8e5a8bb036e21662c4708b61a829c04")
-# s = air.status()
-# message = ""
-# message += f"Purificatore d'aria Xiaomi Air Purifier 3H: {'Acceso' if s.is_on else 'Spento'}\n"
-# message += f"Temperatura: {s.temperature}°C - Umidità: {s.humidity}% - AQI: {s.aqi}\n"
-# message += f"Ore d'uso: {s.filter_hours_used}h - Aria purificati: {s.purify_volume} m³ - Filtro rimanente: {s.filter_life_remaining}%\n"
