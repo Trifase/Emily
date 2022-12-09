@@ -57,6 +57,7 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         async with aiohttp.ClientSession() as session:
             async with session.post("https://api.openai.com/v1/completions", json=data, headers=headers) as r:
                 response = await r.json()
+        # print(response)
         output = response['choices'][0]['text'].strip()
 
         total_tkns = response['usage']['total_tokens']
@@ -68,7 +69,7 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_html(f"<b>{input}</b>\n{output}\n<i>______</i>\n<i>Questo messaggio è costato circa ${rounded_price}</i>")
 
     except Exception as e:
-        await update.message.reply_text(f"{e}")
+        await update.message.reply_text(f"Stong rott")
 
 
 async def ai_blank(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

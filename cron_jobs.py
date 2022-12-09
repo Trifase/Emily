@@ -80,7 +80,7 @@ async def lotto_member_count(context: ContextTypes.DEFAULT_TYPE) -> None:
 # Runs every hour
 async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
-    access_token = config.access_token
+    # access_token = config.access_token
     r_token = config.r_token
     home_id = config.home_id
     room_id = config.room_id
@@ -103,7 +103,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
         async with aiohttp.ClientSession() as session:
             async with session.post("https://api.netatmo.com/oauth2/token", data=data) as resp:
-                response = resp.json()
+                response = await resp.json()
 
         return response
 
@@ -115,7 +115,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
         async with aiohttp.ClientSession() as session:
             async with session.get('https://api.netatmo.com/api/homesdata', headers=headers) as resp:
-                response = resp.json()
+                response = await resp.json()
 
         return response
 
@@ -131,11 +131,11 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
         async with aiohttp.ClientSession() as session:
             async with session.get('https://api.netatmo.com/api/homestatus', params=params, headers=headers) as resp:
-                response = resp.json()
+                response = await resp.json()
 
         return response
 
-    async def get_room_history(access_token, home_id, room_id, date_end='last', scale='1hour'):
+    async def get_room_history(access_token, home_id, room_id, date_end='last', type='temperature', scale='1hour'):
         headers = {
             'accept': 'application/json',
             'Authorization': f'Bearer {access_token}',
@@ -145,8 +145,9 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
             'home_id': home_id,
             'room_id': room_id,
             'scale': scale,
+            'date_begin': int(datetime.datetime.now().timestamp())-(3600*50),
             # 'date_end': date_end,
-            'type': 'temperature'
+            'type': type
             # 'type': [
             #     'temperature',
             #     'sp_temperature',
@@ -161,7 +162,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
         async with aiohttp.ClientSession() as session:
             async with session.get('https://api.netatmo.com/api/getroommeasure', params=params, headers=headers) as resp:
-                response = resp.json()
+                response = await resp.json()
 
         return response
 
@@ -190,13 +191,13 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
         async with aiohttp.ClientSession() as session:
             async with session.get('https://api.netatmo.com/api/getmeasure', params=params, headers=headers) as resp:
-                response = resp.json()
+                response = await resp.json()
 
         return response
 
 
 
-    access_token = await refresh_token(r_token)['access_token']
+    access_token = (await refresh_token(r_token))['access_token']
 
     home_status = await get_home_status(access_token, home_id)
 
@@ -204,41 +205,50 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
     set_temp = home_status['body']['home']['rooms'][0]['therm_setpoint_temperature']
     is_boiler_active = home_status['body']['home']['modules'][-1]['boiler_status']
 
-    temp_history = await get_room_history(access_token, home_id, room_id)
-    temps = temp_history['body'][0]
-    boiler_history = await get_boiler_history(access_token, bridge_mac, therm_mac)
-    boiler = boiler_history['body'][0]
 
+    temp_history = await get_room_history(access_token, home_id, room_id)
+    set_temp_history = await get_room_history(access_token, home_id, room_id, type='sp_temperature')
+    boiler_history = await get_boiler_history(access_token, bridge_mac, therm_mac)
+
+    temps = temp_history['body'][0]
+    list_temps = [x[0] for x in temps['value']]
+
+    set_temps = set_temp_history['body'][0]
+    list_set_temps = [x[0] for x in set_temps['value']]
+    
+    boiler = boiler_history['body'][0]
+    list_minutes = [x[0]//60 for x in boiler['value']]
 
     initial_timestamp = temps.get('beg_time')
     step = temps.get('step_time')
-
     list_timestamps = [initial_timestamp+(step*n) for n in range(len(temps.get('value')))]
     list_timestamps = [datetime.datetime.fromtimestamp(x).strftime('%d-%m %H:00') for x in list_timestamps]
-    list_temps = [x[0] for x in temps['value']]
-    list_minutes = [x[0]//60 for x in boiler['value']]
 
 
     N_HOURS = 48
     px = 1/plt.rcParams['figure.dpi']
 
-    fig,ax = plt.subplots(figsize=(1280*px, 500*px))
+    fig,bars = plt.subplots(figsize=(1280*px, 500*px))
 
-    ax.set_xlabel("Hours")
-    ax.set_ylabel("Temp in °C")
-    ax.set_title(f"Temperature and Boiler activity (last {N_HOURS}hrs)\nCurrent: {current_temp}°C - Desidered: {set_temp}°C · Boiler active: {is_boiler_active}")
-    ax.set_ylim(18, 22)
-    ax.yaxis.set_major_locator(ticker.LinearLocator(5))
-    ax.yaxis.set_minor_locator(ticker.LinearLocator(9))
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(6))
-    ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
-    ax.plot(list_timestamps[-N_HOURS:], list_temps[-N_HOURS:])
-    ax.grid(True)
+    bars.set_xlabel("Time of the day")
+    bars.set_title(f"Temperature and boiler activity (last {N_HOURS}hrs)\nCurrent: {current_temp}°C - Desidered: {set_temp}°C · Boiler active: {is_boiler_active}")
+    bars.yaxis.set_major_locator(ticker.LinearLocator(5))
+    bars.yaxis.set_minor_locator(ticker.LinearLocator(13))
+    bars.xaxis.set_major_locator(ticker.MultipleLocator(6))
+    bars.xaxis.set_minor_locator(ticker.MultipleLocator(1))
+    bars.set_ylabel("Boiler activity, Minutes per hour", color='red')
+    bars.set_ylim(0, 60)
+    bars.grid(True)
+    bars.bar(list_timestamps[-N_HOURS:], list_minutes[-N_HOURS:], color='red', zorder=1, label="Boiler activity")
 
-    ax2=ax.twinx()
-    ax2.set_ylabel("Boiler Acttive, Minutes per hour", color='red')
-    ax2.set_ylim(0, 60)
-    ax2.bar(list_timestamps[-N_HOURS:], list_minutes[-N_HOURS:], color='red')
+    lines=bars.twinx()
+    lines.set_ylim(13, 25)
+    lines.set_ylabel("Temperature in °C",)
+    lines.plot(list_timestamps[-N_HOURS:], list_temps[-N_HOURS:], zorder=10, label="Temperature")
+    lines.plot(list_timestamps[-N_HOURS:], list_set_temps[-N_HOURS:], label="Desidered Temperature", zorder=2, color='grey', linestyle='dotted', linewidth=1)
+
+    bars.legend(loc='upper left')
+    lines.legend(loc='upper right')
 
     plt.savefig("images/boiler48h.jpg")
 
