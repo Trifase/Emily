@@ -20,6 +20,7 @@ from rich import print
 from gtts import gTTS
 from pydub import AudioSegment
 from dateutil.parser import parse, parserinfo
+from aiohttp_client_cache import CachedSession, FileBackend
 
 import config
 
@@ -30,6 +31,51 @@ from pyrog import get_user_from_username, send_reaction, pyro_bomb_reaction
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationHandlerStop
+
+
+async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.message.chat.id not in [config.ID_TIMELINE, config.ID_AOC]:
+        return
+
+    if await no_can_do(update, context):
+        return
+
+    if update.message.chat.id == config.ID_TIMELINE:
+        LB_ID = 799277
+    else:
+        LB_ID = 8518
+    
+    SESSION = config.AOC_SESSION
+
+    url = f"https://adventofcode.com/2022/leaderboard/private/view/{LB_ID}.json"
+    headers = {'Cookie': f'session={SESSION}'}
+
+    cache = FileBackend(cache_name='aiohttp_cache', use_temp=True, expire_after=900)
+
+    async with CachedSession(cache=cache) as session:
+        response = await session.get(url, headers=headers)
+    response = await response.json()
+
+    leaderboard = []
+    classifica = ""
+
+    for member in response['members']:
+        m = []
+        member = response['members'][member]
+        m.append(int(member.get('local_score')))
+        if member.get('name'):
+            m.append(member.get('name'))
+        else:
+            m.append(f"Anonymous User #{member.get('id')}")
+        m.append(member.get('stars'))
+        leaderboard.append(m)
+
+    top5 = sorted(leaderboard, reverse=True)[:10]
+
+    for i, value in enumerate(top5, start=1):
+        classifica += f"{i: >2})\t[{value[0]}] {value[2]: >2} ⭐️ {value[1]}\n"
+
+    await update.message.reply_html(f"<code>{classifica}</code>")
 
 async def random_trifase(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await no_can_do(update, context):

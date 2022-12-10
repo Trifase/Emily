@@ -28,7 +28,7 @@ from admin import (cancella, commandlist, count_lines, echo, esci, executecode,
     track_chats, show_chats, send_custom_media, check_temp, flush_arbitrary_callback_data)
 from asphalto import azzurro, lurkers
 from banca import bot_get_saldo, bot_get_transazioni
-from best_timeline import scrape_tweet_bt, silenzia, deleta_if_channel, aoc_leaderboard
+from best_timeline import scrape_tweet_bt, silenzia, deleta_if_channel
 from compleanni import compleanni_add, compleanni_list, compleanni_manual_check, compleanno_del
 from cron_jobs import check_reminders, check_compleanni, lotto_member_count, do_global_backup, plot_boiler_stats
 from diochan import save_tensor, random_tensor, search_quote, add_quote, diochan, mon, ascendi
@@ -42,7 +42,7 @@ from meteo import meteo_oggi, ora, prometeo_oggi, forecast
 from movies import doveguardo, imdb, doveguardo_buttons
 from misc import (bioritmo, fascio, fatfingers, scacchi, square, traduci, spongebob, voice, alexa, get_user_info,
     set_auto_reaction, send_auto_reaction, bomb_react, start, polls_callbackqueryhandlers, condominioweb, is_safe,
-    greet_BT_user, random_trifase)
+    greet_BT_user, random_trifase, aoc_leaderboard)
 from pyrog import reaction_karma
 from quiz import classifica, make_poll, ricevi_risposta_quiz, punteggio
 from reddit import reddit

@@ -262,7 +262,7 @@ async def imdb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     searchquery = ia.search_movie(query)
     await printlog(update, "cerca qualcosa su imdb", query)
-    
+    # print(searchquery)
     try:
         movie_id = searchquery[0].movieID
     except IndexError:
@@ -271,7 +271,7 @@ async def imdb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     movie = ia.get_movie(movie_id)
     imdb_id = movie['imdbID']
     imdb_url = f'https://www.imdb.com/title/tt{imdb_id}/'
-    print(f"{query} - {imdb_url}")
+    # print(f"{query} - {imdb_url}")
     try:
         year = movie['year']
     except KeyError:
@@ -323,7 +323,7 @@ async def imdb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     t1 = f'https://proxyrarbg.org/torrents.php?imdb=tt{imdb_id}&order=seeders&by=DESC'
 
     t2_name = '[1337x]'
-    t2 = f'https://1337x.to/sort-search/{searchstring}/seeders/desc/1/'
+    t2 = f'https://1337xx.to/sort-search/{searchstring}/seeders/desc/1/'
 
     torrents = f"<a href='{t1}'>{t1_name}</a> <a href='{t2}'>{t2_name}</a>"
     message = f"{summary}\n{torrents}"

@@ -1,6 +1,6 @@
 import datetime
 import random
-from aiohttp_client_cache import CachedSession, FileBackend
+
 
 from rich import print
 from telegram import Update, InputMediaPhoto, InputMediaVideo, ChatPermissions, ChatMember
@@ -133,46 +133,6 @@ async def silenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     sta_zitto = ChatPermissions.no_permissions()
     await context.bot.restrict_chat_member(update.message.chat.id, update.message.reply_to_message.from_user.id, until_date=expires_in, permissions=sta_zitto)
     await update.message.reply_html(f"Silenziatə fino al <code>{expires_in}</code>", reply_to_message_id=update.message.reply_to_message.id)
-
-async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if update.message.chat.id != config.ID_TIMELINE:
-        return
-
-    if await no_can_do(update, context):
-        return
-
-    LB_ID = 799277
-    SESSION = config.AOC_SESSION
-
-    url = f"https://adventofcode.com/2022/leaderboard/private/view/{LB_ID}.json"
-    headers = {'Cookie': f'session={SESSION}'}
-
-    cache = FileBackend(cache_name='aiohttp_cache', use_temp=True, expire_after=900)
-
-    async with CachedSession(cache=cache) as session:
-        response = await session.get(url, headers=headers)
-    response = await response.json()
-
-    leaderboard = []
-    classifica = ""
-
-    for member in response['members']:
-        m = []
-        member = response['members'][member]
-        m.append(int(member.get('local_score')))
-        if member.get('name'):
-            m.append(member.get('name'))
-        else:
-            m.append(f"Anonymous User #{member.get('id')}")
-        m.append(member.get('stars'))
-        leaderboard.append(m)
-
-    top5 = sorted(leaderboard, reverse=True)[:10]
-
-    for i, value in enumerate(top5, start=1):
-        classifica += f"{i: >2})\t[{value[0]}] {value[2]: >2} ⭐️ {value[1]}\n"
-
-    await update.message.reply_html(f"<code>{classifica}</code>")
 
 async def deleta_if_channel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # if update.message.chat.id != config.ID_TIMELINE:
