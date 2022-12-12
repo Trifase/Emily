@@ -130,9 +130,7 @@ async def get_tiktok_username_id(url):
         link = f"https://vm.tiktok.com/{tiktok_id}"
         headers = {'User-Agent': 'Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36'}
         response = requests.get(link, headers=headers)
-
         info_list = requests.utils.unquote(response.url).split("?")[0].split("/")
-
         username = info_list[3]
         id = info_list[5]
     elif purl.netloc == 'www.tiktok.com':
@@ -152,29 +150,32 @@ async def get_tiktok_video_infos_aweme(username: str, ID: str) -> dict:
     tiktok_api_headers = {
             'User-Agent': 'com.ss.android.ugc.trill/494+Mozilla/5.0+(Linux;+Android+12;+2112123G+Build/SKQ1.211006.001;+wv)+AppleWebKit/537.36+(KHTML,+like+Gecko)+Version/4.0+Chrome/107.0.5304.105+Mobile+Safari/537.36'
         }
-    try:
-        api_url = f'https://api.tiktokv.com/aweme/v1/feed/?aweme_id={ID}&iid=6165993682518218889&device_id={random.randint(10*10*10, 9*10**10)}&aid=1180'
-        async with aiohttp.ClientSession() as session:
-            async with session.get(api_url, headers=tiktok_api_headers, timeout=10) as response:
-                response = await response.json()
-                data = response["aweme_list"][0]
+    # try:
+    api_url = f'https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/?aweme_id={ID}&iid=6165993682518218889&device_id={random.randint(10*10*10, 9*10**10)}&aid=1180'
+    async with aiohttp.ClientSession() as session:
+        async with session.get(api_url, headers=tiktok_api_headers, timeout=10) as response:
+            response = await response.json()
 
-        video_url = data["video"]["play_addr"]["url_list"][0]
-        caption = f"<a href='https://www.tiktok.com/{username}'>{username}</a>\n"
-        caption += data["desc"]
-        thumbnail_jpg = data["video"]["cover"]["url_list"][0]
-        title = f"Tiktok Video from {username}"
+    # print(response)
+    data = response["aweme_list"][0]
 
-        infos["username"] = username
-        infos["video_id"] = ID
-        infos["video_url"] = video_url
-        infos["title"] = title
-        infos["caption"] = caption
-        infos["thumbnail_url"] = thumbnail_jpg
-        return infos
+    video_url = data["video"]["play_addr"]["url_list"][0]
+    caption = f"<a href='https://www.tiktok.com/{username}'>{username}</a>\n"
+    caption += data["desc"]
+    thumbnail_jpg = data["video"]["cover"]["url_list"][0]
+    title = f"Tiktok Video from {username}"
 
-    except Exception as e:
-        return None
+    infos["username"] = username
+    infos["video_id"] = ID
+    infos["video_url"] = video_url
+    infos["title"] = title
+    infos["caption"] = caption
+    infos["thumbnail_url"] = thumbnail_jpg
+    return infos
+
+    # except Exception as e:
+    #     print(e)
+    #     return None
 
 # async def get_tiktok_video_infos(username: str, ID: str) -> dict:
 #     """

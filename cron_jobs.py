@@ -212,16 +212,21 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     temps = temp_history['body'][0]
     list_temps = [x[0] for x in temps['value']]
+    # print(list_temps)
 
     set_temps = set_temp_history['body'][0]
     list_set_temps = [x[0] for x in set_temps['value']]
+    # print(list_set_temps)
     
     boiler = boiler_history['body'][0]
     list_minutes = [x[0]//60 for x in boiler['value']]
+    # print(list_minutes)
 
     initial_timestamp = temps.get('beg_time')
     step = temps.get('step_time')
     list_timestamps = [initial_timestamp+(step*n) for n in range(len(temps.get('value')))]
+
+    # print(list_timestamps)
     list_timestamps = [datetime.datetime.fromtimestamp(x).strftime('%d-%m %H:00') for x in list_timestamps]
 
 
