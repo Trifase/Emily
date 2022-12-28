@@ -234,7 +234,7 @@ async def doveguardo_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE)
             await query.edit_message_media(media=InputMediaPhoto(poster_url, caption=message), reply_markup=reply_markup)
 
         except Exception as e:
-            await query.edit_message_media(message, disable_web_page_preview=True, reply_markup=reply_markup)
+            await query.edit_message_media(message, reply_markup=reply_markup)
     except ValueError:
         await query.reply_html("Non ho trovato niente")
 

@@ -30,7 +30,7 @@ from uuid import uuid4
 
 import config
 
-from utils import printlog, get_display_name, is_function_enabled, function_name, get_now, get_chat_name, no_can_do
+from utils import printlog, get_display_name, is_function_enabled, function_name, get_now, get_chat_name, no_can_do, alert
 
 local_tz = pytz.timezone('Europe/Rome')
 
@@ -141,7 +141,7 @@ async def get_tiktok_username_id(url):
         raise RuntimeError
     return (username, id, link)
 
-async def get_tiktok_video_infos_aweme(username: str, ID: str) -> dict:
+async def get_tiktok_video_infos_aweme(username: str, video_ID: str) -> dict:
     """
     Get Infos from the tiktok api and return a dict of relevant informations
     """
@@ -151,7 +151,8 @@ async def get_tiktok_video_infos_aweme(username: str, ID: str) -> dict:
             'User-Agent': 'com.ss.android.ugc.trill/494+Mozilla/5.0+(Linux;+Android+12;+2112123G+Build/SKQ1.211006.001;+wv)+AppleWebKit/537.36+(KHTML,+like+Gecko)+Version/4.0+Chrome/107.0.5304.105+Mobile+Safari/537.36'
         }
     # try:
-    api_url = f'https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/?aweme_id={ID}&iid=6165993682518218889&device_id={random.randint(10*10*10, 9*10**10)}&aid=1180'
+    # api_url = f'https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/?aweme_id={ID}&iid=6165993682518218889&device_id={random.randint(10*10*10, 9*10**10)}&aid=1180'
+    api_url = f'https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/?aweme_id={video_ID}'
     async with aiohttp.ClientSession() as session:
         async with session.get(api_url, headers=tiktok_api_headers, timeout=10) as response:
             response = await response.json()
@@ -166,7 +167,7 @@ async def get_tiktok_video_infos_aweme(username: str, ID: str) -> dict:
     title = f"Tiktok Video from {username}"
 
     infos["username"] = username
-    infos["video_id"] = ID
+    infos["video_id"] = video_ID
     infos["video_url"] = video_url
     infos["title"] = title
     infos["caption"] = caption
@@ -488,7 +489,8 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     url = context.match.group(1)
     url_path = parse.urlsplit(url).path[1:].split('/')
-    user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E149"
+    # user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E149"
+    user_agent = "Mozilla/5.0 (X11; Linux aarch64; rv:91.0) Gecko/20100101 Firefox/91.0"
     
     L = instaloader.Instaloader(dirname_pattern="ig/{target}", quiet=True, fatal_status_codes=[429], save_metadata=False, max_connection_attempts=1, user_agent=user_agent, iphone_support=False)
     USER = "emilia_superbot"
@@ -709,8 +711,13 @@ async def instagram_stories(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     except instaloader.exceptions.ProfileNotExistsException:
         await update.message.reply_text("Il profilo non esiste.")
         return
+    except instaloader.exceptions.QueryReturnedBadRequestException as e:
+        await update.message.reply_text("Probabilmente sono bannata da instagram")
+        await alert(update, context, f"ha cercato le storie di @{username}", f"{e}")
+        return
     except Exception as e:
         await update.message.reply_html(f"Qualcosa è andato storto:\n{e}")
+        await alert(update, context, f"ha cercato le storie di @{username}", f"{e}")
         print(traceback.format_exc())
         return
 

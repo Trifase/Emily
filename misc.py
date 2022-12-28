@@ -41,6 +41,8 @@ async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         return
 
     if update.message.chat.id == config.ID_TIMELINE:
+        await update.message.reply_html(f"<code>https://www.youtube.com/watch?v=6Z3QJ4L1Bg0</code>")
+        return
         LB_ID = 799277
     else:
         LB_ID = 8518
