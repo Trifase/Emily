@@ -120,20 +120,23 @@ async def punteggio(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def classifica(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-    # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} chiede la classifica dei trivia')
+
     await printlog(update, "chiede la classifica dei trivia")
+
     classifica = []
+
     for user_id, value in context.application.user_data.items():
         if 'trivia_points_new' in value:
-            # print(user_id, value)
             if 'trivia_wrongs' not in value:
                 trivia_wrongs = 0
             else:
                 trivia_wrongs = value['trivia_wrongs']
-            # print(f"{user_id} - {value['triviapoints']}")
+
             classifica.append((user_id, value['trivia_points_new'], trivia_wrongs))
+
     classifica.sort(key=lambda x: x[1], reverse=True)
     risposta = ""
+
     for i, (user_id, points, wrongs) in enumerate(classifica[:10]):
         try:
             user = await context.bot.get_chat(user_id)
@@ -142,4 +145,3 @@ async def classifica(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
             continue
         
     await update.message.reply_html(risposta)
-    # print(risposta)
