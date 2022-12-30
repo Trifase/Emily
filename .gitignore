@@ -8,6 +8,7 @@ images/
 reddit/
 tarocchi/
 tts/
+logs/
 
 .env
 logs.txt

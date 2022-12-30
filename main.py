@@ -566,6 +566,12 @@ async def admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     command = query.data.split(":")[1]
     args = query.data.split(":")[2]
 
+    # becase v20b makes TelegramObjects frozen (as in: Immutable), we need to warm up them a bit before 
+    # we can edit them - there is an internal context manager ready that unfreezes and freezes on exit
+
+    query._unfreeze()
+    query.message._unfreeze()
+
     # forging a fake message.text
     query.message.text = f"/{command} {args}"
 

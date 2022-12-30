@@ -5,6 +5,7 @@ import config
 import io
 import time
 
+
 from rich import print
 from telegram import Update, Bot, CallbackQuery, User, Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CallbackContext
@@ -146,13 +147,14 @@ async def printlog(update, action, additional_data=None):
     else:
         user = update.effective_user
         chat_id = update.effective_chat.id
+    current_m = datetime.date.today().strftime("%Y-%m")
     if additional_data:
         print(f'{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}: {additional_data}')
-        with open('logs.txt', 'a') as f:
+        with open(f'logs/{current_m}-logs.txt', 'a') as f:
              f.write(f"{get_now()} {await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}: {additional_data}\n")
     else:
         print(f'{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}')
-        with open('logs.txt', 'a') as f:
+        with open(f'logs/{current_m}-logs.txt', 'a') as f:
              f.write(f"{get_now()} {await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}\n")
 
 
