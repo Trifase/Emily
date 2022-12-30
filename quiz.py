@@ -39,7 +39,7 @@ async def make_poll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     random.shuffle(risposte)
     risp_giusta_index = risposte.index(risposta_corretta)
     
-    message = await context.bot.send_poll(
+    sent_poll = await context.bot.send_poll(
         chat_id=update.message.chat_id,
         question=domanda,
         options=risposte,
@@ -50,24 +50,24 @@ async def make_poll(update: Update, context: ContextTypes.DEFAULT_TYPE):
         open_period = difficuly_time[poll_data['difficulty']],
     )
     this_poll = [poll_data['difficulty'], risp_giusta_index]
-    await printlog(update, "crea un quiz", f"{message.poll.id} ({poll_data['difficulty']})")
-    # print(f"{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} crea un quiz: {message.poll.id} ({poll_data['difficulty']})")
+
+    await printlog(update, "crea un quiz", f"{sent_poll.poll.id} ({poll_data['difficulty']})")
+
     if 'trivia' not in context.user_data:
         context.bot_data['trivia'] = {}
-    # print(f"Poll ID: {message.poll.id} Risposta Giusta: {risp_giusta_index}")
-    # print(this_poll)
-    context.bot_data['trivia'][message.poll.id] = []
-    context.bot_data['trivia'][message.poll.id] = this_poll
-    # print(context.bot_data['trivia'][message.poll.id])
+
+    context.bot_data['trivia'][sent_poll.poll.id] = this_poll
+
     await asyncio.sleep(difficuly_time[poll_data['difficulty']])
+
     if update.message.chat.id == config.ID_LOTTO:
         context.chat_data["trivia_in_corso"] = False
         await asyncio.sleep(15)
-        await message.delete()
+        await sent_poll.delete()
     else:
         await update.message.reply_text("Trivia finito.", quote=False)
         context.chat_data["trivia_in_corso"] = False
-    
+
     return
 
 async def ricevi_risposta_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -79,28 +79,34 @@ async def ricevi_risposta_quiz(update: Update, context: ContextTypes.DEFAULT_TYP
         'medium': 2,
         'hard': 3
     }
+
     if poll_id not in context.bot_data['trivia']:
         return
+    
     difficulty = context.bot_data['trivia'][poll_id][0]
+
     if risposta == context.bot_data['trivia'][poll_id][1]:
         if 'trivia_points_new' not in context.user_data:
             context.user_data['trivia_points_new'] = 0
+
         context.user_data['trivia_points_new'] += points[difficulty]
-        # await printlog(update, f"risponde a {poll_id} ({difficulty}) correttamente, nuovo punteggio", context.user_data["trivia_points_new"])
         print(f'{get_now()} {await get_display_name(update.effective_user)} risponde a {poll_id} ({difficulty}) correttamente! Ora ha {context.user_data["_points_new"]} punti.')
+
     else:
         if 'trivia_wrongs' not in context.user_data:
             context.user_data['trivia_wrongs'] = 0
+
         context.user_data['trivia_wrongs'] += 1
-        # await printlog(update, f"risponde a {poll_id} ({difficulty}) ma sbaglia. Quante volte ha sbagliato", context.user_data["trivia_wrongs"])
         print(f'{get_now()} {await get_display_name(update.effective_user)} risponde a {poll_id} ({difficulty}) ma sbaglia! Ha sbagliato {context.user_data["trivia_wrongs"]} volte.')
 
 async def punteggio(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
+
     await printlog(update, "chiede il punteggio nei trivia")
-    # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} chiede il punteggio nei trivia')
+
     message = ""
+
     if 'trivia_points_new' not in context.user_data:
         message += "Hai 0 punti.\n"
     else:
