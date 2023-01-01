@@ -34,13 +34,13 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         model = 'text-davinci-001'
 
     if '--003' in context.args:
-        update.message.text.replace(' --003', '')
+        update.message.text.replace('--003 ', '')
         model = 'text-davinci-003'
     price_per_1k = 0.02
 
     try:
 
-        input = update.message.text[4:].replace(' --003', '')
+        input = update.message.text[4:].replace('--003 ', '')
 
         headers = {
             'Content-Type': 'application/json',

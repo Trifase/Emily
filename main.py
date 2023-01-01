@@ -101,7 +101,10 @@ def main():
 
     # main.py
     app.add_handler(CallbackQueryHandler(admin_buttons, pattern=r'^cmd:'))
-    app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, parse_everything), 21)
+    app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, exit_from_banned_groups), -20)
+    app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, nuova_chat_rilevata), -19)
+    app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, update_timestamps_asphalto), -18)
+    app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, check_for_sets), -16)
 
 
     # Error handler
@@ -179,13 +182,11 @@ def main():
 
     # gpt3.py
     app.add_handler(CommandHandler("ai", ai))
-    # app.add_handler(CommandHandler("tarocchi", ai_tarocchi))
 
     # lotto.py
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT & filters.Chat(config.ID_LOTTO), maesta_primo), 15)
     app.add_handler(CommandHandler("maesta", elenco_maesta))
     app.add_handler(CommandHandler(["stats_maesta", 'maesta_stats', 'maestats', 'maestat'], stat_maesta))
-    # app.add_handler(ChatMemberHandler(conta_morti, ChatMemberHandler.ANY_CHAT_MEMBER), 18)
     
 
     # macros.py
@@ -325,75 +326,40 @@ def main():
     app.add_handler(CommandHandler(['tw', 'tweet'], tweet, filters=~filters.UpdateType.EDITED))
     app.add_handler(CommandHandler(['tweetlists', 'listatweet', 'tweets', 'twlist'], lista_tweets, filters=~filters.UpdateType.EDITED))
 
-    # app.add_handler(MessageHandler(
-    #     ~filters.UpdateType.EDITED & 
-    #     filters.Regex(
-    #         re.compile(
-    #             r"(?:(?:http|https):\/\/)?(?:www.)?(?:instagram.com|instagr.am|instagr.com)\/(?:p|reel)\/([^\/]{11})",
-    #             re.IGNORECASE
-    #             )
-    #         ),
-    #         instagram_post
-    #     ))
-    # app.add_handler(MessageHandler(
-    #     ~filters.UpdateType.EDITED & 
-    #     filters.Regex(re.compile(r"(?:(?:http|https):\/\/)?(?:www.)?(?:instagram.com|instagr.am|instagr.com)\/(stories|s)\/([\w.]+)(\/([\w.]+))?", re.IGNORECASE)), instagram_story
-    #     ))
-    # app.add_handler(MessageHandler(
-    #     ~filters.UpdateType.EDITED & 
-    #     filters.Regex(re.compile(r"(?:(?:http|https):\/\/)?(?:www.)?(?:\binstagram.com|instagr.am|instagr.com)\/(?!stories\/)(?!p\/)(?!tv\/)(?!s\/)(?!reel\/)([^\/\n?]+)", re.IGNORECASE)), instagram_profile
-    #     ))
-    # app.add_handler(MessageHandler(
-    #     ~filters.UpdateType.EDITED & 
-    #     filters.Regex(re.compile(r"(?:(?:http|https):\/\/)?(?:www.)?(?:instagram.com|instagr.am|instagr.com)\/tv\/([^\/]*)", re.IGNORECASE)), instagram_tv
-    #     ))
-
 
     app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
 # All Messages
-async def parse_everything(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if await no_can_do(update, context):
-        return
 
+# from utils import ForgeCommand
+
+"""
+TODO: Splittare il seguente comando in:
+-controllare i set
+-uscire dai gruppi bannati
+-controllare se è una nuova chat e mandare messaggino
+    - utilizzare una nuova meccanica per i bottoni, utilizzando la classe ForgeCommand invece di splittare la stringa
+-controllare se serve spiare e forwardare i messaggi
+-aggiungere il timestamp per asphalto
+"""
+async def exit_from_banned_groups(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # Auto exit on banned groups
     chat_id = int(update.effective_chat.id)
 
-    SPY = True
-
-
-    # Auto exit on banned groups
     if chat_id in config.BANNED_GROUPS:
         await context.bot.leave_chat(chat_id)
 
+async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if 'lista_chat' not in context.bot_data:
         context.bot_data['lista_chat'] = []
+
     if "listen_to" not in context.bot_data:
         context.bot_data['listen_to'] = []
 
-    # Se è nella lista spiati, inoltra il messaggio su emily spia
-    if chat_id in context.bot_data['listen_to']:
-        my_chat = await context.bot.get_chat(chat_id)
-        msg_from = "👤 chat privata"
-        if my_chat.title:
-            msg_from = f"💬 {my_chat.title}"
-        text = f"[SPIO] Messaggio su {msg_from}:\nID: <code>{my_chat.id}</code>\n{update.effective_user.mention_html()}: {update.effective_message.text}"
-        # Inline Keyboard
-        keyboard = [
-            [
-                InlineKeyboardButton(f"{'Spia' if chat_id not in context.bot_data['listen_to'] else 'Non spiare'}", callback_data=f"cmd:listen_to:{chat_id}"),
-                InlineKeyboardButton("Banna", callback_data=f"cmd:ban:{chat_id}"),
-                InlineKeyboardButton("Info", callback_data=f"cmd:getchat:{chat_id}"),
-                InlineKeyboardButton("Del chatlist", callback_data=f"cmd:listachat:-delete {chat_id}"),
-            ]
-        ]
+    chat_id = int(update.effective_chat.id)
+    SPY = True
 
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await context.bot.send_message(chat_id=config.ID_SPIA, text=text, reply_markup=reply_markup)
-
-    # if 'lista_chat' not in context.bot_data:
-    #     context.bot_data['lista_chat'] = {}
-
-
+    # Se non è in lista chat, invio un sommario su emily spia
     if chat_id not in context.bot_data['lista_chat']:
         context.bot_data['lista_chat'].append(chat_id)
         is_presente = await is_member_in_group(config.ID_TRIF, chat_id, context)
@@ -402,35 +368,30 @@ async def parse_everything(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             
             if not is_presente:
                 context.bot_data['listen_to'].append(chat_id)
-                # await context.bot.send_message(chat_id=config.ID_SPIA, text=f"Spio: {chat_id}")
             else:
-                # await context.bot.send_message(chat_id=config.ID_SPIA, text=f"Non spio {chat_id} - gruppo in comune.")
                 pass
                 
         elif chat_id not in context.bot_data['listen_to'] and SPY:
             context.bot_data['listen_to'].append(chat_id)
-            # await context.bot.send_message(chat_id=config.ID_SPIA, text=f"Spio: {chat_id}")
 
         if not await is_user(update):
             
             message = ""
             mychat = await context.bot.get_chat(chat_id)
             utenti = await context.bot.get_chat_member_count(chat_id)
+
             if chat_id in context.bot_data['listen_to']:
                 message += "Nuova chat di gruppo rilevata! (Spio)\n\n"
+
             else:
                 message += "Nuova chat di gruppo rilevata! (Non spio)\n\n"
+
             message += f"<b>Nome: {mychat.title}</b>\n"
             message += f"ID: <code>{mychat.id}</code>\n"
             message += f"Tipo: {mychat.type}\n"
             message += f"Utenti: {utenti}\n"
             message += f"Invite Link: {mychat.invite_link}\n"
             message += f"Descrizione:\n{mychat.description}\n\n"
-            # try:
-            #     presente = await context.bot.get_chat_member(int(chat_id), config.ID_TRIF)
-            #     message += f"Sei presente in questa chat\n"
-            # except Exception as e:
-            #     message += f"Non sei presente in questa chat\n"
 
             message += f"Messaggio: {update.effective_user.mention_html()}: {update.effective_message.text}"
 
@@ -461,6 +422,32 @@ async def parse_everything(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
         await context.bot.send_message(config.ID_SPIA, message, reply_markup=reply_markup)
 
+    # Se è nella lista spiati, inoltra il messaggio su emily spia
+    if chat_id in context.bot_data['listen_to']:
+        my_chat = await context.bot.get_chat(chat_id)
+        msg_from = "👤 chat privata"
+        if my_chat.title:
+            msg_from = f"💬 {my_chat.title}"
+        text = f"[SPIO] Messaggio su {msg_from}:\nID: <code>{my_chat.id}</code>\n{update.effective_user.mention_html()}: {update.effective_message.text}"
+        # Inline Keyboard
+        keyboard = [
+            [
+                InlineKeyboardButton(f"{'Spia' if chat_id not in context.bot_data['listen_to'] else 'Non spiare'}", callback_data=f"cmd:listen_to:{chat_id}"),
+                InlineKeyboardButton("Banna", callback_data=f"cmd:ban:{chat_id}"),
+                InlineKeyboardButton("Info", callback_data=f"cmd:getchat:{chat_id}"),
+                InlineKeyboardButton("Del chatlist", callback_data=f"cmd:listachat:-delete {chat_id}"),
+            ]
+        ]
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await context.bot.send_message(chat_id=config.ID_SPIA, text=text, reply_markup=reply_markup)
+
+async def update_timestamps_asphalto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await no_can_do(update, context):
+        return
+
+    chat_id = int(update.effective_chat.id)
+
     # Timestamp per asphalto
     if chat_id == config.ID_ASPHALTO:
         if 'timestamps' not in context.bot_data:
@@ -472,14 +459,23 @@ async def parse_everything(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             user_id = int(update.effective_user.id)
             context.bot_data['timestamps'][chat_id][user_id] = int(time.time())
 
-    # Da qui in poi, i messaggi privati vengono ignorati.
+async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await no_can_do(update, context):
+        return
+
+    chat_id = int(update.effective_chat.id)
+
+    # I messaggi privati vengono ignorati.
     if update.message.chat.type == "private":
         return
 
     # Sets
-    with open('db/sets.json') as sets_db:
-        sets = json.load(sets_db)
+    # with open('db/sets.json') as sets_db:
+    #     sets = json.load(sets_db)
+    if 'current_sets' not in context.bot_data:
+        context.bot_data['current_sets'] = {}
 
+    sets = context.bot_data['current_sets']
     chat_id = str(update.message.chat.id)
     messaggio = update.effective_message.text
 
@@ -553,6 +549,8 @@ async def parse_everything(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             else:
                 await update.message.reply_text(f'{chatdict[messaggio.lower()]}', quote=False, disable_web_page_preview=True)
             return
+
+
 
 async def admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
@@ -640,7 +638,13 @@ async def post_init(app: Application) -> None:
 
     r = get_reminders_from_db()
     added = 0
-    
+
+    if 'current_sets' not in app.bot_data:
+        app.bot_data['current_sets'] = {}
+    with open('db/sets.json') as sets_db:
+        sets = json.load(sets_db)
+        app.bot_data['current_sets'] = sets
+
     for reminder in r['reminders']:
         # print(f"app.job_queue.run_once(send_reminder, {reminder['date_to_remind']}, chat_id={reminder['chat_id']}, name=f'{reminder['chat_id']}_{reminder['reply_id']}', data=reminder)")
         app.job_queue.run_once(send_reminder, reminder['date_to_remind'], chat_id=reminder['chat_id'], name=f"{reminder['chat_id']}_{reminder['reply_id']}", data=reminder)

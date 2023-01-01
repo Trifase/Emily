@@ -24,13 +24,13 @@ from cron_jobs import plot_boiler_stats
 
 
 def get_bulb(name: str):
-    ip_pranzo = "192.168.1.63"
+    ip_pranzo = "192.168.1.206"
     token_pranzo = "e9466aedeab8b3eecd97ac6f337257fe"
 
-    ip_cucina = "192.168.1.134"
+    ip_cucina = "192.168.1.207"
     token_cucina = "33188b32b80cca8eeead7036b4da32da"
 
-    ip_salotto = "192.168.1.178"
+    ip_salotto = "192.168.1.150"
     token_salotto = "8b81464003a7a0d4126ea8e6cb8d28e3"
 
     ip_penisola = "192.168.1.50"
@@ -178,3 +178,5 @@ async def riscaldamento_stats(update: Update, context: ContextTypes.DEFAULT_TYPE
         await plot_boiler_stats(context)
         await printlog(update, "genera un nuovo grafico della caldaia")
     await update.message.reply_photo(open('images/boiler48h.jpg', 'rb'))
+
+

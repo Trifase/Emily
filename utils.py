@@ -20,6 +20,11 @@ class InlineButton:
     original_update: Update = None
     vote: str
 
+@dataclass
+class ForgeCommand:
+    original_update: Update
+    new_data: dict
+    callable: Callable
 
 
 async def crea_sondaggino(context, update, max_votes, callable, domanda=''):
@@ -156,7 +161,6 @@ async def printlog(update, action, additional_data=None):
         print(f'{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}')
         with open(f'logs/{current_m}-logs.txt', 'a') as f:
              f.write(f"{get_now()} {await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}\n")
-
 
 async def alert(update, context: CallbackContext, action, errore):
 

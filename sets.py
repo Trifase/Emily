@@ -74,12 +74,23 @@ async def addset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed
 
     json.dump(sets, open('db/sets.json', 'w'), indent=4)
 
+    # we refresh the in-memory copy of sets
+    if 'current_sets' not in context.bot_data:
+        context.bot_data['current_sets'] = {}
+    with open('db/sets.json') as sets_db:
+        sets = json.load(sets_db)
+        context.bot_data['current_sets'] = sets
+
 async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
 
-    with open('db/sets.json') as sets_db:
-        sets = json.load(sets_db)
+    # with open('db/sets.json') as sets_db:
+    #     sets = json.load(sets_db)
+    if 'current_sets' not in context.bot_data:
+        context.bot_data['current_sets'] = {}
+
+    sets = context.bot_data['current_sets']
 
     chat_id = str(update.message.chat.id)
     message = ""
@@ -157,7 +168,7 @@ async def deleteset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_pas
 
     if chatdict.get(trigger.lower()) and not poll_passed:
         max_votes = 4
-        await crea_sondaggino(context, update, max_votes, addset, domanda="Vogliamo cancellare questo set?")
+        await crea_sondaggino(context, update, max_votes, deleteset, domanda="Vogliamo cancellare questo set?")
         return
 
     if trigger in chatdict:
@@ -166,6 +177,12 @@ async def deleteset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_pas
             print(f'{get_now()} Fatto!')
             await update.message.reply_text(f'Fatto.', quote=False)
             json.dump(sets, open('db/sets.json', 'w'), indent=4)
+            # we refresh the in-memory copy of sets
+            if 'current_sets' not in context.bot_data:
+                context.bot_data['current_sets'] = {}
+            with open('db/sets.json') as sets_db:
+                sets = json.load(sets_db)
+                context.bot_data['current_sets'] = sets
             return
         except KeyError:
             await update.message.reply_text(f'Per qualche ragione non riesco.')
@@ -173,7 +190,6 @@ async def deleteset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_pas
     else:
         await update.message.reply_text(f'Non ci sta, controlla meglio con /listaset')
         return
-
 
 async def jukebox(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -183,8 +199,13 @@ async def jukebox(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     #     return
 
 
-    with open('db/sets.json') as sets_db:
-        sets = json.load(sets_db)
+    # with open('db/sets.json') as sets_db:
+    #     sets = json.load(sets_db)
+    if 'current_sets' not in context.bot_data:
+        context.bot_data['current_sets'] = {}
+
+    sets = context.bot_data['current_sets']
+
     chat_id = str(update.message.chat.id)
     message = ""
     await printlog(update, "chiede la lista jukebox di", chat_id)
