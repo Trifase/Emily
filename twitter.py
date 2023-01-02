@@ -24,9 +24,13 @@ from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do,
 
 #     await crea_sondaggino(context, update, max_votes, chiedi_opinione)
 
+
 async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=False) -> None:
     if await no_can_do(update, context):
         return
+
+    MASTODON = False
+    TWITTER = True
 
     from mastodon import Mastodon
 
@@ -87,24 +91,26 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
             actual_picture = await picture.get_file()
             await actual_picture.download_to_drive(custom_path=tempphoto)
 
-            try:
-                media = api.media_upload(tempphoto)
-                post_result = api.update_status(status=message, media_ids=[media.media_id])
-                status_id = post_result.id_str
-                tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
-            except Exception as e:
-                print(traceback.format_exc())
+            if TWITTER:
+                try:
+                    media = api.media_upload(tempphoto)
+                    post_result = api.update_status(status=message, media_ids=[media.media_id])
+                    status_id = post_result.id_str
+                    tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
+                except Exception as e:
+                    print(traceback.format_exc())
 
-            try:
-                mast_media = mastodon.media_post(tempphoto)
-                mast_response = mastodon.status_post(message, media_ids=mast_media)
-                mastodon_url = mast_response.get('url')
-                mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
-            except Exception as e:
-                print(traceback.format_exc())
+            if MASTODON:
+                try:
+                    mast_media = mastodon.media_post(tempphoto)
+                    mast_response = mastodon.status_post(message, media_ids=mast_media)
+                    mastodon_url = mast_response.get('url')
+                    mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
+                except Exception as e:
+                    print(traceback.format_exc())
 
             if tw_url or mast_url:
-                await update.message.reply_html(f"Postato su {', '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
+                await update.message.reply_html(f"Postato su {', '.join([x for x in [tw_url, mast_url] if x])}!", disable_web_page_preview=True)
                 await printlog(update, "vuole inviare un tweet con una foto")
 
             else:
@@ -124,24 +130,26 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
             actual_video = await video.get_file()
             await actual_video.download_to_drive(custom_path=tempvideo)
 
-            try:
-                media = api.media_upload(tempvideo)
-                post_result = api.update_status(status=message, media_ids=[media.media_id])
-                status_id = post_result.id_str
-                tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
-            except Exception as e:
-                print(traceback.format_exc())
+            if TWITTER:
+                try:
+                    media = api.media_upload(tempvideo)
+                    post_result = api.update_status(status=message, media_ids=[media.media_id])
+                    status_id = post_result.id_str
+                    tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
+                except Exception as e:
+                    print(traceback.format_exc())
 
-            try:
-                mast_media = mastodon.media_post(tempvideo, synchronous=True)
-                mast_response = mastodon.status_post(message, media_ids=mast_media)
-                mastodon_url = mast_response.get('url')
-                mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
-            except Exception as e:
-                print(traceback.format_exc())
+            if MASTODON:
+                try:
+                    mast_media = mastodon.media_post(tempvideo, synchronous=True)
+                    mast_response = mastodon.status_post(message, media_ids=mast_media)
+                    mastodon_url = mast_response.get('url')
+                    mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
+                except Exception as e:
+                    print(traceback.format_exc())
 
             if tw_url or mast_url:
-                await update.message.reply_html(f"Postato su {', '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
+                await update.message.reply_html(f"Postato su {', '.join([x for x in [tw_url, mast_url] if x])}!", disable_web_page_preview=True)
                 await printlog(update, "vuole inviare un tweet con un video")
 
             else:
@@ -159,22 +167,24 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
             await update.message.reply_text(f"it's too long man!")
             return
 
-        try:
-            status = api.update_status(status=message)
-            status_id = status.id_str
-            tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
-        except Exception as e:
-            print(traceback.format_exc())
+        if TWITTER:
+            try:
+                status = api.update_status(status=message)
+                status_id = status.id_str
+                tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
+            except Exception as e:
+                print(traceback.format_exc())
 
-        try:
-            mast_response = mastodon.status_post(message)
-            mastodon_url = mast_response.get('url')
-            mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
-        except Exception as e:
-            print(traceback.format_exc())
+        if MASTODON:
+            try:
+                mast_response = mastodon.status_post(message)
+                mastodon_url = mast_response.get('url')
+                mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
+            except Exception as e:
+                print(traceback.format_exc())
 
         if tw_url or mast_url:
-            await update.message.reply_html(f"Postato su {', '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
+            await update.message.reply_html(f"Postato su {', '.join([x for x in [tw_url, mast_url] if x])}!", disable_web_page_preview=True)
             return
         else:
             await update.message.reply_html("Qualcosa è andato storto, scusa")
