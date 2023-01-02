@@ -1,6 +1,6 @@
 
 import tempfile
-
+import traceback
 
 from rich import print
 from telegram import Update
@@ -93,7 +93,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 status_id = post_result.id_str
                 tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
             except Exception as e:
-                pass
+                print(traceback.format_exc())
 
             try:
                 mast_media = mastodon.media_post(tempphoto)
@@ -101,7 +101,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 mastodon_url = mast_response.get('url')
                 mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
             except Exception as e:
-                pass
+                print(traceback.format_exc())
 
             if tw_url or mast_url:
                 await update.message.reply_html(f"Postato su {', '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
@@ -130,7 +130,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 status_id = post_result.id_str
                 tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
             except Exception as e:
-                pass
+                print(traceback.format_exc())
 
             try:
                 mast_media = mastodon.media_post(tempvideo, synchronous=True)
@@ -138,7 +138,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 mastodon_url = mast_response.get('url')
                 mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
             except Exception as e:
-                pass
+                print(traceback.format_exc())
 
             if tw_url or mast_url:
                 await update.message.reply_html(f"Postato su {', '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
@@ -164,14 +164,14 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
             status_id = status.id_str
             tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
         except Exception as e:
-                pass
+            print(traceback.format_exc())
 
         try:
             mast_response = mastodon.status_post(message)
             mastodon_url = mast_response.get('url')
             mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
         except Exception as e:
-                pass
+            print(traceback.format_exc())
 
         if tw_url or mast_url:
             await update.message.reply_html(f"Postato su {', '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
