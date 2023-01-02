@@ -29,7 +29,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
     if await no_can_do(update, context):
         return
 
-    MASTODON = False
+    MASTODON = True
     TWITTER = True
 
     from mastodon import Mastodon
@@ -37,7 +37,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
     #   Set up Mastodon
     mastodon = Mastodon(
         access_token = 'db/mastodon.token',
-        api_base_url = 'https://livellosegreto.it/'
+        api_base_url = 'https://botsin.space/'
     )
 
     message = " ".join(context.args)
