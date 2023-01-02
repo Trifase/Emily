@@ -204,3 +204,28 @@ async def is_member_in_group(user_id, chat_id, context):
         print(e)
         print(f"chat_id: {chat_id}, user_id: {user_id}")
         return True
+
+def count_k_v(d):
+    keys = 0
+    values = 0
+    if type(d) == dict:
+        for item in d.keys():
+            if isinstance(d[item], (list, tuple, dict)):
+                keys += 1
+                k, v = count_k_v(d[item])
+                values += v
+                keys += k
+            else:
+                keys += 1
+                values += 1
+
+    elif type(d) == list or type(d) == tuple:
+        for item in d:
+            if isinstance(item, (list, tuple, dict)):
+                k, v = count_k_v(item)
+                values += v
+                keys += k
+            else:
+                values += 1
+
+    return keys, values

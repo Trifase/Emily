@@ -57,7 +57,7 @@ from tarots import tarot, oroscopo, tarotschema
 from testing import test, getfile
 from torrent import lista_torrent
 from twitter import lista_tweets, tweet
-from utils import is_user, is_inline_button
+from utils import is_user, is_inline_button, count_k_v
 
 def main():
 
@@ -333,15 +333,7 @@ def main():
 
 # from utils import ForgeCommand
 
-"""
-TODO: Splittare il seguente comando in:
--controllare i set
--uscire dai gruppi bannati
--controllare se è una nuova chat e mandare messaggino
-    - utilizzare una nuova meccanica per i bottoni, utilizzando la classe ForgeCommand invece di splittare la stringa
--controllare se serve spiare e forwardare i messaggi
--aggiungere il timestamp per asphalto
-"""
+
 async def exit_from_banned_groups(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Auto exit on banned groups
     chat_id = int(update.effective_chat.id)
@@ -644,12 +636,14 @@ async def post_init(app: Application) -> None:
     with open('db/sets.json') as sets_db:
         sets = json.load(sets_db)
         app.bot_data['current_sets'] = sets
-
+    k, v = count_k_v(sets)
+    print(f"{get_now()} Sets caricati. {v} keywords totali.")
     for reminder in r['reminders']:
         # print(f"app.job_queue.run_once(send_reminder, {reminder['date_to_remind']}, chat_id={reminder['chat_id']}, name=f'{reminder['chat_id']}_{reminder['reply_id']}', data=reminder)")
         app.job_queue.run_once(send_reminder, reminder['date_to_remind'], chat_id=reminder['chat_id'], name=f"{reminder['chat_id']}_{reminder['reply_id']}", data=reminder)
         added += 1
     print(f"{get_now()} Trovati {r['processed']} reminders. {added} aggiunti e {r['deleted']} eliminati.")
+    
 
 
 
