@@ -46,7 +46,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
     if update.effective_chat.id in [config.ID_TIMELINE]:
         max_votes = 6
 
-    if not poll_passed:
+    if not poll_passed and update.effective_user.id not in config.ADMINS:
         await crea_sondaggino(context, update, max_votes, tweet, domanda='Vogliamo veramente twittarlo?')
         return
 
@@ -72,7 +72,6 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
     if update.message.reply_to_message and not message:
         message = update.message.reply_to_message.text
     
-    message = ""
     tw_url = ""
     mast_url = ""
     try:
@@ -105,7 +104,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 pass
 
             if tw_url or mast_url:
-                await update.message.reply_html(f"Postato su {' , '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
+                await update.message.reply_html(f"Postato su {', '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
                 await printlog(update, "vuole inviare un tweet con una foto")
 
             else:
@@ -142,7 +141,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 pass
 
             if tw_url or mast_url:
-                await update.message.reply_html(f"Postato su {' , '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
+                await update.message.reply_html(f"Postato su {', '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
                 await printlog(update, "vuole inviare un tweet con un video")
 
             else:
@@ -175,7 +174,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 pass
 
         if tw_url or mast_url:
-            await update.message.reply_html(f"Postato su {' , '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
+            await update.message.reply_html(f"Postato su {', '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
             return
         else:
             await update.message.reply_html("Qualcosa è andato storto, scusa")
