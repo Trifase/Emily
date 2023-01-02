@@ -28,11 +28,16 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
     if await no_can_do(update, context):
         return
 
+    from mastodon import Mastodon
+
+    #   Set up Mastodon
+    mastodon = Mastodon(
+        access_token = 'db/mastodon.token',
+        api_base_url = 'https://livellosegreto.it/'
+    )
 
     message = " ".join(context.args)
 
-
-    
     if not update.message.reply_to_message and not message:
         await update.message.reply_html(f'Uso: <code>/tweet messaggio</code> oppure <code>/tweet</code> in risposta a qualcosa.')
         return
@@ -44,10 +49,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
     if not poll_passed:
         await crea_sondaggino(context, update, max_votes, tweet, domanda='Vogliamo veramente twittarlo?')
         return
-    
-    
-    # import pprint
-    # pprint.pprint(context.to_dict())
+
     import tweepy
     BEARER_TOKEN = config.TW_BEARER_TOKEN
     CONSUMER_KEY = config.TW_API
@@ -70,7 +72,9 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
     if update.message.reply_to_message and not message:
         message = update.message.reply_to_message.text
     
-
+    message = ""
+    tw_url = ""
+    mast_url = ""
     try:
         if update.message.reply_to_message.photo:
             if update.message.reply_to_message.caption:
@@ -83,15 +87,31 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
             tempphoto = tempfile.mktemp(suffix='.jpg')
             actual_picture = await picture.get_file()
             await actual_picture.download_to_drive(custom_path=tempphoto)
-            media = api.media_upload(tempphoto)
-            post_result = api.update_status(status=message, media_ids=[media.media_id])
-            status_id = post_result.id_str
-            await update.message.reply_html(
-                f'Tweet <a href="https://twitter.com/Emily_superbot/status/{status_id}">postato</a>!',
-                disable_web_page_preview=True)
-            # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} vuole inviare un tweet con una foto')
-            await printlog(update, "vuole inviare un tweet con una foto")
+
+            try:
+                media = api.media_upload(tempphoto)
+                post_result = api.update_status(status=message, media_ids=[media.media_id])
+                status_id = post_result.id_str
+                tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
+            except Exception as e:
+                pass
+
+            try:
+                mast_media = mastodon.media_post(tempphoto)
+                mast_response = mastodon.status_post(message, media_ids=mast_media)
+                mastodon_url = mast_response.get('url')
+                mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
+            except Exception as e:
+                pass
+
+            if tw_url or mast_url:
+                await update.message.reply_html(f"Postato su {' , '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
+                await printlog(update, "vuole inviare un tweet con una foto")
+
+            else:
+                await update.message.reply_html("Qualcosa è andato storto, scusa")
             return
+
         elif update.message.reply_to_message.video:
             if update.message.reply_to_message.caption:
                 message = update.message.reply_to_message.caption
@@ -99,19 +119,35 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 message = "guarda qua"
             else:
                 message = message
+
             video = update.message.reply_to_message.video
             tempvideo = tempfile.mktemp(suffix='.mp4')
-            # tempvideo = 'uploads/tw_video.mp4'
             actual_video = await video.get_file()
             await actual_video.download_to_drive(custom_path=tempvideo)
-            media = api.media_upload(tempvideo)
-            post_result = api.update_status(status=message, media_ids=[media.media_id])
-            status_id = post_result.id_str
-            await update.message.reply_html(
-                f'Tweet <a href="https://twitter.com/Emily_superbot/status/{status_id}">postato</a>!',
-                disable_web_page_preview=True)
-            # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} vuole inviare un tweet con un video')
-            await printlog(update, "vuole inviare un tweet con un video")
+
+            try:
+                media = api.media_upload(tempvideo)
+                post_result = api.update_status(status=message, media_ids=[media.media_id])
+                status_id = post_result.id_str
+                tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
+            except Exception as e:
+                pass
+
+            try:
+                mast_media = mastodon.media_post(tempvideo, synchronous=True)
+                mast_response = mastodon.status_post(message, media_ids=mast_media)
+                mastodon_url = mast_response.get('url')
+                mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
+            except Exception as e:
+                pass
+
+            if tw_url or mast_url:
+                await update.message.reply_html(f"Postato su {' , '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
+                await printlog(update, "vuole inviare un tweet con un video")
+
+            else:
+                await update.message.reply_html("Qualcosa è andato storto, scusa")
+
             return
 
     except AttributeError:
@@ -123,16 +159,29 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
         if len(message) > 270:
             await update.message.reply_text(f"it's too long man!")
             return
-        status = api.update_status(status=message)
-        # status = client.create_tweet(text=message)
-        status_id = status.id_str
-        await update.message.reply_html(f'Tweet <a href="https://twitter.com/Emily_superbot/status/{status_id}">postato</a>!',
-                                  disable_web_page_preview=True)
-        return
+
+        try:
+            status = api.update_status(status=message)
+            status_id = status.id_str
+            tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
+        except Exception as e:
+                pass
+
+        try:
+            mast_response = mastodon.status_post(message)
+            mastodon_url = mast_response.get('url')
+            mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
+        except Exception as e:
+                pass
+
+        if tw_url or mast_url:
+            await update.message.reply_html(f"Postato su {' , '.join([tw_url, mast_url])}!", disable_web_page_preview=True)
+            return
+        else:
+            await update.message.reply_html("Qualcosa è andato storto, scusa")
     else:
         await update.message.reply_markdown_v2(f'Uso: `/tweet messaggio`')
         return
-    pass
 
 
 async def lista_tweets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

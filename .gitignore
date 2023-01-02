@@ -28,6 +28,7 @@ db/session-emilia_superbot
 db/sets.json
 db/sqlite.db
 db/tiktok-cookies.txt
+db/mastodon.token
 
 templates/motivational_poster.jpg
 
@@ -186,3 +187,4 @@ cython_debug/
 #.idea/
 
 logs2022-12-28.txt
+

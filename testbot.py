@@ -1,38 +1,28 @@
+
+from telegram.ext import ApplicationBuilder, filters, MessageHandler, ContextTypes
+import re
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext, ContextTypes
 import config
 
 
+async def echo_test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    print(context.matches)
+    print(context.match)
+
+    for match in context.matches:
+        print(match)
+    
 
 
-
-async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Yo")
-#     member = await context.bot.get_chat_member(config.ID_TESTING, 769270800)
-#     print(member)
-#     print(member.status)
-#     if member.status == "left":
-#         print("Yes")
+def main():
+    builder = ApplicationBuilder()
+    builder.token(config.BOT_TOKEN_FRAGOLONE)
+    app = builder.build()
 
 
-test_token = '5404382184:AAHTp_oxftqcsVz8tchV8_Dt8g1sGhX1pFk' # Fragolone
+    app.add_handler(MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(r"([0-9]+):([a-zA-Z0-9_-]{35})", re.IGNORECASE)), echo_test))
+    app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
 
-async def my_init( context: ContextTypes.DEFAULT_TYPE):
-    print("init begin")
-    # wapp = web.Application()
-    # wapp.add_routes([web.get('/logs', hello)])
-    # runner = web.AppRunner(wapp)
-    # await runner.setup()
-    # site = web.TCPSite(runner, '0.0.0.0', 8888)
-    # await site.start()
-
-    print("Init is go")
-
-
-app = ApplicationBuilder().token(test_token).post_init(my_init).build()
-# 
-app.add_handler(CommandHandler("yo", test))
-
-app.run_polling()
+main()
 
