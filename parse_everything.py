@@ -86,10 +86,12 @@ async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE
         # Inline Keyboard
         keyboard = [
             [
-                InlineKeyboardButton(f"{'Spia' if chat_id not in context.bot_data['listen_to'] else 'Non spiare'}", callback_data=f"cmd:listen_to:{chat_id}"),
-                InlineKeyboardButton("Banna", callback_data=f"cmd:ban:{chat_id}"),
-                InlineKeyboardButton("Info", callback_data=f"cmd:getchat:{chat_id}"),
-                InlineKeyboardButton("Del chatlist", callback_data=f"cmd:listachat:-delete {chat_id}"),
+                InlineKeyboardButton(f"{'🔊 Spia' if chat_id not in context.bot_data['listen_to'] else '🔇 Non spiare'}", callback_data=f"cmd:listen_to:{chat_id}"),
+                InlineKeyboardButton("ℹ️ Info", callback_data=f"cmd:getchat:{chat_id}")
+            ],
+            [
+                InlineKeyboardButton("🚫 Banna", callback_data=f"cmd:ban:{chat_id}"),
+                InlineKeyboardButton("🗑 Del chatlist", callback_data=f"cmd:listachat:-delete {chat_id}"),
             ]
         ]
 
@@ -107,10 +109,12 @@ async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE
         # Inline Keyboard
         keyboard = [
             [
-                InlineKeyboardButton(f"{'Spia' if chat_id not in context.bot_data['listen_to'] else 'Non spiare'}", callback_data=f"cmd:listen_to:{chat_id}"),
-                InlineKeyboardButton("Banna", callback_data=f"cmd:ban:{chat_id}"),
-                InlineKeyboardButton("Info", callback_data=f"cmd:getchat:{chat_id}"),
-                InlineKeyboardButton("Del chatlist", callback_data=f"cmd:listachat:-delete {chat_id}"),
+                InlineKeyboardButton(f"{'🔊 Spia' if chat_id not in context.bot_data['listen_to'] else '🔇 Non spiare'}", callback_data=f"cmd:listen_to:{chat_id}"),
+                InlineKeyboardButton("ℹ️ Info", callback_data=f"cmd:getchat:{chat_id}")
+            ],
+            [
+                InlineKeyboardButton("🚫 Banna", callback_data=f"cmd:ban:{chat_id}"),
+                InlineKeyboardButton("🗑 Del chatlist", callback_data=f"cmd:listachat:-delete {chat_id}"),
             ]
         ]
 
