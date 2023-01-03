@@ -43,7 +43,7 @@ from movies import doveguardo, imdb, doveguardo_buttons
 from misc import (bioritmo, fascio, fatfingers, scacchi, square, traduci, spongebob, voice, alexa, get_user_info,
     set_auto_reaction, send_auto_reaction, bomb_react, start, polls_callbackqueryhandlers, condominioweb, is_safe,
     greet_BT_user, random_trifase, aoc_leaderboard)
-from parse_everything import admin_buttons, exit_from_banned_groups, nuova_chat_rilevata, update_timestamps_asphalto, check_for_sets, drop_update_from_banned_users
+from parse_everything import exit_from_banned_groups, nuova_chat_rilevata, update_timestamps_asphalto, check_for_sets, drop_update_from_banned_users, new_admin_buttons
 from pyrog import reaction_karma
 from quiz import classifica, make_poll, ricevi_risposta_quiz, punteggio
 from reddit import reddit
@@ -58,7 +58,7 @@ from tarots import tarot, oroscopo, tarotschema
 from testing import test, getfile
 from torrent import lista_torrent
 from twitter import lista_tweets, tweet
-from utils import is_user, is_inline_button, count_k_v
+from utils import is_user, is_inline_button, count_k_v, is_forged_command
 
 def main():
 
@@ -97,8 +97,10 @@ def main():
 
     j.run_daily(do_global_backup, datetime.time(hour=2, minute=00, tzinfo=pytz.timezone('Europe/Rome')), data=None)
 
-    # parse_everythin.py
-    app.add_handler(CallbackQueryHandler(admin_buttons, pattern=r'^cmd:'))
+    # parse_everything.py
+    # app.add_handler(CallbackQueryHandler(admin_buttons, pattern=r'^cmd:'))
+    app.add_handler(CallbackQueryHandler(new_admin_buttons, pattern=is_forged_command))
+    
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, drop_update_from_banned_users), -1001)
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, exit_from_banned_groups), -20)
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, nuova_chat_rilevata), -19)

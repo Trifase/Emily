@@ -23,7 +23,8 @@ class InlineButton:
 @dataclass
 class ForgeCommand:
     original_update: Update
-    new_data: dict
+    new_text: str
+    new_args: list[str] = []
     callable: Callable
 
 
@@ -64,6 +65,11 @@ async def crea_sondaggino(context, update, max_votes, callable, domanda=''):
 
 def is_inline_button(callback_data):
     if isinstance(callback_data, InlineButton):
+        return True
+    return False
+
+def is_forged_command(callback_data):
+    if isinstance(callback_data, ForgeCommand):
         return True
     return False
 
@@ -124,8 +130,11 @@ async def get_chat_name(chat_id, tolog=False):
     if this_chat.id > 0:
         return "[deep_sky_blue1]chat privata[/deep_sky_blue1]"
     else:
-        chat_title = this_chat.title.split(" ")[0]
-        return f"[yellow1]{chat_title}[/yellow1] ({str(this_chat.id)[4:]})"
+        if len(this_chat.title) > 20:
+            chat_title = f"{this_chat.title[:20]}..."
+        else:
+            chat_title = this_chat.title
+        return f"[yellow1]{chat_title}[/yellow1] ({str(this_chat.id)})"
 
 async def get_display_name(user: User, tolog=False):
     if tolog:

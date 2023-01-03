@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 
 import config
 
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
+from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do, ForgeCommand
 from cron_jobs import plot_boiler_stats
 
 
@@ -109,14 +109,16 @@ async def luci_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     bulbs = ["salotto", "pranzo", "cucina", "penisola"]
 
+    callbacks = [ForgeCommand(original_update=update, new_text=f"/toggle {x}", new_args=[x], callable=toggle_light) for x in bulbs]
+
     luci_keyb = [
         [
-            InlineKeyboardButton(f"{get_light_label(bulbs[0])}", callback_data=f"cmd:toggle:{bulbs[0]}"),
-            InlineKeyboardButton(f"{get_light_label(bulbs[1])}", callback_data=f"cmd:toggle:{bulbs[1]}"),
+            InlineKeyboardButton(f"{get_light_label(bulbs[0])}", callback_data=callbacks[0]),
+            InlineKeyboardButton(f"{get_light_label(bulbs[1])}", callback_data=callbacks[1]),
         ],
         [
-            InlineKeyboardButton(f"{get_light_label(bulbs[2])}", callback_data=f"cmd:toggle:{bulbs[2]}"),
-            InlineKeyboardButton(f"{get_light_label(bulbs[3])}", callback_data=f"cmd:toggle:{bulbs[3]}"),
+            InlineKeyboardButton(f"{get_light_label(bulbs[2])}", callback_data=callbacks[2]),
+            InlineKeyboardButton(f"{get_light_label(bulbs[3])}", callback_data=callbacks[3]),
         ]
     ]
 
@@ -143,6 +145,28 @@ async def toggle_light(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await printlog(update, "toggla una luce", context.args[0])
 
     toggle(get_bulb(context.args[0])['object'])
+    if update.message.reply_markup:
+
+        bulbs = ["salotto", "pranzo", "cucina", "penisola"]
+
+        callbacks = [ForgeCommand(original_update=update, new_text=f"/toggle {x}", new_args=[x], callable=toggle_light) for x in bulbs]
+
+        luci_keyb = [
+            [
+                InlineKeyboardButton(f"{get_light_label(bulbs[0])}", callback_data=callbacks[0]),
+                InlineKeyboardButton(f"{get_light_label(bulbs[1])}", callback_data=callbacks[1]),
+            ],
+            [
+                InlineKeyboardButton(f"{get_light_label(bulbs[2])}", callback_data=callbacks[2]),
+                InlineKeyboardButton(f"{get_light_label(bulbs[3])}", callback_data=callbacks[3]),
+            ]
+        ]
+
+        reply_markup = InlineKeyboardMarkup(luci_keyb)
+
+
+        await update.message.edit_reply_markup(reply_markup=reply_markup)
+
     return
 
 async def consumo(update: Update, context: ContextTypes.DEFAULT_TYPE):

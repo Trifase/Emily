@@ -10,7 +10,7 @@ import config
 
 from admin import getchat, lista_chat, listen_to, add_ban
 from smarthome import toggle_light, get_light_label
-from utils import printlog, no_can_do, is_member_in_group, is_user # ForgeCommand
+from utils import printlog, no_can_do, is_member_in_group, is_user, ForgeCommand
 
 
 async def drop_update_from_banned_users(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -83,15 +83,19 @@ async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE
             message += f"Bio: {utente.bio}\n\n"
             message += f"Messaggio: {update.effective_user.mention_html()}: {update.effective_message.text}"
 
-        # Inline Keyboard
+        cbdata_listen_to = ForgeCommand(original_update=update, new_text=f"/listen_to {chat_id}", new_args=[chat_id], callable=listen_to)
+        cbdata_getchat = ForgeCommand(original_update=update, new_text=f"/getchat {chat_id}", new_args=[chat_id], callable=getchat)
+        cbdata_ban = ForgeCommand(original_update=update, new_text=f"/ban {chat_id}", new_args=[chat_id], callable=add_ban)
+        cbdata_delete = ForgeCommand(original_update=update, new_text=f"/listachat -delete {chat_id}", new_args=['-delete', chat_id], callable=lista_chat)
+
         keyboard = [
             [
-                InlineKeyboardButton(f"{'🔊 Spia' if chat_id not in context.bot_data['listen_to'] else '🔇 Non spiare'}", callback_data=f"cmd:listen_to:{chat_id}"),
-                InlineKeyboardButton("ℹ️ Info", callback_data=f"cmd:getchat:{chat_id}")
+                InlineKeyboardButton(f"{'🔊 Spia' if chat_id not in context.bot_data['listen_to'] else '🔇 Non spiare'}", callback_data=cbdata_listen_to),
+                InlineKeyboardButton("ℹ️ Info", callback_data=cbdata_getchat)
             ],
             [
-                InlineKeyboardButton("🚫 Banna", callback_data=f"cmd:ban:{chat_id}"),
-                InlineKeyboardButton("🗑 Del chatlist", callback_data=f"cmd:listachat:-delete {chat_id}"),
+                InlineKeyboardButton("🚫 Banna", callback_data=cbdata_ban),
+                InlineKeyboardButton("🗑 Del chatlist", callback_data=cbdata_delete),
             ]
         ]
 
@@ -106,17 +110,24 @@ async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE
         if my_chat.title:
             msg_from = f"💬 {my_chat.title}"
         text = f"[SPIO] Messaggio su {msg_from}:\nID: <code>{my_chat.id}</code>\n{update.effective_user.mention_html()}: {update.effective_message.text}"
-        # Inline Keyboard
+    
+        cbdata_listen_to = ForgeCommand(original_update=update, new_text=f"/listen_to {chat_id}", new_args=[chat_id], callable=listen_to)
+        cbdata_getchat = ForgeCommand(original_update=update, new_text=f"/getchat {chat_id}", new_args=[chat_id], callable=getchat)
+        cbdata_ban = ForgeCommand(original_update=update, new_text=f"/ban {chat_id}", new_args=[chat_id], callable=add_ban)
+        cbdata_delete = ForgeCommand(original_update=update, new_text=f"/listachat -delete {chat_id}", new_args=['-delete', chat_id], callable=lista_chat)
+
         keyboard = [
             [
-                InlineKeyboardButton(f"{'🔊 Spia' if chat_id not in context.bot_data['listen_to'] else '🔇 Non spiare'}", callback_data=f"cmd:listen_to:{chat_id}"),
-                InlineKeyboardButton("ℹ️ Info", callback_data=f"cmd:getchat:{chat_id}")
+                InlineKeyboardButton(f"{'🔊 Spia' if chat_id not in context.bot_data['listen_to'] else '🔇 Non spiare'}", callback_data=cbdata_listen_to),
+                InlineKeyboardButton("ℹ️ Info", callback_data=cbdata_getchat)
             ],
             [
-                InlineKeyboardButton("🚫 Banna", callback_data=f"cmd:ban:{chat_id}"),
-                InlineKeyboardButton("🗑 Del chatlist", callback_data=f"cmd:listachat:-delete {chat_id}"),
+                InlineKeyboardButton("🚫 Banna", callback_data=cbdata_ban),
+                InlineKeyboardButton("🗑 Del chatlist", callback_data=cbdata_delete),
             ]
         ]
+
+
 
         reply_markup = InlineKeyboardMarkup(keyboard)
         await context.bot.send_message(chat_id=config.ID_SPIA, text=text, reply_markup=reply_markup)
@@ -229,64 +240,70 @@ async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 await update.message.reply_text(f'{chatdict[messaggio.lower()]}', quote=False, disable_web_page_preview=True)
             return
 
-async def admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+# async def admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
+#     query = update.callback_query
+#     await query.answer()
+
+#     # Example of update.callback_query.data it receives:
+#     # cmd:ban:123456789
+
+#     # splitting the string into command and args
+#     command = query.data.split(":")[1]
+#     args = query.data.split(":")[2]
+
+#     # becase v20b makes TelegramObjects frozen (as in: Immutable), we need to warm up them a bit before 
+#     # we can edit them - there is an internal context manager ready that unfreezes and freezes on exit
+
+#     query._unfreeze()
+#     query.message._unfreeze()
+
+#     # forging a fake message.text
+#     query.message.text = f"/{command} {args}"
+
+#     # creating an empty context.args
+#     if not context.args:
+#         context.args = []
+
+#     # forging a fake context.args
+#     for arg in args.split(" "):
+#         context.args.append(arg)
+
+#     # calling actual functions with the forged callback_query and forged context
+#     # add_ban is the same function that would be called by /add_ban <user_id>
+#     if command == 'toggle':
+#         if query.from_user.id not in config.ADMINS:
+#             await query.answer(f"Non puoi.")
+#             return
+
+#         await toggle_light(update.callback_query, context)
+#         bulbs = ["salotto", "pranzo", "cucina", "penisola"]
+
+#         luci_keyb = [
+#             [
+#                 InlineKeyboardButton(f"{get_light_label(bulbs[0])}", callback_data=f"cmd:toggle:{bulbs[0]}"),
+#                 InlineKeyboardButton(f"{get_light_label(bulbs[1])}", callback_data=f"cmd:toggle:{bulbs[1]}"),
+#             ],
+#             [
+#                 InlineKeyboardButton(f"{get_light_label(bulbs[2])}", callback_data=f"cmd:toggle:{bulbs[2]}"),
+#                 InlineKeyboardButton(f"{get_light_label(bulbs[3])}", callback_data=f"cmd:toggle:{bulbs[3]}"),
+#             ]
+#         ]
+
+#         reply_markup = InlineKeyboardMarkup(luci_keyb)
+#         await query.message.edit_text("Luci:", reply_markup=reply_markup)
+
+async def new_admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
+    
     await query.answer()
-
-    # Example of update.callback_query.data it receives:
-    # cmd:ban:123456789
-
-    # splitting the string into command and args
-    command = query.data.split(":")[1]
-    args = query.data.split(":")[2]
-
-    # becase v20b makes TelegramObjects frozen (as in: Immutable), we need to warm up them a bit before 
-    # we can edit them - there is an internal context manager ready that unfreezes and freezes on exit
+    mybutton: ForgeCommand = query.data
 
     query._unfreeze()
     query.message._unfreeze()
 
-    # forging a fake message.text
-    query.message.text = f"/{command} {args}"
+    query.message.text = mybutton.new_text
+    context.args = mybutton.new_args
+    function_to_call = mybutton.callable
 
-    # creating an empty context.args
-    if not context.args:
-        context.args = []
-
-    # forging a fake context.args
-    for arg in args.split(" "):
-        context.args.append(arg)
-
-    # calling actual functions with the forged callback_query and forged context
-    # add_ban is the same function that would be called by /add_ban <user_id>
-    if command == 'ban':
-        await add_ban(update.callback_query, context)
-    elif command == 'getchat':
-        await getchat(update.callback_query, context)
-    elif command == 'listen_to':
-        await listen_to(update.callback_query, context)
-    elif command == 'listachat':
-        await lista_chat(update.callback_query, context)
-        
-    elif command == 'toggle':
-        if query.from_user.id not in config.ADMINS:
-            await query.answer(f"Non puoi.")
-            return
-
-        await toggle_light(update.callback_query, context)
-        bulbs = ["salotto", "pranzo", "cucina", "penisola"]
-
-        luci_keyb = [
-            [
-                InlineKeyboardButton(f"{get_light_label(bulbs[0])}", callback_data=f"cmd:toggle:{bulbs[0]}"),
-                InlineKeyboardButton(f"{get_light_label(bulbs[1])}", callback_data=f"cmd:toggle:{bulbs[1]}"),
-            ],
-            [
-                InlineKeyboardButton(f"{get_light_label(bulbs[2])}", callback_data=f"cmd:toggle:{bulbs[2]}"),
-                InlineKeyboardButton(f"{get_light_label(bulbs[3])}", callback_data=f"cmd:toggle:{bulbs[3]}"),
-            ]
-        ]
-
-        reply_markup = InlineKeyboardMarkup(luci_keyb)
-        await query.message.edit_text("Luci:", reply_markup=reply_markup)
+    await function_to_call(query, context)

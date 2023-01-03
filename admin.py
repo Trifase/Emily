@@ -11,7 +11,7 @@ import datetime
 import asyncio
 
 import config
-from utils import printlog, get_display_name, print_to_string, get_now, get_chat_name, no_can_do
+from utils import printlog, get_display_name, print_to_string, get_now, get_chat_name, no_can_do, ForgeCommand
 from scrapers import file_in_limits
 from cron_jobs import do_global_backup
 from rich import print
@@ -411,25 +411,29 @@ async def getchat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message += f"Nickname: @{mychat.username}\n"
         message += f"Descrizione: {mychat.bio}\n"
 
+
+    cbdata_listen_to = ForgeCommand(original_update=update, new_text=f"/listen_to {chat_id}", new_args=[chat_id], callable=listen_to)
+    cbdata_ban = ForgeCommand(original_update=update, new_text=f"/ban {chat_id}", new_args=[chat_id], callable=add_ban)
+
     keyboard = [
         [
-            InlineKeyboardButton(f"{'Spia' if chat_id not in context.bot_data['listen_to'] else 'Non spiare'}", callback_data=f"cmd:listen_to:{chat_id}"),
-            InlineKeyboardButton(f"{'Banna' if chat_id not in context.bot_data['global_bans'] else 'Sbanna'}", callback_data=f"cmd:ban:{chat_id}")
+            InlineKeyboardButton(f"{'Spia' if chat_id not in context.bot_data['listen_to'] else 'Non spiare'}", callback_data=cbdata_listen_to),
+            InlineKeyboardButton(f"{'Banna' if chat_id not in context.bot_data['global_bans'] else 'Sbanna'}", callback_data=cbdata_ban)
         ]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await context.bot.send_message(config.ID_SPIA, message, reply_markup=reply_markup)
-    # await update.message.reply_text(message)
+
 
 async def lista_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if update.message.from_user.id not in config.ADMINS:
         return
 
-    # await printlog(update, "chiede la lista delle chat")
-    print("Lista delle chat")
+    await printlog(update, "chiede la lista delle chat")
+    # print("Lista delle chat")
 
     if "-wipe" in context.args:
         context.bot_data['lista_chat'] = []
