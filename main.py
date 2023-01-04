@@ -43,7 +43,8 @@ from movies import doveguardo, imdb, doveguardo_buttons
 from misc import (bioritmo, fascio, fatfingers, scacchi, square, traduci, spongebob, voice, alexa, get_user_info,
     set_auto_reaction, send_auto_reaction, bomb_react, start, polls_callbackqueryhandlers, condominioweb, is_safe,
     greet_BT_user, random_trifase, aoc_leaderboard)
-from parse_everything import exit_from_banned_groups, nuova_chat_rilevata, update_timestamps_asphalto, check_for_sets, drop_update_from_banned_users, new_admin_buttons
+from parse_everything import (exit_from_banned_groups, nuova_chat_rilevata, update_timestamps_asphalto, check_for_sets,
+    drop_update_from_banned_users, new_admin_buttons, messaggio_spiato) 
 from pyrog import reaction_karma
 from quiz import classifica, make_poll, ricevi_risposta_quiz, punteggio
 from reddit import reddit
@@ -100,12 +101,15 @@ def main():
     # parse_everything.py
     # app.add_handler(CallbackQueryHandler(admin_buttons, pattern=r'^cmd:'))
     app.add_handler(CallbackQueryHandler(new_admin_buttons, pattern=is_forged_command))
-    
+
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, drop_update_from_banned_users), -1001)
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, exit_from_banned_groups), -20)
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, nuova_chat_rilevata), -19)
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, update_timestamps_asphalto), -18)
-    app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, check_for_sets), -17)
+    app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, messaggio_spiato), -17)
+    app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, check_for_sets), -16)
+
+    
 
 
     # Error handler

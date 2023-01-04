@@ -23,6 +23,10 @@ async def exit_from_banned_groups(update: Update, context: ContextTypes.DEFAULT_
 
     if chat_id in config.BANNED_GROUPS:
         await context.bot.leave_chat(chat_id)
+    raise ApplicationHandlerStop
+
+
+
 
 async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if 'lista_chat' not in context.bot_data:
@@ -103,6 +107,17 @@ async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE
 
         await context.bot.send_message(config.ID_SPIA, message, reply_markup=reply_markup)
 
+
+async def messaggio_spiato(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if 'lista_chat' not in context.bot_data:
+        context.bot_data['lista_chat'] = []
+
+    if "listen_to" not in context.bot_data:
+        context.bot_data['listen_to'] = []
+
+    chat_id = int(update.effective_chat.id)
+    SPY = True
+
     # Se è nella lista spiati, inoltra il messaggio su emily spia
     if chat_id in context.bot_data['listen_to']:
         my_chat = await context.bot.get_chat(chat_id)
@@ -131,6 +146,7 @@ async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE
 
         reply_markup = InlineKeyboardMarkup(keyboard)
         await context.bot.send_message(chat_id=config.ID_SPIA, text=text, reply_markup=reply_markup)
+
 
 async def update_timestamps_asphalto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
