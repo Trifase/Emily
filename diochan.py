@@ -127,7 +127,7 @@ async def search_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         for quote in quotes:
             mymessage += f"{quote.quote_text}\n-----\n"
 
-        URL = "https://www.toptal.com/developers/hastebin"
+        URL = "https://hastebin.com"
         response = requests.post(URL + "/documents", mymessage.encode('utf-8'))
 
         r = json.loads(response.text)

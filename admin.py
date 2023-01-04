@@ -595,6 +595,12 @@ async def banlist(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         context.bot_data['global_bans'].clear()
         await update.message.reply_text(f"ban list vuota.")
         return
+
+    if "-removeduplicates" in context.args:
+        context.bot_data['global_bans'] = list(set(context.bot_data['global_bans']))
+        await update.message.reply_text(f"Fatto.")
+        return
+
     lista_ban = context.bot_data.get('global_bans', [])
     if not lista_ban:
         context.bot_data['global_bans'] = []
@@ -606,36 +612,39 @@ async def banlist(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             user = await context.bot.getChat(user_id)
         except Exception as e:
             context.bot_data['global_bans'].remove(user_id)
-            message += f"{user_id} - Cancellato\n"
+            message += f"ID: <code>{user_id}</code> Cancellato\n"
             continue
-        message += f"ID: {user['id']}\t @{user['username']}\n" 
+        message += f"ID: <code>{user['id']}</code> @{user['username']}\n" 
     if not message:
         await update.message.reply_text("Lista ban vuota!", disable_notification=True)
         return
     else:
-        await update.message.reply_html(f"<code>{message}</code>", disable_notification=True)
+        await update.message.reply_html(f"{message}", disable_notification=True)
         return
 
 async def add_ban(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:
         return
-    # print(f'{get_now()} [deep_pink3]{update.message.from_user.username}[/deep_pink3] in {await get_chat_name(update.message.chat.id)} aggiunge un ban!')
+
     lista_ban = context.bot_data.get('global_bans', [])
     if not lista_ban:
         context.bot_data['global_bans'] = []
 
     if context.args:
         user_id = int(context.args[0])
-        context.bot_data.get('global_bans').append(user_id)
-    else:
+    elif update.message.reply_to_message:
         user_id = update.message.reply_to_message.from_user.id
-        chat_id = update.message.chat.id
-        member = await context.bot.get_chat_member(chat_id, user_id)
-        context.bot_data.get('global_bans').append(member.user.id)
-        user_id = member.user.id
-    await printlog(update, "aggiunge alla lista ban", user_id)
-    await update.message.reply_text("Fatto!", disable_notification=True)
-    return
+    else:
+        await update.message.reply_text("Non saprei chi bannare")
+        return
+    if user_id not in lista_ban:
+        context.bot_data.get('global_bans').append(user_id)
+        await update.message.reply_text("Fatto!", disable_notification=True)
+        await printlog(update, "aggiunge alla lista ban", user_id)
+    else:
+        await update.message.reply_text("È già bannato", disable_notification=True)
+
+
 
 async def del_ban(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:

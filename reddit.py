@@ -334,7 +334,7 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             await update.message.reply_html(message)
 
             mymessage = pprint.pformat(vars(submission))
-            URL = "https://www.toptal.com/developers/hastebin"
+            URL = "https://hastebin.com"
             response = requests.post(URL + "/documents", mymessage.encode('utf-8'))
             r = json.loads(response.text)
             pastebin_url = f"{URL}/raw/{r['key']}"

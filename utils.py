@@ -109,7 +109,7 @@ async def no_can_do(update, context):
     if "global_bans" not in context.bot_data:
         context.bot_data["global_bans"] = []
     one = update.effective_user.id in context.bot_data['global_bans']
-    two = is_function_enabled(update.message.chat.id, function_name(), context)
+    two = is_function_enabled(update.effective_chat.id, function_name(), context)
 
     if one or not two:
         return True

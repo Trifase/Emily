@@ -14,7 +14,7 @@ from utils import printlog, no_can_do, is_member_in_group, is_user, ForgeCommand
 
 
 async def drop_update_from_banned_users(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if await no_can_do(update, context):
+    if update.effective_user.id in context.bot_data.get('global_bans'):
         raise ApplicationHandlerStop
 
 async def exit_from_banned_groups(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -29,6 +29,9 @@ async def exit_from_banned_groups(update: Update, context: ContextTypes.DEFAULT_
 
 
 async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await no_can_do(update, context):
+        return
+
     if 'lista_chat' not in context.bot_data:
         context.bot_data['lista_chat'] = []
 
@@ -109,6 +112,9 @@ async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 
 async def messaggio_spiato(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await no_can_do(update, context):
+        return
+
     if 'lista_chat' not in context.bot_data:
         context.bot_data['lista_chat'] = []
 
