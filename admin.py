@@ -587,6 +587,9 @@ async def banlist(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     await printlog(update, "chiede la lista bannati")
 
+    if not 'global_bans' in context.bot_data:
+        context.bot_data['global_bans'] = []
+
     message = ""
     if update.message.from_user.id not in config.ADMINS:
         return
@@ -601,20 +604,28 @@ async def banlist(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(f"Fatto.")
         return
 
-    lista_ban = context.bot_data.get('global_bans', [])
-    if not lista_ban:
-        context.bot_data['global_bans'] = []
-
     lista_ban = context.bot_data['global_bans'].copy()
 
     for user_id in lista_ban:
         try:
-            user = await context.bot.getChat(user_id)
+            chat = await context.bot.get_chat(user_id)
+
         except Exception as e:
             context.bot_data['global_bans'].remove(user_id)
-            message += f"ID: <code>{user_id}</code> Cancellato\n"
+            message += f"ID: <code>{user_id}</code> - Cancellato\n"
             continue
-        message += f"ID: <code>{user['id']}</code> @{user['username']}\n" 
+
+        if chat.type == 'private':
+            if chat.username:
+                message += f"ID: <code>{chat.id}</code> - <code>{chat.full_name} (@{chat.username})</code>\n"
+            else:
+                message += f"ID: <code>{chat.id}</code> - <code>{chat.full_name}</code>\n"
+        else:
+            if chat.username:
+                message += f"ID: <code>{chat.id}</code> - <code>{chat.title} (@{chat.username})</code>\n"
+            else:
+                message += f"ID: <code>{chat.id}</code> - <code>{chat.title}</code>\n"
+
     if not message:
         await update.message.reply_text("Lista ban vuota!", disable_notification=True)
         return

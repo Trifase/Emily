@@ -187,7 +187,7 @@ async def purificatore(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
     await printlog(update, "chiede lo status del purificatore d'aria")
     import miio
-    air = miio.AirPurifierMiot("192.168.1.60", "e8e5a8bb036e21662c4708b61a829c04") # 54:48:E6:55:B3:72
+    air = miio.AirPurifierMiot("192.168.1.84", "e8e5a8bb036e21662c4708b61a829c04") # 54:48:E6:55:B3:72
     s = air.status()
     message = ""
     message += f"Purificatore d'aria Xiaomi Air Purifier 3H: {'Acceso' if s.is_on else 'Spento'}\n"
