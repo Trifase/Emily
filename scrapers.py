@@ -95,9 +95,6 @@ async def file_in_limits(url, debug=False) -> bool:
                 print("E' nei limiti")
                 pprint.pprint(info.headers)
             return True
-        # elif (int(info.headers["Content-Length"]) <= 50000000):
-        #     raise AttributeError
-    
 
     if ('image' in info.headers["Content-Type"]):
         if (int(info.headers["Content-Length"]) <= 5000000):
@@ -107,8 +104,6 @@ async def file_in_limits(url, debug=False) -> bool:
                 pprint.pprint(info.headers)
                 print("E' nei limiti")
             return True
-        # elif (int(info.headers["Content-Length"]) <= 10000000):
-        #     raise AttributeError
 
     if debug:
         import pprint
@@ -150,14 +145,12 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str) -> dict:
     tiktok_api_headers = {
             'User-Agent': 'com.ss.android.ugc.trill/494+Mozilla/5.0+(Linux;+Android+12;+2112123G+Build/SKQ1.211006.001;+wv)+AppleWebKit/537.36+(KHTML,+like+Gecko)+Version/4.0+Chrome/107.0.5304.105+Mobile+Safari/537.36'
         }
-    # try:
-    # api_url = f'https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/?aweme_id={ID}&iid=6165993682518218889&device_id={random.randint(10*10*10, 9*10**10)}&aid=1180'
+
     api_url = f'https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/?aweme_id={video_ID}'
     async with aiohttp.ClientSession() as session:
         async with session.get(api_url, headers=tiktok_api_headers, timeout=10) as response:
             response = await response.json()
 
-    # print(response)
     data = response["aweme_list"][0]
 
     video_url = data["video"]["play_addr"]["url_list"][0]
@@ -190,11 +183,10 @@ async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     if 'tiktok' not in query.split('.'):
         return
 
-    
-    username, id, link = await get_tiktok_username_id(query)
-    # await printlog(update, "chiede un tiktok inline", link")
-    print(f'{get_now()} {await get_display_name(update.effective_user)} inline chiede un tiktok: {link}')
 
+    username, id, link = await get_tiktok_username_id(query)
+
+    print(f'{get_now()} {await get_display_name(update.effective_user)} inline chiede un tiktok: {link}')
 
     try:
         video_info = await get_tiktok_video_infos_aweme(username, id)
