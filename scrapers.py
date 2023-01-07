@@ -165,6 +165,8 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str) -> dict:
     caption += data["desc"]
     thumbnail_jpg = data["video"]["cover"]["url_list"][0]
     title = f"Tiktok Video from {username}"
+    height = data["video"]["height"]
+    width = data["video"]["width"]
 
     infos["username"] = username
     infos["video_id"] = video_ID
@@ -172,6 +174,8 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str) -> dict:
     infos["title"] = title
     infos["caption"] = caption
     infos["thumbnail_url"] = thumbnail_jpg
+    infos["height"] = height
+    infos["width"] = width
     return infos
 
 
@@ -266,12 +270,10 @@ async def tiktok(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     elif int(info.headers["Content-Length"]) >= 20000000:
         deleteme = await update.message.reply_text(f"Il video è più di 20MB\nTocca caricarlo a mano, un attimo.")
         try:
-            
-
             with urllib.request.urlopen(video_info["video_url"]) as response:
                 with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
                     shutil.copyfileobj(response, tmp_file)
-            await update.message.reply_video(video=open(tmp_file.name, "rb"), caption=video_info["caption"], parse_mode='HTML')
+            await update.message.reply_video(video=open(tmp_file.name, "rb"), caption=video_info["caption"], height=video_info["height"], width=video_info["width"], parse_mode='HTML')
             await context.bot.delete_message(chat_id=update.message.chat_id, message_id=deleteme.message_id)
         except Exception as e:
             await update.message.reply_text(f"Errore: {e}")
@@ -304,12 +306,10 @@ async def tiktok_long(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     elif int(info.headers["Content-Length"]) >= 20000000:
         deleteme = await update.message.reply_text(f"Il video è più di 20MB\nTocca caricarlo a mano, un attimo.")
         try:
-            
-
             with urllib.request.urlopen(video_info["video_url"]) as response:
                 with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
                     shutil.copyfileobj(response, tmp_file)
-            await update.message.reply_video(video=open(tmp_file.name, "rb"), caption=video_info["caption"], parse_mode='HTML')
+            await update.message.reply_video(video=open(tmp_file.name, "rb"), caption=video_info["caption"], height=video_info["height"], width=video_info["width"], parse_mode='HTML')
             await context.bot.delete_message(chat_id=update.message.chat_id, message_id=deleteme.message_id)
         except Exception as e:
             await update.message.reply_text(f"Errore: {e}")
