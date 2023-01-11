@@ -982,7 +982,7 @@ async def tarot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_html(h, disable_web_page_preview=True)
         return
 
-    imagepath = tempfile.mktemp(suffix='.jpg')
+    imagepath = tempfile.NamedTemporaryFile(suffix='.jpg')
 
     with open('db/tarots.json') as tarots_db:
         tarots = json.load(tarots_db)
@@ -990,8 +990,6 @@ async def tarot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lettura = ""
 
     my_spread = await get_spread(spread_name)
-    # print("My spread:")
-    # pprint.pprint(my_spread)
 
     await printlog(update, "fa i tarocchi", my_spread['name'])
 
@@ -999,14 +997,10 @@ async def tarot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         my_cards = await draw_cards_special(reverse=reverse, force_obliqua=force_obliqua, deck=deck)
     else:
         my_cards = await draw_cards(my_spread, reverse=reverse, deck=deck, context=context)
-    # print("My cards:")
-    # pprint.pprint(my_cards)
 
-    await generate_cards_table(my_cards, imagepath, spread_name, zodiac=zodiac)
-    # print("My file")
-    # print(imagepath)
+    await generate_cards_table(my_cards, imagepath.name, spread_name, zodiac=zodiac)
     caption = my_spread['name']
-    msg = await update.message.reply_photo(photo=open(imagepath, 'rb'), caption=caption)
+    msg = await update.message.reply_photo(photo=imagepath, caption=caption)
 
     if info:
         info = ''
@@ -1039,6 +1033,7 @@ async def tarot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         lettura += f"{tarots[future]['future']}"
 
         await update.message.reply_html(lettura, reply_to_message_id=msg.message_id)
+    imagepath.close()
 
 async def tarotschema(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await no_can_do(update, context):
@@ -1085,7 +1080,8 @@ async def tarotschema(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if chosen_deck == 'marsiglia':
         deck = 'mars'
 
-    imagepath = tempfile.mktemp(suffix='.jpg')
+    # imagepath = tempfile.mktemp(suffix='.jpg')
+    imagepath = tempfile.NamedTemporaryFile(suffix='.jpg')
 
     await printlog(update, "fa i tarocchi", spread['name'])
 
@@ -1115,9 +1111,10 @@ async def tarotschema(update: Update, context: ContextTypes.DEFAULT_TYPE):
         'cards': returned_cards
     }
 
-    await generate_cards_table(my_cards, imagepath, spread_name, zodiac=zodiac)
+    await generate_cards_table(my_cards, imagepath.name, spread_name, zodiac=zodiac)
     caption = spread['name']
-    msg = await update.message.reply_photo(photo=open(imagepath, 'rb'), caption=caption)
+    msg = await update.message.reply_photo(photo=imagepath, caption=caption)
+    imagepath.close()
 
 # Oroscopulo
 async def oroscopo(update: Update, context: ContextTypes.DEFAULT_TYPE):

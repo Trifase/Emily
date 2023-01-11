@@ -9,6 +9,7 @@ import subprocess
 import tempfile
 import datetime
 import asyncio
+import traceback
 
 import config
 from utils import printlog, get_display_name, print_to_string, get_now, get_chat_name, no_can_do, ForgeCommand
@@ -708,16 +709,19 @@ async def set_group_picture(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         return
 
     picture = update.message.reply_to_message.photo[-1]
-    tempphoto = tempfile.mktemp(suffix='.jpg')
-    actual_picture = await picture.get_file()
-    await actual_picture.download_to_drive(custom_path=tempphoto)
 
-    try:
-        await context.bot.set_chat_photo(update.message.chat.id, open(tempphoto, 'rb'))
-        await printlog(update, "cambia la propic al gruppo")
-        # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} cambia la propic al gruppo')
-    except Exception as e:
-        await update.message.reply_text("Non posso farlo")
+    with tempfile.NamedTemporaryFile(suffix='.jpg') as tempphoto:
+        actual_picture = await picture.get_file()
+        await actual_picture.download_to_drive(custom_path=tempphoto.name)
+
+        try:
+            await context.bot.set_chat_photo(update.message.chat.id, tempphoto)
+            await printlog(update, "cambia la propic al gruppo")
+
+        except Exception as e:
+            print(traceback.format_exc())
+            await update.message.reply_text("Non posso farlo")
+
 
 async def do_manual_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     import shutil

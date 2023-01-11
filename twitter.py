@@ -87,13 +87,14 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
             else:
                 message = message
             picture = update.message.reply_to_message.photo[-1]
-            tempphoto = tempfile.mktemp(suffix='.jpg')
+            # tempphoto = tempfile.mktemp(suffix='.jpg')
+            tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
             actual_picture = await picture.get_file()
-            await actual_picture.download_to_drive(custom_path=tempphoto)
+            await actual_picture.download_to_drive(custom_path=tempphoto.name)
 
             if TWITTER:
                 try:
-                    media = api.media_upload(tempphoto)
+                    media = api.media_upload(tempphoto.name)
                     post_result = api.update_status(status=message, media_ids=[media.media_id])
                     status_id = post_result.id_str
                     tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
@@ -102,7 +103,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
 
             if MASTODON:
                 try:
-                    mast_media = mastodon.media_post(tempphoto)
+                    mast_media = mastodon.media_post(tempphoto.name)
                     mast_response = mastodon.status_post(message, media_ids=mast_media)
                     mastodon_url = mast_response.get('url')
                     mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
@@ -115,7 +116,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
 
             else:
                 await update.message.reply_html("Qualcosa è andato storto, scusa")
-            return
+            tempphoto.close()
 
         elif update.message.reply_to_message.video:
             if update.message.reply_to_message.caption:
@@ -126,13 +127,14 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 message = message
 
             video = update.message.reply_to_message.video
-            tempvideo = tempfile.mktemp(suffix='.mp4')
+            # tempvideo = tempfile.mktemp(suffix='.mp4')
+            tempvideo = tempfile.NamedTemporaryFile(suffix='.mp4')
             actual_video = await video.get_file()
-            await actual_video.download_to_drive(custom_path=tempvideo)
+            await actual_video.download_to_drive(custom_path=tempvideo.name)
 
             if TWITTER:
                 try:
-                    media = api.media_upload(tempvideo)
+                    media = api.media_upload(tempvideo.name)
                     post_result = api.update_status(status=message, media_ids=[media.media_id])
                     status_id = post_result.id_str
                     tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
@@ -141,7 +143,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
 
             if MASTODON:
                 try:
-                    mast_media = mastodon.media_post(tempvideo, synchronous=True)
+                    mast_media = mastodon.media_post(tempvideo.name, synchronous=True)
                     mast_response = mastodon.status_post(message, media_ids=mast_media)
                     mastodon_url = mast_response.get('url')
                     mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
@@ -155,7 +157,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
             else:
                 await update.message.reply_html("Qualcosa è andato storto, scusa")
 
-            return
+            tempvideo.close()
 
     except AttributeError:
         pass

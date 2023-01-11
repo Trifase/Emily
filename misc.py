@@ -204,15 +204,17 @@ async def is_safe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await printlog(update, "controlla una foto per NSFW")
 
     picture = update.message.reply_to_message.photo[-1]
-    tempphoto = tempfile.mktemp(suffix='.jpg')
+    # tempphoto = tempfile.mktemp(suffix='.jpg')
+    tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
+
     actual_picture = await picture.get_file()
-    await actual_picture.download_to_drive(custom_path=tempphoto)
+    await actual_picture.download_to_drive(custom_path=tempphoto.name)
 
     classifier = NudeClassifier()
-    results = classifier.classify(tempphoto)
+    results = classifier.classify(tempphoto.name)
 
-    unsafeness = results[tempphoto]['unsafe']
-    safeness = results[tempphoto]['safe']
+    unsafeness = results[tempphoto.name]['unsafe']
+    safeness = results[tempphoto.name]['safe']
     limit = 0.80
 
     text = f"Safe: ({str(safeness * 100)[:4]}%)\nUnsafe: ({str(unsafeness * 100)[:4]}%)\n\n{'❌ NOT' if unsafeness > safeness else '✅'} SAFE"
@@ -220,7 +222,7 @@ async def is_safe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if '-why' in context.args:
         detector = NudeDetector()
-        results = detector.detect(tempphoto)
+        results = detector.detect(tempphoto.name)
         text += "\n\n"
         original_text = text
 
@@ -720,14 +722,15 @@ async def fascio(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 message = message
             picture = update.message.reply_to_message.photo[-1]
-            tempphoto = tempfile.mktemp(suffix='.jpg')
+            # tempphoto = tempfile.mktemp(suffix='.jpg')
+            tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
             actual_picture = await picture.get_file()
-            await actual_picture.download_to_drive(custom_path=tempphoto)
-            im = Image.open(tempphoto)
+            await actual_picture.download_to_drive(custom_path=tempphoto.name)
+            im = Image.open(tempphoto.name)
             out = im.rotate(180, expand=True)
-            out.save(tempphoto)
-            await update.message.reply_photo(open(tempphoto, 'rb'), caption=upsidedown.transform(message))
-            return
+            out.save(tempphoto.name)
+            await update.message.reply_photo(tempphoto, caption=upsidedown.transform(message))
+            tempphoto.close()
 
     except AttributeError:
         pass

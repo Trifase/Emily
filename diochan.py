@@ -229,9 +229,10 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 else:
                     message = "Ho il culo pieno di ovatta"
             picture = update.message.reply_to_message.photo[-1]
-            tempphoto = tempfile.mktemp(suffix='.jpg')
+            # tempphoto = tempfile.mktemp(suffix='.jpg')
+            tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
             actual_picture = await picture.get_file()
-            await actual_picture.download_to_drive(custom_path=tempphoto)
+            await actual_picture.download_to_drive(custom_path=tempphoto.name)
 
             baseurl = 'https://www.diochan.com/'
             referurl = f'{baseurl}{board}/index.html'
@@ -283,7 +284,7 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     payload[name] = value
 
             # Textboox upload multipart-encoded files with Requests 
-            image_file_descriptor = open(tempphoto, 'rb')
+            image_file_descriptor = tempphoto
             files = {'file': image_file_descriptor}
             posturl = f'{baseurl}post.php'
             richiesta = requests.post(posturl, headers=HEADERS, data=payload, files=files)
@@ -296,14 +297,14 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 reply_link = f"Postato! {link}"
                 print(f'{get_now()} Fatto! {reply_link} - pass per cancellare: {delpass}')
                 await context.bot.send_message(update.message.chat.id, reply_link)
-                return
+                
             except Exception as e:
                 print(e)
                 await context.bot.send_message(update.message.chat.id, richiesta.text)
-                return
+            tempphoto.close()
         else:
             await context.bot.send_message(update.message.chat.id, "Devi rispondere ad una foto con didascalia")
-            return
+            
     except AttributeError:
         return
 

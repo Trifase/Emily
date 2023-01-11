@@ -20,6 +20,5 @@ async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def getfile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     picture = update.message.reply_to_message.photo[-1]
-    tempphoto = tempfile.mktemp(suffix='.jpg')
     actual_picture = await picture.get_file()
     pprint.pprint(actual_picture.to_dict())
