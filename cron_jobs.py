@@ -200,6 +200,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
     access_token = (await refresh_token(r_token))['access_token']
 
     home_status = await get_home_status(access_token, home_id)
+    # print(home_status)
 
     current_temp = home_status['body']['home']['rooms'][0]['therm_measured_temperature']
     set_temp = home_status['body']['home']['rooms'][0]['therm_setpoint_temperature']
@@ -231,6 +232,14 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
     N_HOURS = 48
+    # print(list_timestamps)
+    # print()
+    # print(list_minutes)
+    # print()
+    # print(list_temps)
+    # print()
+    # print(list_set_temps)
+
     px = 1/plt.rcParams['figure.dpi']
 
     fig,bars = plt.subplots(figsize=(1280*px, 500*px))

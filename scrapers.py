@@ -1100,7 +1100,6 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
                 gallery = []
                 for image in submission.media_metadata:
-                    # print(image)
                     mtype = submission.media_metadata[image]['m']
                     if mtype.startswith("image"):
                         if await file_in_limits(submission.media_metadata[image]['s']['u']):
@@ -1145,11 +1144,6 @@ async def twitch_clips(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     client_secret = config.TWITCH_CLIENT_SECRET
 
     clip_id = context.match.group(1)
-    # print(context.match.group(0))
-    
-    # print(context.match.group(1))
-    # print(clip_id)
-
 
     bearer_token = httpx.post(f"https://id.twitch.tv/oauth2/token?client_id={client_id}&client_secret={client_secret}&grant_type=client_credentials").json()['access_token']
     if bearer_token.lower().startswith('bearer'):

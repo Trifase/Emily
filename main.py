@@ -42,7 +42,7 @@ from meteo import meteo_oggi, ora, prometeo_oggi, forecast
 from movies import doveguardo, imdb, doveguardo_buttons
 from misc import (bioritmo, fascio, fatfingers, scacchi, square, traduci, spongebob, voice, alexa, get_user_info,
     set_auto_reaction, send_auto_reaction, bomb_react, start, polls_callbackqueryhandlers, condominioweb, is_safe,
-    greet_BT_user, random_trifase, aoc_leaderboard)
+    greet_BT_user, random_trifase, aoc_leaderboard, wikihow)
 from parse_everything import (exit_from_banned_groups, nuova_chat_rilevata, update_timestamps_asphalto, check_for_sets,
     drop_update_from_banned_users, new_admin_buttons, messaggio_spiato) 
 from pyrog import reaction_karma
@@ -88,7 +88,7 @@ def main():
     # cron_jobs.py
     j = app.job_queue
 
-    j.run_repeating(plot_boiler_stats, interval=2600.0, data=None, job_kwargs={'misfire_grace_time': 25})
+    # j.run_repeating(plot_boiler_stats, interval=2600.0, data=None, job_kwargs={'misfire_grace_time': 25})
 
     j.run_daily(lotto_member_count, datetime.time(hour=9, minute=0, tzinfo=pytz.timezone('Europe/Rome')), data=None)
 
@@ -209,6 +209,7 @@ def main():
     app.add_handler(CommandHandler(['forecast', 'previsioni'], forecast, filters=~filters.UpdateType.EDITED))
 
     # misc.py
+    app.add_handler(CommandHandler('wikihow', wikihow, filters=~filters.UpdateType.EDITED))
     # app.add_handler(CommandHandler('chiedi_opinione', chiedi_opinione))
     app.add_handler(CommandHandler(['trifase', 'randomtrif', 'randomtrifase'], random_trifase, filters=~filters.UpdateType.EDITED))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, greet_BT_user))

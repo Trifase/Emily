@@ -7,6 +7,7 @@ import requests
 import lichess.api
 import random
 import os
+import aiohttp
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -29,9 +30,42 @@ from twitter import tweet
 from pyrog import get_user_from_username, send_reaction, pyro_bomb_reaction
 
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 from telegram.ext import ApplicationHandlerStop
 
+
+async def wikihow(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await no_can_do(update, context):
+        return
+
+    count = 3
+
+    url_text = "https://hargrimm-wikihow-v1.p.rapidapi.com/steps"
+    url_images = "https://hargrimm-wikihow-v1.p.rapidapi.com/images"
+
+    querystring = {"count":f"{count}"}
+    headers = {
+        "X-RapidAPI-Key": "6b1eba0153msh8cd62219142c90fp1f3ea3jsn5e757aabd168",
+        "X-RapidAPI-Host": "hargrimm-wikihow-v1.p.rapidapi.com"
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url_text, headers=headers, params=querystring) as resp:
+            response_text = await resp.json()
+        async with session.get(url_images, headers=headers, params=querystring) as resp:
+            response_images = await resp.json()
+        
+    
+    # response_text = requests.request("GET", url_text, headers=headers, params=querystring).json()
+    # response_images = requests.request("GET", url_images, headers=headers, params=querystring).json()
+    await printlog(update, "chiede aiuto a wikihow")
+    mystring = ""
+    for k, v in response_text.items():
+        mystring += f"{k}. {v}\n"
+
+    images = [url for url in response_images.values()]
+    medialist = [InputMediaPhoto(media=url) for url in images]
+    await update.message.reply_media_group(media=medialist, caption=mystring)
 
 async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message.chat.id not in [config.ID_TIMELINE, config.ID_AOC]:
