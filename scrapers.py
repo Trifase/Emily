@@ -14,7 +14,6 @@ import json
 import traceback
 import pprint
 import httpx
-import aiohttp
 import random
 
 
@@ -30,7 +29,7 @@ from uuid import uuid4
 
 import config
 
-from utils import printlog, get_display_name, is_function_enabled, function_name, get_now, get_chat_name, no_can_do, alert
+from utils import printlog, get_display_name, get_now, no_can_do, alert
 
 local_tz = pytz.timezone('Europe/Rome')
 
@@ -147,9 +146,11 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str) -> dict:
         }
 
     api_url = f'https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/?aweme_id={video_ID}'
-    async with aiohttp.ClientSession() as session:
-        async with session.get(api_url, headers=tiktok_api_headers, timeout=10) as response:
-            response = await response.json()
+
+    async with httpx.AsyncClient() as session:
+        r = await session.get(api_url, headers=tiktok_api_headers, timeout=10)
+    response = r.json()
+
 
     data = response["aweme_list"][0]
 
@@ -170,7 +171,6 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str) -> dict:
     infos["height"] = height
     infos["width"] = width
     return infos
-
 
 async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.inline_query.query
@@ -316,7 +316,6 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     url = context.match.group(1)
     url_path = parse.urlsplit(url).path[1:].split('/')
-    # user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E149"
     user_agent = "Mozilla/5.0 (X11; Linux aarch64; rv:91.0) Gecko/20100101 Firefox/91.0"
     
     L = instaloader.Instaloader(dirname_pattern="ig/{target}", quiet=True, fatal_status_codes=[429], save_metadata=False, max_connection_attempts=1, user_agent=user_agent, iphone_support=False)
@@ -532,7 +531,6 @@ async def instagram_stories(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     messaggio = await update.message.reply_text(f"Scarico le storie di: @{username}")
     await printlog(update, "scarica le storie instagram di", f"@{username}")
-    # profile = L.check_profile_id(username)
     try:
         profile = Profile.from_username(L.context, username)
     except instaloader.exceptions.ProfileNotExistsException:
@@ -566,7 +564,6 @@ async def instagram_stories(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             # print("STOP!")
             break
 
-        # print(item._asdict())
 
         if item.is_video:
             url = item.video_url
@@ -590,8 +587,7 @@ async def instagram_stories(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         await update.message.reply_text(f"@{username} non ha nessuna storia visibile.")
         return
 
-    # for media in medialist:
-    #     print(media.to_dict())
+
 
     await context.bot.send_media_group(update.effective_chat.id, media=medialist)
     await messaggio.delete()
@@ -881,20 +877,17 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     if await no_can_do(update, context):
         return
     start_time = time.perf_counter()
-    # reddit = asyncpraw.Reddit(client_id=config.REDDIT_ID, client_secret=config.REDDIT_SECRET, user_agent="Emily Bot", username=config.REDDIT_USERNAME, password=config.REDDIT_PASSWORD)
+
     reddit = asyncpraw.Reddit(
         client_id=config.REDDIT_ID,
         client_secret=config.REDDIT_SECRET,
         user_agent="Emily Bot"
         )
 
-    # print(context.match.group(0))
+
     url = context.match.group(0)
     submission = await reddit.submission(url=url, fetch=True)
 
-    # submission._fetch()  # Popolo la submission
-    # import pprint
-    # pprint.pprint(vars(submission))
 
     if hasattr(submission, "crosspost_parent"):  # controllo se è un crosspost
         submission = await reddit.submission(id=submission.crosspost_parent.split("_")[1])
@@ -1028,7 +1021,6 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                             await update.message.reply_html(f"Il file è troppo grande, ecco un <a href='{url}'>link</a>\n{caption}")
                     await reddit.close()
 
-
     elif "imgur" in url:
         if submission.url.endswith(".gif") or submission.url.endswith(".gifv") or submission.url.endswith(".mp4"):
 
@@ -1160,8 +1152,6 @@ async def twitch_clips(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     API_URL = 'https://api.twitch.tv/helix/clips'
     response = httpx.get(API_URL, params=params, headers=headers).json()
-
-    # print(response)
 
     if not response.get('data'):
         await update.message.reply_html(f"Non trovo niente")

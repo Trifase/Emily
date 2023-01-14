@@ -1,10 +1,8 @@
 import datetime
-import random
-
-import aiohttp
+import httpx
 import peewee
 
-from telegram.ext import CallbackContext, ContextTypes
+from telegram.ext import ContextTypes
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -13,8 +11,7 @@ from rich import print
 from rich.progress import track
 
 import config
-from utils import printlog, get_display_name, get_now
-
+from utils import get_now
 
 db = peewee.SqliteDatabase(config.DBPATH)
 
@@ -42,8 +39,6 @@ class Compleanni(peewee.Model):
         primary_key = False
 
 
-
-
 # Runs every minute
 async def check_reminders(context: ContextTypes.DEFAULT_TYPE) -> None:
     datenow = str(datetime.datetime.today().strftime("%d/%m/%Y %H:%M"))
@@ -61,15 +56,8 @@ async def check_reminders(context: ContextTypes.DEFAULT_TYPE) -> None:
 
 # Runs every day at 9:00 (Europe/Rome)
 async def lotto_member_count(context: ContextTypes.DEFAULT_TYPE) -> None:
-    # print("Controllo il lotto")
     newcount = await context.bot.get_chat_member_count(config.ID_LOTTO)
-    # if 'lotto_history' not in context.bot_data:
-    #     context.bot_data['lotto_history'] = []
-        
-    # context.bot_data['lotto_history'].append(f"{datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')}_{newcount}")
-    # print(f"Ci sono {newcount} anime adesso")
     oldcount = context.bot_data.get('lotto_count', 0)
-    # print(f"C'erano {oldcount} anime prima")
     if newcount != oldcount:
         context.bot_data['lotto_count'] = newcount
         await context.bot.send_message(config.ID_LOTTO, f"Popolazione: {newcount} anime.")
@@ -80,7 +68,7 @@ async def lotto_member_count(context: ContextTypes.DEFAULT_TYPE) -> None:
 # Runs every hour
 async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
-    # access_token = config.access_token
+
     r_token = config.r_token
     home_id = config.home_id
     room_id = config.room_id
@@ -101,9 +89,9 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
             "client_secret": client_secret
         }
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post("https://api.netatmo.com/oauth2/token", data=data) as resp:
-                response = await resp.json()
+        async with httpx.AsyncClient() as session:
+            r = await session.post("https://api.netatmo.com/oauth2/token", data=data)
+        response = r.json()
 
         return response
 
@@ -113,9 +101,9 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
             'Authorization': f'Bearer {access_token}',
         }
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get('https://api.netatmo.com/api/homesdata', headers=headers) as resp:
-                response = await resp.json()
+        async with httpx.AsyncClient() as session:
+            r = await session.get('https://api.netatmo.com/api/homesdata', headers=headers)
+        response = r.json()
 
         return response
 
@@ -129,9 +117,9 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
             'home_id': home_id,
         }
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get('https://api.netatmo.com/api/homestatus', params=params, headers=headers) as resp:
-                response = await resp.json()
+        async with httpx.AsyncClient() as session:
+            r = await session.get('https://api.netatmo.com/api/homestatus', params=params, headers=headers)
+        response = r.json()
 
         return response
 
@@ -146,23 +134,12 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
             'room_id': room_id,
             'scale': scale,
             'date_begin': int(datetime.datetime.now().timestamp())-(3600*50),
-            # 'date_end': date_end,
             'type': type
-            # 'type': [
-            #     'temperature',
-            #     'sp_temperature',
-            #     'min_temp',
-            #     'max_temp',
-            #     'date_min_temp',
-            #     'date_max_temp',
-            # ],
-            # 'optimize': 'true',
-            # 'real_time': 'false',
         }
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get('https://api.netatmo.com/api/getroommeasure', params=params, headers=headers) as resp:
-                response = await resp.json()
+        async with httpx.AsyncClient() as session:
+            r = await session.get('https://api.netatmo.com/api/getroommeasure', params=params, headers=headers)
+        response = r.json()
 
         return response
 
@@ -177,21 +154,13 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
             'device_id': bridge_mac,
             'module_id': therm_mac,
             'scale': scale,
-            # 'date_end': date_end,
             'type': 'sum_boiler_on'
-            # 'type': [
-            #     'sum_boiler_on',
-            #     'boileron',
-            #     'boileroff',
-            #     'sum_boiler_off',
-            # ],
-            # 'optimize': 'true',
-            # 'real_time': 'false',
         }
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get('https://api.netatmo.com/api/getmeasure', params=params, headers=headers) as resp:
-                response = await resp.json()
+
+        async with httpx.AsyncClient() as session:
+            r = await session.get('https://api.netatmo.com/api/getmeasure', params=params, headers=headers)
+        response = r.json()
 
         return response
 
@@ -265,11 +234,6 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
     lines.legend(loc='upper right')
 
     plt.savefig("images/boiler48h.jpg")
-
-
-
-
-
 
 
 # Runs every day at 2:00 (Europe/Rome)

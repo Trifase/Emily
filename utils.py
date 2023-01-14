@@ -80,7 +80,6 @@ def function_name():
     
     # print(inspect.stack())
     func_name = inspect.stack()[2][3]
-    # print(func_name)  # my_first_function
     return(func_name)
 
 def is_function_enabled(chat_id, function, context):
@@ -92,7 +91,6 @@ def is_function_enabled(chat_id, function, context):
     if "settings" not in context.chat_data:
         context.chat_data["settings"] = {}
 
-    # print(f"Searching for: {function}")
     if function not in context.chat_data["settings"]:  # non è stata ancora inizializzata
         context.chat_data["settings"][function] = 'enabled'  # default è abilitata
         return True

@@ -1,25 +1,13 @@
-import cairo
-import uuid
-import pytz
-import math
-import random
 import miio
-import pprint
-import requests
-import tabulate
-import aiohttp
+import httpx
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.constants import ChatAction
-from telegram.ext import CallbackContext, ContextTypes
-from rich import print
+from telegram.ext import ContextTypes
 from yeelight import Bulb
-from PIL import Image, ImageDraw, ImageFont
-from datetime import datetime, timezone
 
 import config
 
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do, ForgeCommand
+from utils import printlog, no_can_do, ForgeCommand
 from cron_jobs import plot_boiler_stats
 
 
@@ -97,8 +85,6 @@ def get_light_label(bulbname):
     else:
         return f"🔴 {bulb['label']}"
 
-
-
 async def luci_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await no_can_do(update, context):
         return
@@ -175,12 +161,11 @@ async def consumo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await printlog(update, "controlla il consumo")
 
-    async with aiohttp.ClientSession() as session:
-        async with session.get("http://192.168.1.245/emeter/0") as response:
-            data = await response.json()
+    async with httpx.AsyncClient() as session:
+        r = await session.get("http://192.168.1.246/emeter/0")
+    data = r.json()
 
-            await update.message.reply_html(f"Consumo istantaneo: {data['power']} W")
-
+    await update.message.reply_html(f"Consumo istantaneo: {data['power']} W")
 
 async def purificatore(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id not in config.ADMINS:

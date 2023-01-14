@@ -7,13 +7,13 @@ import requests
 import lichess.api
 import random
 import os
-import aiohttp
+import httpx
 
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-from telegram import Update, Bot
+from telegram import Update
 from telegram.ext import ContextTypes
 
 from PIL import Image
@@ -25,13 +25,10 @@ from aiohttp_client_cache import CachedSession, FileBackend
 
 import config
 
-from utils import printlog, no_can_do, get_now, get_chat_name, expand, get_display_name, InlineButton, print_progressbar, crea_sondaggino
-from twitter import tweet
+from utils import printlog, no_can_do, expand, get_display_name, print_progressbar
 from pyrog import get_user_from_username, send_reaction, pyro_bomb_reaction
 
-
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
-from telegram.ext import ApplicationHandlerStop
+from telegram import InputMediaPhoto
 
 
 async def wikihow(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -49,15 +46,13 @@ async def wikihow(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "X-RapidAPI-Host": "hargrimm-wikihow-v1.p.rapidapi.com"
     }
 
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url_text, headers=headers, params=querystring) as resp:
-            response_text = await resp.json()
-        async with session.get(url_images, headers=headers, params=querystring) as resp:
-            response_images = await resp.json()
-        
-    
-    # response_text = requests.request("GET", url_text, headers=headers, params=querystring).json()
-    # response_images = requests.request("GET", url_images, headers=headers, params=querystring).json()
+    async with httpx.AsyncClient() as session:
+        r = await session.get(url_text, headers=headers, params=querystring)
+        r2 = await session.get(url_images, headers=headers, params=querystring)
+    response_text = r.json()
+    response_images = r2.json()
+
+
     await printlog(update, "chiede aiuto a wikihow")
     mystring = ""
     for k, v in response_text.items():
@@ -251,7 +246,6 @@ async def greet_BT_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     await update.message.reply_html(random.choice(greets))
-
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = """
@@ -885,5 +879,3 @@ async def alexa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = f"<a href='{my_video['link']}'>{my_video['title']}</a>\n"
     message += f"<a href='{my_video['channel']['link']}'>{my_video['channel']['name']}</a> | {my_video['viewCount']['text']} · {my_video['publishedTime']}"
     await update.message.reply_html(message)
-
-

@@ -344,8 +344,9 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
     console.print(tcb)
 
 async def webserver_logs(request):
-    with open("logs.txt", "r") as file:
-        last_lines = file.readlines()[-20:]
+    current_m = datetime.date.today().strftime("%Y-%m")
+    with open(f'logs/{current_m}-logs.txt', "r") as file:
+        last_lines = file.readlines()[-100:]
         my_response = ""
         for line in last_lines:
             my_response += line
@@ -372,14 +373,15 @@ async def post_init(app: Application) -> None:
         added += 1
     print(f"{get_now()} Trovati {r['processed']} reminders. {added} aggiunti e {r['deleted']} eliminati.")
 
-    # wapp = web.Application()
-    # wapp.add_routes([web.get('/logs', webserver_logs)])
-    # runner = web.AppRunner(wapp)
-    # await runner.setup()
-    # site = web.TCPSite(runner, '0.0.0.0', 8888)
-    # await site.start()
+    wapp = web.Application()
 
-    # print(f'{get_now()} Server web inizializzato!')
+    wapp.add_routes([web.get('/logs', webserver_logs)])
+    runner = web.AppRunner(wapp)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 8888)
+    await site.start()
+
+    print(f'{get_now()} Server web inizializzato!')
 
     L = instaloader.Instaloader(dirname_pattern="ig/{target}", quiet=True, fatal_status_codes=[429], save_metadata=False, max_connection_attempts=1)
     USER = "emilia_superbot"
@@ -391,14 +393,12 @@ async def post_init(app: Application) -> None:
     return
 
 async def post_shutdown(app: Application) -> None:
-    import gc
-    import aiohttp
 
-    clientsessions = [obj for obj in gc.get_objects() if isinstance(obj, aiohttp.client.ClientSession)]
-
-    for c in clientsessions:
-        await c.close()
-
+    # import gc
+    # import aiohttp
+    # clientsessions = [obj for obj in gc.get_objects() if isinstance(obj, aiohttp.client.ClientSession)]
+    # for c in clientsessions:
+    #     await c.close()
     return
 
 def get_reminders_from_db():
