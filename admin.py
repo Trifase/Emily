@@ -446,7 +446,7 @@ async def lista_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             try:
                 context.bot_data['lista_chat'].remove(int(chat_id))
             except ValueError:
-                update.message.reply_html(f"{chat_id} non trovato")
+                await update.message.reply_html(f"{chat_id} non trovato")
         await update.message.reply_html("Fatto!")
         return
 
@@ -731,6 +731,6 @@ async def do_manual_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
         newfile = f"db/backups/{datetime.datetime.today().strftime('%Y%m%d_%H%M%S')}-{filename}"
         shutil.copy(oldfile, newfile)
     print(f"{get_now()} [AUTO] Backup eseguito")
-    update.message.reply_text("Fatto!")
+    await update.message.reply_text("Fatto!")
 
 
