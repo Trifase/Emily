@@ -26,7 +26,7 @@ from admin import (cancella, commandlist, count_lines, echo, esci, executecode,
     getchat, ip, lista_chat, listen_to, restart, _eval, set_group_picture,
     set_title, tg_info, wakeup, banlist, add_ban, del_ban, trigger_backup, parla,
     track_chats, show_chats, send_custom_media, check_temp, flush_arbitrary_callback_data)
-from asphalto import azzurro, lurkers
+from asphalto import azzurro
 from banca import bot_get_saldo, bot_get_transazioni
 from best_timeline import scrape_tweet_bt, silenzia, deleta_if_channel
 from compleanni import compleanni_add, compleanni_list, compleanni_manual_check, compleanno_del
@@ -42,7 +42,7 @@ from meteo import meteo_oggi, ora, prometeo_oggi, forecast
 from movies import doveguardo, imdb, doveguardo_buttons
 from misc import (bioritmo, fascio, fatfingers, scacchi, square, traduci, spongebob, voice, alexa, get_user_info,
     set_auto_reaction, send_auto_reaction, bomb_react, start, polls_callbackqueryhandlers, condominioweb, is_safe,
-    greet_BT_user, random_trifase, aoc_leaderboard, wikihow)
+    greet_BT_user, random_trifase, aoc_leaderboard, wikihow, lurkers)
 from parse_everything import (exit_from_banned_groups, nuova_chat_rilevata, update_timestamps_asphalto, check_for_sets,
     drop_update_from_banned_users, new_admin_buttons, messaggio_spiato) 
 from pyrog import reaction_karma
