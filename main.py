@@ -289,7 +289,7 @@ def main():
         ))
     app.add_handler(MessageHandler(
         ~filters.UpdateType.EDITED & 
-        filters.Regex(re.compile(r"^http(?:s)?://(?:www\.)?(?:[\w-]+?\.)?reddit\.com(/r/|/user/)?(?(1)([\w:]{2,21}))(/comments/)?(?(3)(\w{5,9})(?:/[\w%\\\\-]+)?)?(?(4)/(\w{7}))?/?(\?)?(?(6)(\S+))?(\#)?(?(8)(\S+))?$", re.IGNORECASE)), parse_reddit_link
+        filters.Regex(re.compile(r"http(?:s)?:\/\/(?:[\w-]+?\.)?reddit\.com(\/r\/|\/user\/)?([\w:\.]{2,21})(\/comments\/)?(\w{5,9}(?:\/[\w%\\-]+)?)?(\/\w{7})?\/?(\?)?(\S+)?", re.IGNORECASE)), parse_reddit_link
         ))
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(r"(?:https:\/\/)?clips\.twitch\.tv\/(\S+)", re.IGNORECASE)), twitch_clips))
 
