@@ -161,7 +161,7 @@ async def update_timestamps_asphalto(update: Update, context: ContextTypes.DEFAU
     chat_id = int(update.effective_chat.id)
 
     # Timestamp per asphalto
-    if chat_id == config.ID_ASPHALTO:
+    if chat_id in [config.ID_ASPHALTO, config.ID_DIOCHAN2]:
         if 'timestamps' not in context.bot_data:
             context.bot_data['timestamps'] = {}
         if chat_id not in context.bot_data['timestamps']:

@@ -88,7 +88,7 @@ def main():
     # cron_jobs.py
     j = app.job_queue
 
-    # j.run_repeating(plot_boiler_stats, interval=2600.0, data=None, job_kwargs={'misfire_grace_time': 25})
+    j.run_repeating(plot_boiler_stats, interval=2600.0, data=None, job_kwargs={'misfire_grace_time': 25})
 
     j.run_daily(lotto_member_count, datetime.time(hour=9, minute=0, tzinfo=pytz.timezone('Europe/Rome')), data=None)
 
@@ -146,7 +146,7 @@ def main():
 
     # asphalto.py
     app.add_handler(CommandHandler(['azzurro', 'azz'], azzurro, filters=~filters.UpdateType.EDITED))
-    app.add_handler(CommandHandler('lurkers', lurkers, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
+    app.add_handler(CommandHandler('lurkers', lurkers, filters=~filters.UpdateType.EDITED))
 
     # banca.py
     app.add_handler(CommandHandler(['saldo', 'carige_saldo'], bot_get_saldo, filters=~filters.UpdateType.EDITED))
@@ -373,15 +373,15 @@ async def post_init(app: Application) -> None:
         added += 1
     print(f"{get_now()} Trovati {r['processed']} reminders. {added} aggiunti e {r['deleted']} eliminati.")
 
-    wapp = web.Application()
+    # wapp = web.Application()
 
-    wapp.add_routes([web.get('/logs', webserver_logs)])
-    runner = web.AppRunner(wapp)
-    await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', 8888)
-    await site.start()
+    # wapp.add_routes([web.get('/logs', webserver_logs)])
+    # runner = web.AppRunner(wapp)
+    # await runner.setup()
+    # site = web.TCPSite(runner, '0.0.0.0', 8888)
+    # await site.start()
 
-    print(f'{get_now()} Server web inizializzato!')
+    # print(f'{get_now()} Server web inizializzato!')
 
     L = instaloader.Instaloader(dirname_pattern="ig/{target}", quiet=True, fatal_status_codes=[429], save_metadata=False, max_connection_attempts=1)
     USER = "emilia_superbot"

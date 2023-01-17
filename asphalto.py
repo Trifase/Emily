@@ -49,10 +49,10 @@ async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
     await printlog(update, "controlla i lurkers")
-    # if update.message.chat.id != config.ID_ASPHALTO:
-    #     return
+    if update.message.chat.id not in [config.ID_ASPHALTO, config.ID_DIOCHAN2]:
+        return
 
-    chat_id = config.ID_ASPHALTO
+    chat_id = update.message.chat.id
     if "timestamps" not in context.bot_data:
         context.bot_data["timestamps"] = {}
     if chat_id not in context.bot_data["timestamps"]:
