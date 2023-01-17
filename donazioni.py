@@ -69,9 +69,9 @@ async def donazioni(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def precheckout_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Answers the PreQecheckoutQuery"""
     query = update.pre_checkout_query
+
     # check the payload, is this from your bot?
     if query.invoice_payload != "ItsFromEmilyTheBot":
-        # answer False pre_checkout_query
         await query.answer(ok=False, error_message="Qualcosa è andato storto...")
     else:
         await query.answer(ok=True)
@@ -81,5 +81,5 @@ async def precheckout_callback(update: Update, context: ContextTypes.DEFAULT_TYP
 async def successful_payment_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Confirms the successful payment."""
     # do something after successfully receiving payment?
-    printlog(update, "ha donato qualcosa.")
+    await printlog(update, "ha donato qualcosa.")
     await update.message.reply_text("Grazie! Pagamento effettuato!")
