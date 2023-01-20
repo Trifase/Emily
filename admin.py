@@ -3,8 +3,6 @@ from telegram.constants import ParseMode, ChatMemberStatus
 from telegram.ext import CallbackContext, ContextTypes, Updater
 from telegram.error import BadRequest
 
-from typing import Optional, Tuple
-
 import subprocess
 import tempfile
 import datetime
@@ -31,7 +29,6 @@ async def flush_arbitrary_callback_data(update: Update, context: CallbackContext
     await update.message.delete()
     return
 
-
 async def check_temp(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_user.id not in config.ADMINS:
         return
@@ -40,86 +37,6 @@ async def check_temp(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     response = subprocess.run(mycommand, capture_output=True, encoding='utf-8')
     temp = response.stdout.split("=")[1].strip()[:-2]
     await update.message.reply_html(f"Temperatura interna: {temp}° C")
-
-
-def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
-    """Takes a ChatMemberUpdated instance and extracts whether the 'old_chat_member' was a member
-    of the chat and whether the 'new_chat_member' is a member of the chat. Returns None, if
-    the status didn't change.
-    """
-    status_change = chat_member_update.difference().get("status")
-    old_is_member, new_is_member = chat_member_update.difference().get("is_member", (None, None))
-
-    if status_change is None:
-        return None
-
-    old_status, new_status = status_change
-
-    was_member = old_status in [
-        ChatMember.MEMBER,
-        ChatMember.OWNER,
-        ChatMember.ADMINISTRATOR,
-    ] or (old_status == ChatMember.RESTRICTED and old_is_member is True)
-
-    is_member = new_status in [
-        ChatMember.MEMBER,
-        ChatMember.OWNER,
-        ChatMember.ADMINISTRATOR,
-    ] or (new_status == ChatMember.RESTRICTED and new_is_member is True)
-
-    return was_member, is_member
-
-async def track_chats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Tracks the chats the bot is in."""
-    result = extract_status_change(update.my_chat_member)
-    if result is None:
-        return
-
-    was_member, is_member = result
-
-    # Let's check who is responsible for the change
-    cause_name = update.effective_user.full_name
-    cause_id = update.effective_user.id
-
-    # Handle chat types differently:
-    chat = update.effective_chat
-
-    if chat.type == Chat.PRIVATE:
-        if not was_member and is_member:
-            print(f"{cause_name} started the bot.")
-            context.bot_data.setdefault("user_ids", set()).add(chat.id)
-        elif was_member and not is_member:
-            print(f"{cause_name} ({cause_id}) blocked the bot.")
-            context.bot_data.setdefault("user_ids", set()).discard(chat.id)
-    elif chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
-        if not was_member and is_member:
-            print(f"{cause_name} added the bot to the group {chat.title}")
-            context.bot_data.setdefault("group_ids", set()).add(chat.id)
-        elif was_member and not is_member:
-            print(f"{cause_name} removed the bot from the group {chat.title}")
-            context.bot_data.setdefault("group_ids", set()).discard(chat.id)
-    else:
-        if not was_member and is_member:
-            print(f"{cause_name} added the bot to the channel {chat.title}")
-            context.bot_data.setdefault("channel_ids", set()).add(chat.id)
-        elif was_member and not is_member:
-            print(f"{cause_name} removed the bot from the channel {chat.title}")
-            context.bot_data.setdefault("channel_ids", set()).discard(chat.id)
-
-
-async def show_chats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Shows which chats the bot is in"""
-
-    user_ids = ", ".join(str(uid) for uid in context.bot_data.setdefault("user_ids", set()))
-    group_ids = ", ".join(str(gid) for gid in context.bot_data.setdefault("group_ids", set()))
-    channel_ids = ", ".join(str(cid) for cid in context.bot_data.setdefault("channel_ids", set()))
-    text = (
-        f"@{context.bot.username} is currently in a conversation with the user IDs {user_ids}."
-        f" Moreover it is a member of the groups with IDs {group_ids} "
-        f"and administrator in the channels with IDs {channel_ids}."
-    )
-    await update.effective_message.reply_text(text)
-
 
 async def trigger_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id not in config.ADMINS:
@@ -175,7 +92,6 @@ async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f'{get_now()} ### RIAVVIO IN CORSO ###')
     raise SystemExit()
 
-
 async def commandlist(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:
         return
@@ -222,8 +138,6 @@ async def cancella(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         except Exception as e:
             pass
 
-
-
 async def send_custom_media(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message.from_user.id not in config.ADMINS:
         return
@@ -242,7 +156,6 @@ async def send_custom_media(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         else:
             await update.message.reply_text("Il file è oltre i limiti di caricamento da URL.")
     return
-
 
 async def count_lines(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     import platform
@@ -384,7 +297,7 @@ async def getchat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             mychat = await context.bot.get_chat(chat_id)
             admins: list = await context.bot.get_chat_administrators(chat_id)
             utenti = await context.bot.get_chat_member_count(chat_id)
-        except BadRequest as e:
+        except Exception as e:
             await context.bot.send_message(config.ID_SPIA, f"Mi dispiace: {e}")
             return
 

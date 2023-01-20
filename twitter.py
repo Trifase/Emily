@@ -117,6 +117,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
             else:
                 await update.message.reply_html("Qualcosa è andato storto, scusa")
             tempphoto.close()
+            return
 
         elif update.message.reply_to_message.video:
             if update.message.reply_to_message.caption:
@@ -158,6 +159,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 await update.message.reply_html("Qualcosa è andato storto, scusa")
 
             tempvideo.close()
+            return
 
     except AttributeError:
         pass

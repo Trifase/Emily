@@ -73,6 +73,11 @@ def is_forged_command(callback_data):
         return True
     return False
 
+def is_lurkers_list(callback_data):
+    if isinstance(callback_data, list) and callback_data[0] == 'LURKERS_LIST':
+        return True
+    return False
+
 def get_now():
     return datetime.datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
 

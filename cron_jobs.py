@@ -1,6 +1,7 @@
 import datetime
 import httpx
 import peewee
+import time
 
 from telegram.ext import ContextTypes
 
@@ -145,6 +146,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # this returns the number of seconds the boiler was on in the time scale
     async def get_boiler_history(access_token, bridge_mac, therm_mac, date_end='last', scale='1hour'):
+
         headers = {
             'accept': 'application/json',
             'Authorization': f'Bearer {access_token}',
@@ -154,7 +156,8 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
             'device_id': bridge_mac,
             'module_id': therm_mac,
             'scale': scale,
-            'type': 'sum_boiler_on'
+            'type': 'sum_boiler_on',
+            'date_begin': int(datetime.datetime.now().timestamp())-(3600*50)
         }
 
 
@@ -164,7 +167,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
         return response
 
-
+    date_start = int(time.time() - 3600*48)
 
     access_token = (await refresh_token(r_token))['access_token']
 
@@ -180,6 +183,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
     set_temp_history = await get_room_history(access_token, home_id, room_id, type='sp_temperature')
     boiler_history = await get_boiler_history(access_token, bridge_mac, therm_mac)
 
+
     temps = temp_history['body'][0]
     list_temps = [x[0] for x in temps['value']]
     # print(list_temps)
@@ -190,6 +194,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
     
     boiler = boiler_history['body'][0]
     list_minutes = [x[0]//60 for x in boiler['value']]
+    # list_minutes = [x[0]//60 for x in reversed(boiler['value'])]
     # print(list_minutes)
 
     initial_timestamp = temps.get('beg_time')
@@ -201,6 +206,13 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
     N_HOURS = 48
+
+
+    list_timestamps = list_timestamps[-N_HOURS:]
+    list_minutes = list_minutes[-N_HOURS:]
+    list_temps = list_temps[-N_HOURS:]
+    list_set_temps = list_set_temps[-N_HOURS:]
+
     # print(list_timestamps)
     # print()
     # print(list_minutes)
@@ -222,13 +234,13 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
     bars.set_ylabel("Boiler activity, Minutes per hour", color='red')
     bars.set_ylim(0, 60)
     bars.grid(True)
-    bars.bar(list_timestamps[-N_HOURS:], list_minutes[-N_HOURS:], color='red', zorder=1, label="Boiler activity")
+    bars.bar(list_timestamps, list_minutes, color='red', zorder=1, label="Boiler activity")
 
     lines=bars.twinx()
     lines.set_ylim(13, 25)
     lines.set_ylabel("Temperature in °C",)
-    lines.plot(list_timestamps[-N_HOURS:], list_temps[-N_HOURS:], zorder=10, label="Temperature")
-    lines.plot(list_timestamps[-N_HOURS:], list_set_temps[-N_HOURS:], label="Desidered Temperature", zorder=2, color='grey', linestyle='dotted', linewidth=1)
+    lines.plot(list_timestamps, list_temps, zorder=10, label="Temperature")
+    lines.plot(list_timestamps, list_set_temps, label="Desidered Temperature", zorder=2, color='grey', linestyle='dotted', linewidth=1)
 
     bars.legend(loc='upper left')
     lines.legend(loc='upper right')

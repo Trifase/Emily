@@ -3,8 +3,10 @@ warnings.filterwarnings("ignore")
 
 import time
 
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Chat, ChatMember, ChatMemberUpdated
+from telegram.constants import ParseMode, ChatMemberStatus
 from telegram.ext import ContextTypes, ApplicationHandlerStop
+from typing import Optional, Tuple
 
 import config
 
@@ -24,9 +26,6 @@ async def exit_from_banned_groups(update: Update, context: ContextTypes.DEFAULT_
     if chat_id in config.BANNED_GROUPS:
         await context.bot.leave_chat(chat_id)
     raise ApplicationHandlerStop
-
-
-
 
 async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -110,7 +109,6 @@ async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE
 
         await context.bot.send_message(config.ID_SPIA, message, reply_markup=reply_markup)
 
-
 async def messaggio_spiato(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
@@ -152,7 +150,6 @@ async def messaggio_spiato(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
         reply_markup = InlineKeyboardMarkup(keyboard)
         await context.bot.send_message(chat_id=config.ID_SPIA, text=text, reply_markup=reply_markup)
-
 
 async def update_timestamps_asphalto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -262,59 +259,6 @@ async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 await update.message.reply_text(f'{chatdict[messaggio.lower()]}', quote=False, disable_web_page_preview=True)
             return
 
-# async def admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-
-#     query = update.callback_query
-#     await query.answer()
-
-#     # Example of update.callback_query.data it receives:
-#     # cmd:ban:123456789
-
-#     # splitting the string into command and args
-#     command = query.data.split(":")[1]
-#     args = query.data.split(":")[2]
-
-#     # becase v20b makes TelegramObjects frozen (as in: Immutable), we need to warm up them a bit before 
-#     # we can edit them - there is an internal context manager ready that unfreezes and freezes on exit
-
-#     query._unfreeze()
-#     query.message._unfreeze()
-
-#     # forging a fake message.text
-#     query.message.text = f"/{command} {args}"
-
-#     # creating an empty context.args
-#     if not context.args:
-#         context.args = []
-
-#     # forging a fake context.args
-#     for arg in args.split(" "):
-#         context.args.append(arg)
-
-#     # calling actual functions with the forged callback_query and forged context
-#     # add_ban is the same function that would be called by /add_ban <user_id>
-#     if command == 'toggle':
-#         if query.from_user.id not in config.ADMINS:
-#             await query.answer(f"Non puoi.")
-#             return
-
-#         await toggle_light(update.callback_query, context)
-#         bulbs = ["salotto", "pranzo", "cucina", "penisola"]
-
-#         luci_keyb = [
-#             [
-#                 InlineKeyboardButton(f"{get_light_label(bulbs[0])}", callback_data=f"cmd:toggle:{bulbs[0]}"),
-#                 InlineKeyboardButton(f"{get_light_label(bulbs[1])}", callback_data=f"cmd:toggle:{bulbs[1]}"),
-#             ],
-#             [
-#                 InlineKeyboardButton(f"{get_light_label(bulbs[2])}", callback_data=f"cmd:toggle:{bulbs[2]}"),
-#                 InlineKeyboardButton(f"{get_light_label(bulbs[3])}", callback_data=f"cmd:toggle:{bulbs[3]}"),
-#             ]
-#         ]
-
-#         reply_markup = InlineKeyboardMarkup(luci_keyb)
-#         await query.message.edit_text("Luci:", reply_markup=reply_markup)
-
 async def new_admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     
@@ -329,3 +273,68 @@ async def new_admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     function_to_call = mybutton.callable
 
     await function_to_call(query, context)
+
+
+def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
+    """Takes a ChatMemberUpdated instance and extracts whether the 'old_chat_member' was a member
+    of the chat and whether the 'new_chat_member' is a member of the chat. Returns None, if
+    the status didn't change.
+    """
+    status_change = chat_member_update.difference().get("status")
+    old_is_member, new_is_member = chat_member_update.difference().get("is_member", (None, None))
+
+    if status_change is None:
+        return None
+
+    old_status, new_status = status_change
+
+    was_member = old_status in [
+        ChatMember.MEMBER,
+        ChatMember.OWNER,
+        ChatMember.ADMINISTRATOR,
+    ] or (old_status == ChatMember.RESTRICTED and old_is_member is True)
+
+    is_member = new_status in [
+        ChatMember.MEMBER,
+        ChatMember.OWNER,
+        ChatMember.ADMINISTRATOR,
+    ] or (new_status == ChatMember.RESTRICTED and new_is_member is True)
+
+    return was_member, is_member
+
+async def track_chats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Tracks the chats the bot is in."""
+    result = extract_status_change(update.my_chat_member)
+    if result is None:
+        return
+
+    was_member, is_member = result
+
+    # Let's check who is responsible for the change
+    cause_name = update.effective_user.full_name
+    cause_id = update.effective_user.id
+
+    # Handle chat types differently:
+    chat = update.effective_chat
+
+    if chat.type == Chat.PRIVATE:
+        if not was_member and is_member:
+            await printlog(update, context, "ha avviato Emily.")
+            # context.bot_data.setdefault("user_ids", set()).add(chat.id)
+        elif was_member and not is_member:
+            await printlog(update, context, "ha bloccato Emily.")
+            # context.bot_data.setdefault("user_ids", set()).discard(chat.id)
+    elif chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
+        if not was_member and is_member:
+            await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha aggiunto Emily al gruppo: {chat.title}")
+            # context.bot_data.setdefault("group_ids", set()).add(chat.id)
+        elif was_member and not is_member:
+            await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha rimosso Emily dal gruppo: {chat.title}")
+            # context.bot_data.setdefault("group_ids", set()).discard(chat.id)
+    else:
+        if not was_member and is_member:
+            await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha aggiunto Emily al canale: {chat.title}")
+            # context.bot_data.setdefault("channel_ids", set()).add(chat.id)
+        elif was_member and not is_member:
+            await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha rimosso Emily dal canale: {chat.title}")
+            # context.bot_data.setdefault("channel_ids", set()).discard(chat.id)

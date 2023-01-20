@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatMember
 from telegram.ext import ContextTypes
 
 from PIL import Image
@@ -52,34 +52,98 @@ async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if '-all' in context.args:
         max_secs = -1
+    elif '-report' in context.args:
+        max_secs = 1_209_600//2
+        # max_secs = 295_000
     else:
         try:
             max_secs = int(context.args[0])
         except IndexError:
             # max_secs = 86400  # 24h
             max_secs = 1_209_600  # 2 settimane
-    
 
 
     for user in context.bot_data["timestamps"][chat_id].keys():
         deltas[user] = int(time.time()) - context.bot_data["timestamps"][chat_id][user]
 
     message = ""
-
+    listona = ["LURKERS_LIST"]
+    messaggio_automatico = ""
     for lurker in sorted(deltas.items(), key=lambda x: x[1], reverse=True):
-        # print(lurker)
+
         if lurker[1] > max_secs:
             try:
                 mylurker = await context.bot.get_chat_member(chat_id, lurker[0])
-                message += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="seconds"))} fa\n'
+                if mylurker.status in ['left', 'kicked']:
+                    context.bot_data["timestamps"][chat_id].pop(lurker[0])
+                    continue
+                else:
+                    message += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="seconds"))} fa\n'
+                    messaggio_automatico += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="days"))} fa\n'
+                    # print(f"Appendo {mylurker.user.id} alla lista")
+                    listona.append(mylurker.user.id)
+                    # print(listona)
             except Exception:
                 pass
+    # print(listona)
 
+    if '-report' in context.args:
+
+        keyboard = [
+            [
+                InlineKeyboardButton(f"👎 Kick", callback_data=listona),
+                InlineKeyboardButton("👍 Passo", callback_data=["LURKERS_LIST", None])
+            ]
+        ]
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        if messaggio_automatico:
+            await update.message.reply_text(messaggio_automatico, reply_markup=reply_markup)
+        else:
+            await update.message.reply_text("Nessun lurker rilevato")
+        return
 
     if message:
         await update.message.reply_text(message)
     else:
         await update.message.reply_text(f"Nessuno lurka da più di {max_secs} secondi")
+
+async def lurkers_callbackqueryhandlers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # print(update.to_dict())
+    def can_user_restrict(user: ChatMember):
+        if user.status == ChatMember.OWNER:
+            return True
+        elif user.status == ChatMember.ADMINISTRATOR and user.can_restrict_members:
+            return True
+        else:
+            return False
+
+    query = update.callback_query
+    
+    user = await context.bot.get_chat_member(update.effective_chat.id, update.effective_user.id)
+    if not can_user_restrict(user) and update.effective_user.id != config.ID_TRIF:
+        await query.answer("Non puoi farlo.")
+        print(f"{update.effective_user.id} non può cliccare")
+        return
+
+    listona = query.data
+
+    if not listona[-1]:
+        await query.delete_message()
+        return
+    else:
+        await printlog(update, f"banna i lurkers", f"{listona[1:]}")
+        await query.answer("Fai conto che li ho bannati tutti")
+        await query.delete_message()
+        for user_id in listona[1:]:
+            try:
+                await context.bot.unban_chat_member(update.effective_chat.id, user_id)
+                context.bot_data["timestamps"][update.effective_chat.id].pop(user_id)
+            except Exception:
+                import traceback
+                print(traceback.format_exc())
+                pass
 
 async def wikihow(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):

@@ -66,6 +66,14 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         total_tkns = response['usage']['total_tokens']
         total_price = (price_per_1k/1000)*total_tkns
         rounded_price = str(round(total_price, 4))
+        if not 'openai_stats' in context.chat_data:
+            context.chat_data['openai_stats'] = {}
+
+        if not update.effective_user.id in context.chat_data['openai_stats']:
+            context.chat_data['openai_stats'][update.effective_user.id] = {}
+        
+        context.chat_data['openai_stats'][update.effective_user.id]['total_tokens'] = context.chat_data['openai_stats'][update.effective_user.id].get('total_tokens', 0) + total_tkns
+        context.chat_data['openai_stats'][update.effective_user.id]['total_price'] = context.chat_data['openai_stats'][update.effective_user.id].get('total_price', 0) + total_price
 
         await printlog(update, "interroga OpenAI", f"{total_tkns} tokens, circa ${rounded_price}")
 
@@ -74,6 +82,27 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except Exception as e:
         print(traceback.format_exc())
         await update.message.reply_text(f"Stong rott")
+
+async def openai_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await no_can_do(update, context):
+        return
+    if update.effective_chat.id in [config.ID_TIMELINE]:
+        try:
+            this_user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)
+        except Exception as e:
+            return
+        if this_user.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+            return
+
+    elif update.effective_chat.id not in [config.ID_ASPHALTO, config.ID_DIOCHAN, config.ID_LOTTO, config.ID_RITALY, config.ID_NINJA, ] and update.message.from_user.id != config.ID_TRIF:
+        return
+
+    tokens = context.chat_data['openai_stats'][update.effective_user.id].get('total_tokens', 0)
+    money = context.chat_data['openai_stats'][update.effective_user.id].get('total_price', 0)
+    money = str(round(money, 4))
+
+    await printlog(update, "chiede le statistiche OpenAI")
+    await update.message.reply_text(f"Token generati totali: {tokens}\nCosto totale: ${money} ")
 
 
 async def ai_blank(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
