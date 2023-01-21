@@ -39,9 +39,6 @@ async def reminder_helper(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 # Gets Job from APScheduler, send a message and delete entry from SQlite
 async def send_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
-    # datenow = str(datetime.datetime.today().strftime("%d/%m/%Y %H:%M"))
-    # for row in Reminders.select().where(Reminders.date_to_remind == datenow):
-        # if row:
     row = context.job.data
     message = row.get('message')
     date_now = row.get('date_now').strftime("%d/%m/%Y %H:%M")
@@ -53,10 +50,8 @@ async def send_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
         missiva = f'Ciao, mi avevi chiesto di ricordarti questo: {message}'
 
     user = await context.bot.get_chat_member(chat_id=row['chat_id'], user_id=row['user_id'])
-
     await context.bot.send_message(row['chat_id'], f"[{user.user.mention_html()}] {missiva}", reply_to_message_id=row['reply_id'], allow_sending_without_reply=True)
-    Reminders.delete().where(Reminders.reply_id == row['reply_id'] and Reminders.chat_id == row['chat_id']).execute()
-    print(f'{get_now()} Reminder annunciato e cancellato.')
+    Reminders.delete().where((Reminders.reply_id == row['reply_id']) & (Reminders.chat_id == row['chat_id'])).execute()
 
 
 async def remindme(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
