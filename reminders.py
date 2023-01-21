@@ -1,7 +1,7 @@
 import datetime
 import peewee
 
-from pytimeparse import parse
+from dateparser.search import search_dates
 from telegram import Update, Bot
 from telegram.ext import CallbackContext, ContextTypes
 from rich import print
@@ -68,40 +68,30 @@ async def remindme(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     reply_id = update.message.message_id
     text = update.message.text
     text = text[10:]  # togliamo "/remindme "
+
     if not context.args:
         await update.message.reply_markdown_v2(
-            f'Devi inserire un lasso di tempo\.\nTempo relativo:\n`/remindme 3d15h25m messaggio`\n`/remindme 5m butta la pasta`\nTempo assoluto:\n`/remindme 23:59 vai a dormire`\n`/remindme 25/12/2024 Natale`\n`/remindme 31/12/2026 23:56 Capodanno!`\n\nUsa `/reminderlist` per la lista dei tuoi reminder e \n`/remindelete <ID>` per eliminare un reminder',
+            f'Devi inserire un lasso di tempo\.\nTempo relativo:\n`/remindme 3 giorni 15 ore messaggio`\n`/remindme 10m butta la pasta`\nTempo assoluto:\n`/remindme 23:59 vai a dormire`\n`/remindme 25/12/2024 Natale`\n`/remindme 31/12/2026 23:56 Capodanno!`\n\nUsa `/reminderlist` per la lista dei tuoi reminder e \n`/remindelete <ID>` per eliminare un reminder',
             quote=True)
         return
-    if ":" in text or "/" in text:  # ora assoluta
-        if text.count("/") == 1:
-            await update.message.reply_html("Se indichi una data, deve essere completa di anno, ad esempio:\n<code>/remindme 11/09/2001 08:46 chiudere le imposte</code>")
-            return
-        # print(text[:17])
-        targetdate = str(parse_date(text[:17], fuzzy=True, dayfirst=True).strftime("%d/%m/%Y %H:%M"))
-        if parse_date(text[:17], fuzzy=True, dayfirst=True) < datetime.datetime.now():
-            await update.message.reply_text("Lascia andare il passato e pensa al futuro.")
-            return
-        if (targetdate.endswith("00:00")) and ("00:00" not in text):
-            message = text[len(text.split()[0]) + 1:]
-        else:
-            message = text[len(text.split()[0]) + len(text.split()[1]) + 2:]
-    else:  # ora non precisa
-        try:
-            secondi = parse(text.split()[0])  # parsiamo delay
-        except IndexError:
-            await update.message.reply_markdown_v2(
-                f'Tempo relativo:\n`/remindme 3d15h25m messaggio`\n`/remindme 5m butta la pasta`\nTempo assoluto:\n`/remindme 23:59 vai a dormire`\n`/remindme 25/12/2024 Natale`\n`/remindme 31/12/2026 23:56 Capodanno!`\n\nUsa `/reminderlist` per la lista dei tuoi reminder e \n`/remindelete <ID>` per eliminare un reminder',
-                quote=True)  # /remindme 20/04/2021 15:15 messaggio`\n`/remindme 13:18 messaggio`\n
-            return
-        if not secondi:  # non parsa correttamente
-            await update.message.reply_markdown_v2(
-                f'Tempo relativo:\n`/remindme 3d15h25m messaggio`\n`/remindme 5m butta la pasta`\nTempo assoluto:\n`/remindme 23:59 vai a dormire`\n`/remindme 25/12/2024 Natale`\n`/remindme 31/12/2026 23:56 Capodanno!`\n\nUsa `/reminderlist` per la lista dei tuoi reminder e \n`/remindelete <ID>` per eliminare un reminder',
-                quote=True)  # /remindme 20/04/2021 15:15 messaggio`\n`/remindme 13:18 messaggio`\n
-            return
-        else:
-            targetdate = str((datetime.datetime.today() + datetime.timedelta(seconds=secondi)).strftime("%d/%m/%Y %H:%M"))
-        message = text[len(text.split()[0]) + 1:]
+
+    date_found = search_dates(text, languages=["it"], settings={'PREFER_DATES_FROM': 'future'})
+
+    if not date_found:
+        await update.message.reply_html("Mi dispiace, non sono riuscita a capire la data e l'orario, scusa.")
+        return
+
+    if date_found[0][1] < datetime.datetime.now():
+        await update.message.reply_text(f"Non posso ricordarti qualcosa nel passato.\nLa data che ho capito: <code>{date_found[0][1].strftime('%d/%m/%Y %H:%M')}</code>")
+        return
+
+    targetdate = date_found[0][1].strftime("%d/%m/%Y %H:%M")
+
+    if targetdate.endswith("00:00") and "00:00" not in text:
+        targetdate = targetdate.replace("00:00", "8:00")
+
+    trigger_text = date_found[0][0]
+    message = text.replace(trigger_text, '').strip()
 
     datenow = str(datetime.datetime.today().strftime("%d/%m/%Y %H:%M"))
 
