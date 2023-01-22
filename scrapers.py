@@ -154,6 +154,9 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str) -> dict:
 
     data = response["aweme_list"][0]
 
+    # with open(f'dump.json', 'w') as outfile:
+    #     json.dump(data, outfile)
+
     video_url = data["video"]["play_addr"]["url_list"][0]
     caption = f"<a href='https://www.tiktok.com/{username}'>{username}</a>\n"
     caption += data["desc"]
@@ -198,6 +201,20 @@ async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                     title="Video not found! ",
                     input_message_content=InputTextMessageContent(link),
                     description="Can't find the video, sorry",
+                    thumb_url="https://i.imgur.com/P9IhjS6.jpg",
+                    thumb_height=80,
+                    thumb_width=80
+                    )]
+            await update.inline_query.answer(results)
+            return
+
+        if not video_info["height"]  and not video_info["width"]:
+            results = [
+                InlineQueryResultArticle(
+                    id=str(uuid4()),
+                    title="Video is slideshow! Sorry!",
+                    input_message_content=InputTextMessageContent(link),
+                    description="Telegram doesn't support slideshows with music",
                     thumb_url="https://i.imgur.com/P9IhjS6.jpg",
                     thumb_height=80,
                     thumb_width=80
@@ -252,6 +269,10 @@ async def tiktok(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if not video_info:
         await update.message.reply_text(f"Non riesco, forse tiktok è rotto, o forse sono programmata male.")
+        return
+
+    if not video_info["height"]  and not video_info["width"]:
+        await update.message.reply_text(f"Temo sia uno slideshow, e Telegram non li supporta, mi dispiace.")
         return
 
     info = requests.head(video_info["video_url"])
