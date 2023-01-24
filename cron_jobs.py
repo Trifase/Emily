@@ -4,6 +4,7 @@ import peewee
 import time
 
 from telegram.ext import ContextTypes
+from telegram import  InlineKeyboardButton, InlineKeyboardMarkup
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -38,6 +39,61 @@ class Compleanni(peewee.Model):
         database = db
         table_name = 'compleanni'
         primary_key = False
+
+
+
+
+
+async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
+    import humanize
+    _localize = humanize.i18n.activate("it_IT")
+
+    print(f"{get_now()} [AUTO] controllo i lurkers")
+    groups_to_check = [config.ID_ASPHALTO, config.ID_DIOCHAN2]
+
+    for chat_id in groups_to_check:
+    
+        if "timestamps" not in context.bot_data:
+            context.bot_data["timestamps"] = {}
+        if chat_id not in context.bot_data["timestamps"]:
+            context.bot_data["timestamps"][chat_id] = {}
+
+        deltas = {}
+
+        MAX_SECS = 1_209_600 # 2 weeks
+
+
+    for user in context.bot_data["timestamps"][chat_id].keys():
+        deltas[user] = int(time.time()) - context.bot_data["timestamps"][chat_id][user]
+
+        listona = ["LURKERS_LIST"]
+        messaggio_automatico = ""
+        for lurker in sorted(deltas.items(), key=lambda x: x[1], reverse=True):
+            if lurker[1] > MAX_SECS:
+                try:
+                    mylurker = await context.bot.get_chat_member(chat_id, lurker[0])
+                    if mylurker.status in ['left', 'kicked']:
+                        context.bot_data["timestamps"][chat_id].pop(lurker[0])
+                        continue
+                    else:
+                        messaggio_automatico += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="days"))} fa\n'
+                        listona.append(mylurker.user.id)
+                except Exception:
+                    pass
+
+        if '-report' in context.args:
+
+            keyboard = [
+                [
+                    InlineKeyboardButton(f"👎 Kick", callback_data=listona),
+                    InlineKeyboardButton("👍 Passo", callback_data=["LURKERS_LIST", None])
+                ]
+            ]
+
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            if messaggio_automatico:
+                await context.bot.send_message(chat_id, messaggio_automatico, reply_markup=reply_markup)
 
 
 # Runs every minute
