@@ -717,6 +717,7 @@ async def wikipedia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         searchquery = update.effective_message.text.split(maxsplit=1)[1]
     except IndexError:
         await update.message.reply_text("Non hai specificato cosa cercare")
+        return
 
 
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} cerca su wikipedia: {searchquery}')
@@ -1016,7 +1017,8 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                             outputs={video_file_finale: '-y -c:v copy -c:a aac -loglevel quiet'}) 
                         ff.run()
                         time_elapsed = time.perf_counter() - start_time
-                        caption = f"<a href='{permalink}'>{sub}</a> | {upvotes} upvotes\n{title}\n\nFinito in: {str(time_elapsed)[:4]}s\nScusate il ritardo, colpa di reddit.\n"
+                        # caption = f"<a href='{permalink}'>{sub}</a> | {upvotes} upvotes\n{title}\n\nFinito in: {str(time_elapsed)[:4]}s\nScusate il ritardo, colpa di reddit.\n"
+                        caption = f"<a href='{permalink}'>{sub}</a> | {upvotes} upvotes\n{title}\n<i>Finito in: {str(time_elapsed)[:4]}s</i>"
                         # update.message.reply_video(open(video_file_finale, "rb"), caption=caption, parse_mode='HTML')
                         await context.bot.edit_message_media(chat_id=update.message.chat.id, message_id=messaggio.message_id, media=InputMediaVideo(media=open(video_file_finale, "rb"), caption=caption, parse_mode='HTML'))
                         # bot.edit_message_caption(chat_id=update.message.chat.id, message_id=messaggio.message_id, caption=caption, parse_mode='HTML')

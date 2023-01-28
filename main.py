@@ -42,7 +42,8 @@ from meteo import meteo_oggi, ora, prometeo_oggi, forecast
 from movies import doveguardo, imdb, doveguardo_buttons
 from misc import (bioritmo, fascio, fatfingers, scacchi, square, traduci, spongebob, voice, alexa, get_user_info,
     set_auto_reaction, send_auto_reaction, bomb_react, start, polls_callbackqueryhandlers, condominioweb, is_safe,
-    greet_BT_user, random_trifase, aoc_leaderboard, wikihow, lurkers, lurkers_callbackqueryhandlers)
+    greet_BT_user, random_trifase, aoc_leaderboard, wikihow, lurkers, lurkers_callbackqueryhandlers,
+    markovs)
 from parse_everything import (exit_from_banned_groups, nuova_chat_rilevata, update_timestamps_asphalto, check_for_sets,
     drop_update_from_banned_users, new_admin_buttons, messaggio_spiato, track_chats) 
 from pyrog import reaction_karma
@@ -136,7 +137,7 @@ def main():
     app.add_handler(CommandHandler('wakeup', wakeup, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
     app.add_handler(CommandHandler(['listaban', 'ban_list', 'banlist'], banlist, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
     app.add_handler(CommandHandler(['addban', 'ban', 'add_ban'], add_ban, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
-    app.add_handler(CommandHandler(['delban', 'del_ban'], del_ban, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
+    app.add_handler(CommandHandler(['delban', 'del_ban', 'unban', 'sban'], del_ban, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
     app.add_handler(CommandHandler(['set_title', 'settitle', 'title'], set_title, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
     app.add_handler(CommandHandler(['set_propic', 'setpicture', 'propic'], set_group_picture, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
     app.add_handler(CommandHandler('backup', trigger_backup, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
@@ -213,6 +214,7 @@ def main():
 
     # misc.py
     app.add_handler(CommandHandler('wikihow', wikihow, filters=~filters.UpdateType.EDITED))
+    app.add_handler(CommandHandler('markov', markovs, filters=~filters.UpdateType.EDITED))
     # app.add_handler(CommandHandler('chiedi_opinione', chiedi_opinione))
     app.add_handler(CommandHandler(['trifase', 'randomtrif', 'randomtrifase'], random_trifase, filters=~filters.UpdateType.EDITED))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, greet_BT_user))

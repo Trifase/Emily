@@ -8,6 +8,8 @@ import lichess.api
 import random
 import os
 import httpx
+import markovify
+import json
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -29,6 +31,53 @@ from utils import printlog, no_can_do, expand, get_display_name, print_progressb
 from pyrog import get_user_from_username, send_reaction, pyro_bomb_reaction
 
 from telegram import InputMediaPhoto
+
+async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+    def get_corpus(filename, user_id):
+        with open(filename, encoding='utf') as json_file:
+            data = json.load(json_file)
+            messages = []
+            for m in data:
+                if m.get('user_id') == f"user{user_id}":
+                    messages.append(m['text'])
+            corpus = '\n'.join(messages)
+            return corpus
+
+    chats = {
+        -1001329447461: 'parsed-ungruppo-diochan-combined.json',
+        -1001255745056: 'parsed-asphalto.json',
+        -1001809875381: 'parsed-ungruppo-diochan-combined.json',
+    }
+
+    filename = chats.get(update.effective_chat.id, None)
+
+    if update.effective_chat.id == config.ID_TESTING:
+        filename = 'parsed-ungruppo-diochan-combined.json'
+    if not filename:
+        return
+    if not update.message.reply_to_message:
+        return
+
+    user_id = update.message.reply_to_message.from_user.id
+    
+    corpus = get_corpus(f'db/corpuses/{filename}', user_id)
+
+    text_model = markovify.NewlineText(corpus)
+    startword = random.choice(update.message.reply_to_message.text.split())
+    await printlog(update, f"genera markov con la parola {startword} per", user_id)
+    try:
+        markov_message = text_model.make_sentence_with_start(startword, strict=False)
+    except Exception as e:
+        markov_message = text_model.make_sentence()
+    await update.message.reply_text(markov_message, quote=False)
+    # 
+    # if markov_message.endswith('.'):
+    #     markov_message = markov_message[:-1]
+    # messages = [real_message, markov_message]
+    # random.shuffle(messages)
+
+    # print(f"Quale di queste due frasi è realmente stata scritta da tensor?\nA) {messages[0]}\nB) {messages[1]}")
 
 
 
