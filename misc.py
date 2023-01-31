@@ -64,10 +64,11 @@ async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     corpus = get_corpus(f'db/corpuses/{filename}', user_id)
 
     text_model = markovify.NewlineText(corpus)
-    startword = random.choice(update.message.reply_to_message.text.split())
-    await printlog(update, f"genera markov con la parola {startword} per", user_id)
+    stopwords = [l.strip() for l in open('db/stopwords-it.txt', encoding='utf8').readlines()]
+    startword = random.choice([word for word in update.message.reply_to_message.text.split() if word not in stopwords])
+    await printlog(update, f"genera markov chain che inizia con la parola '{startword}' per", user_id)
     try:
-        markov_message = text_model.make_sentence_with_start(startword, strict=False)
+        markov_message = text_model.make_sentence_with_start(startword, strict=False, min_words=20)
     except Exception as e:
         markov_message = text_model.make_sentence()
     await update.message.reply_text(markov_message, quote=False)

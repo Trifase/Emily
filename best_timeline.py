@@ -68,8 +68,7 @@ async def scrape_tweet_bt(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         "nitter.net",
         "nitter.it",
         "nitter.nl",
-        "nitter.cz",
-        "nitter.hu"
+        "nitter.cz"
     ]
     nitter_url = url.replace("twitter.com",random.choice(nitter_instances))
     caption = f"<a href='{url}'>@{name}</a>\n{text if text else ''}{text_url if text_url else ''}\n<a href='{nitter_url}'>[Nitter]</a>"
