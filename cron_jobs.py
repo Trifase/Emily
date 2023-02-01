@@ -81,19 +81,17 @@ async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
                 except Exception:
                     pass
 
-        if '-report' in context.args:
-
-            keyboard = [
-                [
-                    InlineKeyboardButton(f"👎 Kick", callback_data=listona),
-                    InlineKeyboardButton("👍 Passo", callback_data=["LURKERS_LIST", None])
-                ]
+        keyboard = [
+            [
+                InlineKeyboardButton(f"👎 Kick", callback_data=listona),
+                InlineKeyboardButton("👍 Passo", callback_data=["LURKERS_LIST", None])
             ]
+        ]
 
-            reply_markup = InlineKeyboardMarkup(keyboard)
+        reply_markup = InlineKeyboardMarkup(keyboard)
 
-            if messaggio_automatico:
-                await context.bot.send_message(chat_id, messaggio_automatico, reply_markup=reply_markup)
+        if messaggio_automatico:
+            await context.bot.send_message(chat_id, messaggio_automatico, reply_markup=reply_markup)
 
 
 # Runs every minute

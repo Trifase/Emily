@@ -195,7 +195,6 @@ async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         messaggio = messaggio[:-16]
 
     if messaggio.lower() in chatdict:
-        # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} triggera {messaggio}')
         await printlog(update, "triggera", messaggio)
         set_text: str = chatdict[messaggio.lower()]
         is_reply = False
@@ -248,7 +247,7 @@ async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                         await context.bot.send_video_note(chat_id, media_id)
                 else:
                     await update.message.reply_text("Tipo di media non riconosciuto")
-                return
+
             except Exception as e:
                 await update.message.reply_html(f'<b>Errore:</b> {e}')
                 return
@@ -257,7 +256,9 @@ async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 await update.message.reply_text(f'{chatdict[messaggio.lower()]}', quote=False, disable_web_page_preview=True, reply_to_message_id=reply_id)
             else:
                 await update.message.reply_text(f'{chatdict[messaggio.lower()]}', quote=False, disable_web_page_preview=True)
-            return
+
+        if int(chat_id) in [config.ID_ASPHALTO]:
+            await update.message.delete()
 
 async def new_admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -319,10 +320,10 @@ async def track_chats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     if chat.type == Chat.PRIVATE:
         if not was_member and is_member:
-            await printlog(update, context, "ha avviato Emily.")
+            await printlog(update, "ha avviato Emily.")
             # context.bot_data.setdefault("user_ids", set()).add(chat.id)
         elif was_member and not is_member:
-            await printlog(update, context, "ha bloccato Emily.")
+            await printlog(update, "ha bloccato Emily.")
             # context.bot_data.setdefault("user_ids", set()).discard(chat.id)
     elif chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
         if not was_member and is_member:
