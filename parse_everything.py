@@ -257,7 +257,9 @@ async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             else:
                 await update.message.reply_text(f'{chatdict[messaggio.lower()]}', quote=False, disable_web_page_preview=True)
 
-        if int(chat_id) in [config.ID_ASPHALTO]:
+
+        myself = await context.bot.get_chat_member(update.message.chat.id, config.ID_EMILY)
+        if myself.status == ChatMemberStatus.ADMINISTRATOR and myself.can_delete_messages:
             await update.message.delete()
 
 async def new_admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
