@@ -28,6 +28,23 @@ async def get_user_from_username(username):
         mymessage += f"Status: {myuser.status}"
         return mymessage
 
+async def get_user_from_user_id(user_id):
+    async with Client("db/pyro-session-trifase.session", api_id, api_hash) as pyro:
+        myuser = await pyro.get_users(user_id)
+        return myuser
+
+async def get_chatmember_pyrog(chat_id, user_id):
+    async with Client("db/pyro-session-trifase.session", api_id, api_hash) as pyro:
+        mychatmember = await pyro.get_chat_member(chat_id, user_id)
+        return mychatmember
+
+async def get_all_chatmembers(chat_id):
+    async with Client("db/pyro-session-trifase.session", api_id, api_hash) as pyro:
+        members = []
+        async for member in pyro.get_chat_members(chat_id):
+            members.append(member)
+        return members
+
 
 async def get_reaction_count(user_id, chat_id):
     r = defaultdict(int)

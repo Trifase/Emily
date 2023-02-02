@@ -28,7 +28,7 @@ from aiohttp_client_cache import CachedSession, FileBackend
 import config
 
 from utils import printlog, no_can_do, expand, get_display_name, print_progressbar
-from pyrog import get_user_from_username, send_reaction, pyro_bomb_reaction
+from pyrog import get_user_from_username, send_reaction, pyro_bomb_reaction, get_all_chatmembers
 
 from telegram import InputMediaPhoto
 
@@ -102,9 +102,11 @@ async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if '-all' in context.args:
         max_secs = -1
+
     elif '-report' in context.args:
         max_secs = 1_209_600//2
         # max_secs = 295_000
+    
     else:
         try:
             max_secs = int(context.args[0])
@@ -117,24 +119,29 @@ async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         deltas[user] = int(time.time()) - context.bot_data["timestamps"][chat_id][user]
 
     message = ""
+
     listona = ["LURKERS_LIST"]
     messaggio_automatico = ""
+    # print(deltas)
+    allmembers = await get_all_chatmembers(chat_id)
     for lurker in sorted(deltas.items(), key=lambda x: x[1], reverse=True):
 
         if lurker[1] > max_secs:
-            try:
-                mylurker = await context.bot.get_chat_member(chat_id, lurker[0])
-                if mylurker.status in ['left', 'kicked']:
-                    context.bot_data["timestamps"][chat_id].pop(lurker[0])
-                    continue
-                else:
-                    message += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="seconds"))} fa\n'
-                    messaggio_automatico += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="days"))} fa\n'
-                    # print(f"Appendo {mylurker.user.id} alla lista")
-                    listona.append(mylurker.user.id)
-                    # print(listona)
-            except Exception:
-                pass
+            for u in allmembers:
+                if u.user.id == lurker[0]:
+                    mylurker = u
+                    break
+            # try:
+                # mylurker = await context.bot.get_chat_member(chat_id, lurker[0])
+            if mylurker.status in ['left', 'kicked']:
+                context.bot_data["timestamps"][chat_id].pop(lurker[0])
+                continue
+
+            else:
+                message += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="seconds"))} fa\n'
+                messaggio_automatico += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="days"))} fa\n'
+                listona.append(mylurker.user.id)
+
     # print(listona)
 
     if '-report' in context.args:

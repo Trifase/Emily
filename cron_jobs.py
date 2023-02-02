@@ -14,6 +14,7 @@ from rich.progress import track
 
 import config
 from utils import get_now
+from pyrog import get_all_chatmembers
 
 db = peewee.SqliteDatabase(config.DBPATH)
 
@@ -68,18 +69,24 @@ async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
 
         listona = ["LURKERS_LIST"]
         messaggio_automatico = ""
+
+        allmembers = await get_all_chatmembers(chat_id)
         for lurker in sorted(deltas.items(), key=lambda x: x[1], reverse=True):
+
             if lurker[1] > MAX_SECS:
-                try:
-                    mylurker = await context.bot.get_chat_member(chat_id, lurker[0])
-                    if mylurker.status in ['left', 'kicked']:
-                        context.bot_data["timestamps"][chat_id].pop(lurker[0])
-                        continue
-                    else:
-                        messaggio_automatico += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="days"))} fa\n'
-                        listona.append(mylurker.user.id)
-                except Exception:
-                    pass
+                for u in allmembers:
+                    if u.user.id == lurker[0]:
+                        mylurker = u
+                        break
+
+
+                if mylurker.status in ['left', 'kicked']:
+                    context.bot_data["timestamps"][chat_id].pop(lurker[0])
+                    continue
+                else:
+                    messaggio_automatico += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="days"))} fa\n'
+                    listona.append(mylurker.user.id)
+
 
         keyboard = [
             [
