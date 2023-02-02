@@ -184,7 +184,7 @@ async def lurkers_callbackqueryhandlers(update: Update, context: ContextTypes.DE
         print(f"{update.effective_user.id} non può cliccare")
         return
 
-    listona = query.data
+    listona: list[int] = query.data
 
     if not listona[-1]:
         await query.delete_message()
@@ -194,6 +194,7 @@ async def lurkers_callbackqueryhandlers(update: Update, context: ContextTypes.DE
         await query.answer("Fai conto che li ho bannati tutti")
         await query.delete_message()
         for user_id in listona[1:]:
+            user_id = int(user_id)
             try:
                 await context.bot.unban_chat_member(update.effective_chat.id, user_id)
                 context.bot_data["timestamps"][update.effective_chat.id].pop(user_id)
