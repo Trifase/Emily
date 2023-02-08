@@ -90,7 +90,8 @@ async def get_doveguardo_result(titolo: str, index_n):
                 'cla': 'Classix',
                 'nfa': 'Netflix basic with Ads',
                 'ras': 'Rai Sport',
-                'epl': 'ESPN Player'
+                'epl': 'ESPN Player',
+                'cru': 'Crunchyroll'
             }
 
     offerte = {}

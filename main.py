@@ -111,9 +111,6 @@ def main():
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, messaggio_spiato), -17)
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, check_for_sets), -16)
 
-    
-
-
     # Error handler
     # app.add_error_handler(error_handler)
 

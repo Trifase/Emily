@@ -14,6 +14,12 @@ import sys
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} testa tantissimo!')
     await printlog(update, "testa tantissimo")
+
+    # print(update.to_json())
+    # print()
+    # user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)
+    # print(user.to_json())
+
     # await alert(update, context, "ha testato tantissimo", "errore di prova")
 
     # pprint.pprint(sys.modules['space'])

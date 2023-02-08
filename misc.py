@@ -59,10 +59,10 @@ async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message.reply_to_message:
         return
 
+
     user_id = update.message.reply_to_message.from_user.id
     
     corpus = get_corpus(f'db/corpuses/{filename}', user_id)
-
     text_model = markovify.NewlineText(corpus)
     stopwords = [l.strip() for l in open('db/stopwords-it.txt', encoding='utf8').readlines()]
     startword = random.choice([word for word in update.message.reply_to_message.text.split() if word not in stopwords])
@@ -72,7 +72,8 @@ async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except Exception as e:
         markov_message = text_model.make_sentence()
     await update.message.reply_text(markov_message, quote=False)
-    # 
+
+    #
     # if markov_message.endswith('.'):
     #     markov_message = markov_message[:-1]
     # messages = [real_message, markov_message]
