@@ -84,6 +84,9 @@ def main():
     builder.post_init(post_init)
     builder.post_shutdown(post_shutdown)
 
+    builder.http_version('1.1')
+    builder.get_updates_http_version('1.1')
+
     app = builder.build()
 
     # cron_jobs.py

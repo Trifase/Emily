@@ -50,7 +50,7 @@ async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
     _localize = humanize.i18n.activate("it_IT")
 
     print(f"{get_now()} [AUTO] controllo i lurkers")
-    groups_to_check = [config.ID_ASPHALTO, config.ID_DIOCHAN2]
+    groups_to_check = [config.ID_DIOCHAN2]
 
     for chat_id in groups_to_check:
     
@@ -64,40 +64,41 @@ async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
         MAX_SECS = 1_209_600 # 2 weeks
 
 
-    for user in context.bot_data["timestamps"][chat_id].keys():
-        deltas[user] = int(time.time()) - context.bot_data["timestamps"][chat_id][user]
+        for user in context.bot_data["timestamps"][chat_id].keys():
+            deltas[user] = int(time.time()) - context.bot_data["timestamps"][chat_id][user]
 
-        listona = ["LURKERS_LIST"]
-        messaggio_automatico = ""
+            listona = ["LURKERS_LIST"]
+            messaggio_automatico = ""
 
-        allmembers = await get_all_chatmembers(chat_id)
-        for lurker in sorted(deltas.items(), key=lambda x: x[1], reverse=True):
+            allmembers = await get_all_chatmembers(chat_id)
+            for lurker in sorted(deltas.items(), key=lambda x: x[1], reverse=True):
 
-            if lurker[1] > MAX_SECS:
-                for u in allmembers:
-                    if u.user.id == lurker[0]:
-                        mylurker = u
-                        break
-
-
-                if mylurker.status in ['left', 'kicked']:
-                    context.bot_data["timestamps"][chat_id].pop(lurker[0])
-                    continue
-                else:
-                    messaggio_automatico += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="days"))} fa\n'
-                    listona.append(mylurker.user.id)
+                if lurker[1] > MAX_SECS:
+                    for u in allmembers:
+                        if u.user.id == lurker[0]:
+                            mylurker = u
+                            break
 
 
-        keyboard = [
-            [
-                InlineKeyboardButton(f"👎 Kick", callback_data=listona),
-                InlineKeyboardButton("👍 Passo", callback_data=["LURKERS_LIST", None])
+                    if mylurker.status in ['left', 'kicked']:
+                        context.bot_data["timestamps"][chat_id].pop(lurker[0])
+                        continue
+                    else:
+                        messaggio_automatico += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="days"))} fa\n'
+                        listona.append(mylurker.user.id)
+
+
+            keyboard = [
+                [
+                    InlineKeyboardButton(f"👎 Kick", callback_data=listona),
+                    InlineKeyboardButton("👍 Passo", callback_data=["LURKERS_LIST", None])
+                ]
             ]
-        ]
 
-        reply_markup = InlineKeyboardMarkup(keyboard)
+            reply_markup = InlineKeyboardMarkup(keyboard)
 
         if messaggio_automatico:
+            print(f"{get_now()} [AUTO] trovati lurkers da kickare nel gruppo {chat_id}")
             await context.bot.send_message(chat_id, messaggio_automatico, reply_markup=reply_markup)
 
 

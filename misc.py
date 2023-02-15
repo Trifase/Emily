@@ -182,7 +182,6 @@ async def lurkers_callbackqueryhandlers(update: Update, context: ContextTypes.DE
     user = await context.bot.get_chat_member(update.effective_chat.id, update.effective_user.id)
     if not can_user_restrict(user) and update.effective_user.id != config.ID_TRIF:
         await query.answer("Non puoi farlo.")
-        print(f"{update.effective_user.id} non può cliccare")
         return
 
     listona: list[int] = query.data
@@ -287,6 +286,10 @@ async def random_trifase(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     trifasi_dir = "images/trifasi/"
     random_list = os.listdir(trifasi_dir)
+    if context.args:
+        random_list = [x for x in random_list if context.args[0].lower() in x.lower()]
+        if not random_list:
+            random_list = os.listdir(trifasi_dir)
     random_file = random.choice(random_list)
     pos = random_list.index(random_file)
     name = random_file[:-4]

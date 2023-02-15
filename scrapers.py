@@ -897,6 +897,11 @@ async def scrape_tweet_media(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
+    
+    if update.effective_user.id == 160339370:
+        await update.message.reply_html("Basta Zanna.")
+        return
+
     start_time = time.perf_counter()
 
     reddit = asyncpraw.Reddit(
