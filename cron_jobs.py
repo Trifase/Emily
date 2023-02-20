@@ -72,13 +72,12 @@ async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
 
             allmembers = await get_all_chatmembers(chat_id)
             for lurker in sorted(deltas.items(), key=lambda x: x[1], reverse=True):
+                for u in allmembers:
+                    if u.user.id == lurker[0]:
+                        mylurker = u
+                        break
 
                 if lurker[1] > MAX_SECS:
-                    for u in allmembers:
-                        if u.user.id == lurker[0]:
-                            mylurker = u
-                            break
-
 
                     if mylurker.status in ['left', 'kicked']:
                         context.bot_data["timestamps"][chat_id].pop(lurker[0])

@@ -115,7 +115,7 @@ def main():
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, check_for_sets), -16)
 
     # Error handler
-    # app.add_error_handler(error_handler)
+    app.add_error_handler(error_handler)
 
     # admin.py
     app.add_handler(CommandHandler(['checktemp', 'check_temp', 'temp', 'temperatura'], check_temp, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
@@ -341,12 +341,18 @@ def main():
 
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
-    from rich.console import Console
-    from rich.traceback import Traceback
-    from rich import print
-    console = Console()
-    tcb = Traceback.from_exception(type(context.error), context.error, context.error.__traceback__, show_locals=False, width=140, max_frames=8, extra_lines=1, locals_max_string=140)
-    console.print(tcb)
+    # from rich.console import Console
+    # from rich.traceback import Traceback
+    # from rich import print
+    # console = Console()
+    # tcb = Traceback.from_exception(type(context.error), context.error, context.error.__traceback__, show_locals=False, width=140, max_frames=8, extra_lines=1, locals_max_string=140)
+    # console.print(tcb)
+
+    import traceback
+
+    tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
+    tb_string = "".join(tb_list)
+    print(f"{get_now()} {tb_string}")
 
 async def webserver_logs(request):
     current_m = datetime.date.today().strftime("%Y-%m")
