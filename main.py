@@ -61,6 +61,7 @@ from testing import test, getfile
 from torrent import lista_torrent
 from twitter import lista_tweets, tweet
 from utils import is_user, is_inline_button, count_k_v, is_forged_command, is_lurkers_list
+from zoom import zoom_link
 
 def main():
 
@@ -336,6 +337,8 @@ def main():
     app.add_handler(CommandHandler(['tw', 'tweet'], tweet, filters=~filters.UpdateType.EDITED))
     app.add_handler(CommandHandler(['tweetlists', 'listatweet', 'tweets', 'twlist'], lista_tweets, filters=~filters.UpdateType.EDITED))
 
+    # zoom.py
+    app.add_handler(CommandHandler(['zoom', 'zoomlink', 'zoomlinks'], zoom_link, filters=~filters.UpdateType.EDITED))
 
     app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
