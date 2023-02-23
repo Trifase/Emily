@@ -93,6 +93,11 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     sets = context.bot_data['current_sets']
 
     chat_id = str(update.message.chat.id)
+
+    if context.args:
+        if context.args[0].lstrip("-").isdigit():
+            chat_id = context.args[0]
+
     message = ""
     await printlog(update, "chiede la lista dei set")
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} chiede la lista dei set di {chat_id}')

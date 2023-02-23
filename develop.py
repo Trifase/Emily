@@ -12,7 +12,12 @@ client_secret = "212476d9b0f3472eaa762d90b19b0ba8"
 
 spotdl = Spotdl(client_id, client_secret)
 
-songs = spotdl.search([TEST_URL_5])
+url = TEST_URL_2
+if 'album' in url and 'spotify:track:' in url:
+    song_uid = url.split('spotify:track:')[-1]
+    url = f"https://open.spotify.com/track/{song_uid}"
+
+songs = spotdl.search([url])
 
 results = spotdl.get_download_urls(songs)
 
