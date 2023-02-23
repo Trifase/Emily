@@ -15,6 +15,7 @@ import traceback
 import pprint
 import httpx
 import random
+import pprint
 
 
 from instaloader import BadResponseException, Profile, StoryItem
@@ -135,7 +136,7 @@ async def get_tiktok_username_id(url):
         raise RuntimeError
     return (username, id, link)
 
-async def get_tiktok_video_infos_aweme(username: str, video_ID: str) -> dict:
+async def get_tiktok_video_infos_aweme(username: str, video_ID: str, debug: bool=False) -> dict:
     """
     Get Infos from the tiktok api and return a dict of relevant informations
     """
@@ -151,11 +152,10 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str) -> dict:
         r = await session.get(api_url, headers=tiktok_api_headers, timeout=10)
     response = r.json()
 
-
+    if debug:
+        with open("debug.json", "w") as outfile:
+            outfile.write(json.dumps(response, indent=4))
     data = response["aweme_list"][0]
-
-    # with open(f'dump.json', 'w') as outfile:
-    #     json.dump(data, outfile)
 
     video_url = data["video"]["play_addr"]["url_list"][0]
     caption = f"<a href='https://www.tiktok.com/{username}'>{username}</a>\n"
@@ -164,6 +164,10 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str) -> dict:
     title = f"Tiktok Video from {username}"
     height = data["video"]["height"]
     width = data["video"]["width"]
+    slideshow = []
+    if data['image_post_info']:
+        for image in data['image_post_info']['images'][:10]:
+            slideshow.append(image['display_image']['url_list'][-1])
 
     infos["username"] = username
     infos["video_id"] = video_ID
@@ -173,6 +177,7 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str) -> dict:
     infos["thumbnail_url"] = thumbnail_jpg
     infos["height"] = height
     infos["width"] = width
+    infos["slideshow"] = slideshow
     return infos
 
 async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -271,8 +276,9 @@ async def tiktok(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(f"Non riesco, forse tiktok è rotto, o forse sono programmata male.")
         return
 
-    if not video_info["height"]  and not video_info["width"]:
-        await update.message.reply_text(f"Temo sia uno slideshow, e Telegram non li supporta, mi dispiace.")
+    if video_info["slideshow"]:
+        await update.effective_chat.send_chat_action(action='upload_photo') 
+        await update.message.reply_media_group(media=[InputMediaPhoto(image) for image in video_info['slideshow']])
         return
 
     info = requests.head(video_info["video_url"])
