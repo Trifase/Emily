@@ -96,7 +96,7 @@ def main():
     j.run_repeating(plot_boiler_stats, interval=2600.0, data=None, job_kwargs={'misfire_grace_time': 25})
 
     j.run_daily(lotto_member_count, datetime.time(hour=9, minute=0, tzinfo=pytz.timezone('Europe/Rome')), data=None)
-    j.run_daily(autolurkers, datetime.time(hour=9, minute=0, tzinfo=pytz.timezone('Europe/Rome')), data=None)
+    # j.run_daily(autolurkers, datetime.time(hour=9, minute=0, tzinfo=pytz.timezone('Europe/Rome')), data=None)
 
     j.run_daily(check_compleanni, datetime.time(hour=0, minute=0, tzinfo=pytz.timezone('Europe/Rome')), data=None)
     j.run_daily(check_compleanni, datetime.time(hour=12, minute=00, tzinfo=pytz.timezone('Europe/Rome')), data=None)
@@ -178,7 +178,7 @@ def main():
     app.add_handler(CommandHandler('diochan', diochan, filters=~filters.UpdateType.EDITED))
     app.add_handler(CommandHandler(['tensor', 'tensorbot'], random_tensor, filters=~filters.UpdateType.EDITED))
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & filters.TEXT & filters.User(username="@Tensor1987"), save_tensor), 19)
-    app.add_handler(MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(r'\bmon\b', re.IGNORECASE)), mon), 25)
+    # app.add_handler(MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(r'\bmon\b', re.IGNORECASE)), mon), 25)
 
     # donazioni.py
     app.add_handler(CommandHandler("donazione", donazioni))

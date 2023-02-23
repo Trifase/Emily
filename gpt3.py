@@ -81,7 +81,7 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     except Exception as e:
         print(traceback.format_exc())
-        await update.message.reply_text(f"Stong rott")
+        await update.message.reply_text(f"Song rott")
 
 async def openai_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
