@@ -72,7 +72,7 @@ def sudoku():
         querystring = {"diff":str(diff),"stype":"list","solu":"true"}
 
         headers = {
-            "X-RapidAPI-Key": "6b1eba0153msh8cd62219142c90fp1f3ea3jsn5e757aabd168",
+            "X-RapidAPI-Key": config.RAPIDAPI_KEY,
             "X-RapidAPI-Host": "sudoku-board.p.rapidapi.com"
         }
 
@@ -233,4 +233,4 @@ def sudoku():
         solve_sudoku(sudoku)
         print_sudoku(sudoku)
 
-# sudoku()
+sudoku()

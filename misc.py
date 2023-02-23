@@ -214,7 +214,7 @@ async def wikihow(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     querystring = {"count":f"{count}"}
     headers = {
-        "X-RapidAPI-Key": "6b1eba0153msh8cd62219142c90fp1f3ea3jsn5e757aabd168",
+        "X-RapidAPI-Key": config.RAPIDAPI_KEY,
         "X-RapidAPI-Host": "hargrimm-wikihow-v1.p.rapidapi.com"
     }
 
