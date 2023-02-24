@@ -56,6 +56,7 @@ from scrapers import (tiktok, tiktok_long, new_instagram, instagram_stories,
 from sets import addset, deleteset, jukebox, listaset
 from smarthome import luci_status, toggle_light, get_light_label, consumo, purificatore, riscaldamento_stats
 from space import solarsystem, launches
+from spotify import spoty
 from tarots import tarot, oroscopo, tarotschema
 from testing import test, getfile
 from torrent import lista_torrent
@@ -312,7 +313,6 @@ def main():
     app.add_handler(CommandHandler(['consumo'], consumo, filters=~filters.UpdateType.EDITED))
     app.add_handler(CommandHandler(['purificatore', 'purifier'], purificatore, filters=~filters.UpdateType.EDITED))
     app.add_handler(CommandHandler(['riscaldamento', 'boiler', 'caldaia'], riscaldamento_stats, filters=~filters.UpdateType.EDITED))
-    
 
 
     # space.py
@@ -320,16 +320,24 @@ def main():
     app.add_handler(CommandHandler(['lanci', 'launches'], launches, filters=~filters.UpdateType.EDITED, block=True))
 
 
+    # spotify.py
+    app.add_handler(MessageHandler(
+        ~filters.UpdateType.EDITED & 
+        filters.Regex(re.compile(r"(?:(?:http|https):\/\/)?(?:open\.)(?:spotify\.com)\/(?:track|album)\/(?:\S+)", re.IGNORECASE)), spoty
+        ))
+
+
     # tarots.py
     app.add_handler(CommandHandler(['tarot', 'tarots', 'tarocchi'], tarot, filters=~filters.UpdateType.EDITED))
     app.add_handler(CommandHandler(['oroscopo', 'horoscope', 'oro'], oroscopo, filters=~filters.UpdateType.EDITED))
     app.add_handler(CommandHandler(['tarotschema', 'reversetarots', 'schema'], tarotschema, filters=~filters.UpdateType.EDITED))
-    
+
 
     # testing.py
     app.add_handler(CommandHandler('test', test, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
     app.add_handler(CommandHandler('getfile', getfile, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
-    
+
+
     # torrent.py
     app.add_handler(CommandHandler(['torrents', 'torrentlist', 'listatorrent', 'lista_torrent'], lista_torrent, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
 

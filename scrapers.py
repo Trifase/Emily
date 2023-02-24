@@ -165,7 +165,7 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str, debug: bool
     height = data["video"]["height"]
     width = data["video"]["width"]
     slideshow = []
-    if data['image_post_info']:
+    if data.get('image_post_info'):
         for image in data['image_post_info']['images'][:10]:
             slideshow.append(image['display_image']['url_list'][-1])
 
