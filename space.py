@@ -3,6 +3,8 @@ import uuid
 import pytz
 import math
 import random
+
+import numpy as np
 from datetime import datetime, timezone
 import requests
 from PIL import Image, ImageDraw, ImageFont
@@ -25,8 +27,6 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # random.seed(f"{update.message.from_user.id}+{update.message.chat.id}+{datetime.datetime.today().strftime('%Y-%m-%d')}")
-
-    
 
     list_of_colors = [
         (145, 185, 141), (229, 192, 121), (210, 191, 88), (140, 190, 178), (255, 183, 10), (189, 190, 220),
@@ -1032,7 +1032,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     STARS = 500
     BORDERSIZE = 50
-    NOISE = 0.05
+    NOISE = 3
 
     seed = uuid.uuid4()
 
@@ -1068,15 +1068,13 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if len(context.args) >= 2 and context.args[0].isdigit() and context.args[1].isdigit():
             if int(context.args[0]) < 500 or int(context.args[1]) < 500 or int(context.args[0]) + int(context.args[1]) > 10000:
-                update.message.reply_text("Troppo o troppo poco! Minimo 500x500, e le dimensioni sommate non possono superare 10000")
+                await update.message.reply_text("Troppo o troppo poco! Minimo 500x500, e le dimensioni sommate non possono superare 10000")
                 return
             WIDTH = int(context.args[0])
             HEIGHT = int(context.args[1])
 
     random.seed(str(seed))
-    # print(f"Seed: {str(seed)}")
     await printlog(update, "crea un sistema solare con il seed", str(seed))
-    # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} crea un sistema di stelle e pianeti unico, seed: {str(seed)}')
 
 
     SUNSIZE = random.randint(50, 400)
@@ -1263,6 +1261,35 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         draw.text(anchor, system_name.upper(), font=font, anchor="mm", fill=rgb_bgcolor, stroke_width=0)
         
         img.save(image_path)
+    
+    if NOISE:
+        # Load image
+        img = np.array(Image.open(image_path))
+
+        # Define mean and standard deviation
+        mean = 0
+        stddev = NOISE
+
+        # Create grayscale Gaussian noise array and add it to image
+        noise = np.random.normal(mean, stddev, img.shape[:2])
+        noisy_img = np.zeros(img.shape, dtype=np.uint8)
+        noisy_img[:,:,0] = np.clip(img[:,:,0] + noise, 0, 255)
+        noisy_img[:,:,1] = np.clip(img[:,:,1] + noise, 0, 255)
+        noisy_img[:,:,2] = np.clip(img[:,:,2] + noise, 0, 255)
+
+        # Convert to grayscale
+        noisy_img_gray = np.dot(noisy_img[...,:3], [0.2989, 0.5870, 0.1140])
+
+        # Add opacity to the noisy image
+        alpha = np.random.randint(0, 255, img.shape[:2]).astype(np.uint8)
+        noisy_img_gray = np.stack((noisy_img_gray,)*3, axis=-1)
+        noisy_img_gray = np.concatenate((noisy_img_gray, alpha[:,:,np.newaxis]), axis=2)
+
+        # Save the noisy image
+        noisy_img_pil = Image.fromarray(noisy_img)
+        noisy_img_pil.save(image_path)
+
+
     await context.bot.send_chat_action(chat_id=update.message.chat.id, action=ChatAction.UPLOAD_PHOTO)
     planets_list += f"\nSeed:\n<code>{seed}</code>"
     # from wand.image import Image

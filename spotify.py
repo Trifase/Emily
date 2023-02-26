@@ -22,8 +22,6 @@ spotdl = Spotdl(client_id, client_secret, output='mp3/')
 async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-    
-
 
     url = context.match.group(0)
     if 'album' in url and 'spotify:track:' in url:
@@ -38,18 +36,21 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         except Exception as e: 
             await update.message.reply_text(f"Non capisco:  {e}")
 
-    if results:
-        await printlog(update, "posta una canzone di spotify", results)
-        msg = await update.message.reply_text(f"Arriva, dammi un minuto.")
-        
-        downloader = Downloader(loop=asyncio.get_event_loop(), overwrite='force', output='mp3/')
+    if not results:
+        await update.message.reply_text(f"Non riesco a trovarla su youtube music per scaricarla, scusami.")
+        return
 
-        blocking_download = asyncio.to_thread(downloader.search_and_download, songs[0])
-        song, path = await blocking_download
+    await printlog(update, "posta una canzone di spotify", results)
+    msg = await update.message.reply_text(f"Arriva, dammi un minuto.")
+    
+    downloader = Downloader(loop=asyncio.get_event_loop(), overwrite='force', output='mp3/')
 
-        caption = f"{song.display_name}\nfrom {song.album_name} ({song.year})"
-        await update.message.reply_audio(audio=open(path, "rb"), caption=caption)
+    blocking_download = asyncio.to_thread(downloader.search_and_download, songs[0])
+    song, path = await blocking_download
 
-        await msg.delete()
-        os.remove(path) 
+    caption = f"{song.display_name}\nfrom {song.album_name} ({song.year})"
+    await update.message.reply_audio(audio=open(path, "rb"), caption=caption)
+
+    await msg.delete()
+    os.remove(path) 
  
