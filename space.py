@@ -3,6 +3,9 @@ import uuid
 import pytz
 import math
 import random
+import time
+import tempfile
+import io
 
 import numpy as np
 from datetime import datetime, timezone
@@ -21,6 +24,7 @@ from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
 
 
 async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # start = time.perf_counter()
     if await no_can_do(update, context):
         return
     if update.effective_user.id not in config.ADMINS and update.effective_chat.id == config.ID_TIMELINE:
@@ -1076,6 +1080,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     BORDERSIZE = 50
     NOISE = 3
 
+    # print(f"Inizio:\t{time.perf_counter() - start}")
     seed = uuid.uuid4()
 
     if context.args:
@@ -1126,7 +1131,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sun_size = SUNSIZE
     system_name = generate_system()
     planets_list = f"<b>· {system_name.upper()} ·</b>\n<i>{random.randint(15, 10000)} UA</i>\n\n"
-
+    # print(f"Nomi:\t{time.perf_counter() - start}")
 
     ims = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
     cr = cairo.Context(ims)
@@ -1137,8 +1142,9 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bg_color = (random_bg_color(bg_min, bg_max), random_bg_color(bg_min, bg_max), random_bg_color(bg_min, bg_max),)
 
     draw_background(cr, *bg_color, width, height)
+    # print(f"Background: \t{time.perf_counter() - start}")
 
-    # Starfield
+        # Starfield
     if STARFIELD:
         for _ in range(STARS):
             star_size = random.randint(1, 30)
@@ -1182,7 +1188,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     min_size = 20
     max_size = 150
 
-
+    # print(f"Sole: \t{time.perf_counter() - start}")
     for x in range(1, 20):
         distance_between_planets = random.randint(20, 100)
         next_size = random.randint(min_size, max_size)
@@ -1292,13 +1298,19 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
             last_size = next_size
             if planet_type == "moons" and MOONS and planet_radius >= 50:
                 last_size = orbit_radius
-
-    draw_border(cr, border_size, sun_r, sun_g, sun_b, width, height)
-    image_path = f'images/Stars-{str(width)}x{str(height)}.png'
-    ims.write_to_png(image_path)
+            # print(f"Fine Pianeta: \t{time.perf_counter() - start}")
     
+    draw_border(cr, border_size, sun_r, sun_g, sun_b, width, height)
+    fp = tempfile.NamedTemporaryFile(suffix='.png')
+    # image_path = f'images/Stars-{str(width)}x{str(height)}.png'
+    image_path = fp.name
+    ims.write_to_png(image_path)
+    # print(f"Salvataggio da cairo: \t{time.perf_counter() - start}")
+
+    img = Image.open(image_path)
+    # print(f"Caricamento in PIL: \t{time.perf_counter() - start}")
     if BORDERSIZE >= 20:
-        img = Image.open(image_path)
+        # img = Image.open(image_path)
     
         font_size = BORDERSIZE - 10
 
@@ -1311,11 +1323,12 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         draw.text(anchor, system_name.upper(), font=font, anchor="mm", fill=rgb_bgcolor, stroke_width=0)
         
-        img.save(image_path)
+        # img.save(image_path)
+        # print(f"Aggiunto titolo: \t{time.perf_counter() - start}")
     
     if NOISE:
         # Load image
-        img = np.array(Image.open(image_path))
+        img = np.array(img)
 
         # Define mean and standard deviation
         mean = 0
@@ -1338,23 +1351,27 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # Save the noisy image
         noisy_img_pil = Image.fromarray(noisy_img)
-        noisy_img_pil.save(image_path)
+        # noisy_img_pil.save(image_path)
+        img = noisy_img_pil
+        # print(f"Aggiunto noise: \t{time.perf_counter() - start}")
 
+    # img_bytes_array = io.BytesIO()
+    # img.save(img_bytes_array, format='PNG')
+    # print(f"Salvataggio da PIL a BytesIO: \t{time.perf_counter() - start}")
 
+    img.save(image_path)
+
+    # print(f"Salvataggio da PIL a file temp: \t{time.perf_counter() - start}")
     await context.bot.send_chat_action(chat_id=update.message.chat.id, action=ChatAction.UPLOAD_PHOTO)
+    
     planets_list += f"\nSeed:\n<code>{seed}</code>"
-    # from wand.image import Image
 
-    # with Image(filename=image_path) as wandimg:
-    #     wandimg.noise("poisson", attenuate=50, channel="gray")
-    #     wandimg.save(filename=image_path)
-        # print(" ".join(command))
-        # subprocess.check_call(command)
     if DOWNLOAD:
         await context.bot.send_document(chat_id=update.effective_chat.id, document=open(image_path, 'rb'), caption=planets_list, parse_mode='HTML')
-        return
-
-    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(image_path, 'rb'), caption=f"<b>· {system_name.upper()} ·</b>\n<code>{seed}</code>", parse_mode='HTML')
+    else:
+        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(image_path, 'rb'), caption=f"<b>· {system_name.upper()} ·</b>\n<code>{seed}</code>", parse_mode='HTML')
+    # print(f"Upload: \t{time.perf_counter() - start}")
+    fp.close()
     return
 
 
