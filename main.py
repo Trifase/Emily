@@ -30,7 +30,7 @@ from asphalto import azzurro
 from banca import bot_get_saldo, bot_get_transazioni
 from best_timeline import scrape_tweet_bt, silenzia, deleta_if_channel
 from compleanni import compleanni_add, compleanni_list, compleanni_manual_check, compleanno_del
-from cron_jobs import check_reminders, check_compleanni, lotto_member_count, do_global_backup, plot_boiler_stats, autolurkers
+from cron_jobs import check_reminders, check_compleanni, lotto_member_count, do_global_backup, plot_boiler_stats, autolurkers, parse_diochan
 from diochan import save_tensor, random_tensor, search_quote, add_quote, diochan, mon, ascendi
 from donazioni import donazioni, precheckout_callback, successful_payment_callback
 from games import sassocartaforbici
@@ -94,7 +94,11 @@ def main():
     # cron_jobs.py
     j = app.job_queue
 
-    j.run_repeating(plot_boiler_stats, interval=2600.0, data=None, job_kwargs={'misfire_grace_time': 25})
+    # j.run_repeating(plot_boiler_stats, interval=2600.0, data=None, job_kwargs={'misfire_grace_time': 25})
+
+    # Run every hour
+    j.run_repeating(parse_diochan, interval=1800, data=None, job_kwargs={'misfire_grace_time': 25})
+
 
     j.run_daily(lotto_member_count, datetime.time(hour=9, minute=0, tzinfo=pytz.timezone('Europe/Rome')), data=None)
     # j.run_daily(autolurkers, datetime.time(hour=9, minute=0, tzinfo=pytz.timezone('Europe/Rome')), data=None)

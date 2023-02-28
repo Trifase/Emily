@@ -336,8 +336,8 @@ async def track_chats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             # context.bot_data.setdefault("group_ids", set()).discard(chat.id)
     else:
         if not was_member and is_member:
-            await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha aggiunto Emily al canale: {chat.title}")
+            await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha aggiunto Emily al canale: {chat.title} [{chat.id}]")
             # context.bot_data.setdefault("channel_ids", set()).add(chat.id)
         elif was_member and not is_member:
-            await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha rimosso Emily dal canale: {chat.title}")
+            await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha rimosso Emily dal canale: {chat.title} [{chat.id}]")
             # context.bot_data.setdefault("channel_ids", set()).discard(chat.id)
