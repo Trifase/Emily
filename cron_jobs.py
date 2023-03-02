@@ -58,7 +58,6 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
             return response.json()
 
     diochan = {}
-    print(f"{get_now()} [AUTO] controllo diochan")
     for board in BOARDS:
         diochan[board] = await get_last_threads_from_board(board)
     now = int(time.time())
@@ -94,10 +93,15 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     bot = context.bot
 
+    if not threads:
+        return
+
+    print(f"{get_now()} [AUTO] Trovati {len(threads)} nuovi thread su Diochan")
+
     if SINGLE_POST:
         message = ''
         for thread in threads:
-            timestamp = datetime.datetime.utcfromtimestamp(thread['time']).strftime('%d/%m/%Y %H:%M')
+            timestamp = datetime.datetime.fromtimestamp(thread['time']).strftime('%d/%m/%Y %H:%M')
             text = thread['text'].replace('<br/>','\n').replace('<span class="quote">&gt;','>').replace('</span>','')
             if len(text) > 1000:
                 text = text[:1000] + "..."
@@ -110,7 +114,7 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
     
     else:
         for thread in threads:
-            timestamp = datetime.datetime.utcfromtimestamp(thread['time']).strftime('%d/%m/%Y %H:%M')
+            timestamp = datetime.datetime.fromtimestamp(thread['time']).strftime('%d/%m/%Y %H:%M')
             text = thread['text'].replace('<br/>','\n').replace('<span class="quote">&gt;','>').replace('</span>','')
             if len(text) > 1000:
                 text = text[:1000] + "..."

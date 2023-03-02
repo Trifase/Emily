@@ -42,6 +42,8 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         (255, 95, 83), (253, 209, 162), (255, 243, 161), (252, 255, 212), (248, 247, 253), (201, 216, 255), (154, 175, 255)
         ]
 
+    list_of_planet_textures = ['craters', 'fibers', 'nubi', 'perlin_poly', 'stripes', 'voronoi']
+
     def planet_name():
         part1 = [
             "Æ",
@@ -855,6 +857,73 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         cr.arc(x, y, radius, 0, 2 * math.pi)
         cr.fill()
 
+    def draw_planet(cr, x, y, radius, r, g, b, a=1.0, gradient=False, texture_file=None):
+
+        if GRADIENTS and gradient:
+            orbit_angle = random.randint(0, 20)
+            pattern = cairo.LinearGradient(x + orbit_angle, y + radius, x -orbit_angle, y - radius)
+            n_colors = random.randint(2, 4)
+            for i in range(n_colors):
+                rand_color = random.choice(list_of_colors)
+                r, g, b = rand_color[0] / 255.0, rand_color[1] / 255.0, rand_color[2] / 255.0
+                pattern.add_color_stop_rgb(i, r, g, b)
+            cr.set_source(pattern)
+        else:
+            cr.set_source_rgba(r, g, b, a)
+
+        cr.arc(x, y, radius, 0, 2 * math.pi)
+        cr.fill()
+
+        if TEXTURES and random.randint(1, 100) < 40:
+            texture_file = random.choice(list_of_planet_textures)
+
+        if texture_file:
+            # Load the texture
+            texture = cairo.ImageSurface.create_from_png(f'images/planet_textures/{texture_file}.png')
+
+            # Set the composition operator to multiply
+            cr.set_operator(cairo.Operator.MULTIPLY)
+            
+            # Create a pattern from the texture
+            texture_pattern = cairo.SurfacePattern(texture)
+
+            texture_pattern.set_extend(cairo.EXTEND_REPEAT)
+            texture_pattern.set_filter(cairo.FILTER_NEAREST)
+
+            # Matrix transformation: random rotation angle
+            angle = math.radians(random.randint(1, 360))
+            rotation_matrix = cairo.Matrix(
+                math.cos(angle), math.sin(angle),
+                -math.sin(angle), math.cos(angle),
+                x - math.cos(angle) * x + math.sin(angle) * y,
+                y - math.sin(angle) * x - math.cos(angle) * y
+                )
+
+            # Matrix transformation: scaling the texture to the planet
+            texture_width, texture_height = 400, 400
+            scale_factor = max(texture_width, texture_height) / (radius*2)
+            scale_matrix = cairo.Matrix(scale_factor, 0, 0, scale_factor, 0, 0)
+
+            # Matrix transformation: aligning the texture to the planet
+            move_matrix = cairo.Matrix(1, 0, 0, 1, -x-radius, -y-radius)
+
+            # Matrix transformation: combining all the transformations
+            rotate_move_scale_matrix = rotation_matrix * move_matrix * scale_matrix
+            texture_pattern.set_matrix(rotate_move_scale_matrix)
+
+
+            # Apply the texture to the circle
+            cr.set_source(texture_pattern)
+            cr.arc(x, y, radius, 0, 2 * math.pi)
+            cr.fill()
+
+            # Set the composition operator back to default
+            cr.set_operator(cairo.Operator.OVER)
+
+            # Set the opacity of the texture
+            cr.set_source_rgba(1, 1, 1, 0) # Set the color with alpha value (RGBA)
+            cr.paint_with_alpha(0) # Set the opacity of the texture
+
     def draw_border(cr, size, r, g, b, width, height):
         cr.set_source_rgb(r, g, b)
         cr.rectangle(0, 0, size, height)
@@ -1075,6 +1144,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     SKIPS = True
 
     GRADIENTS = True
+    TEXTURES = True
 
     STARS = 500
     BORDERSIZE = 50
@@ -1262,7 +1332,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             if planet_type == "rings" and RINGS and planet_radius >= 50:
                 planet_size = round(next_size * random.uniform(0.2, 0.5))  # il pianeta è il 20-50% della dimensione totale.
-                draw_circle_fill(cr, width / 2, next_center, planet_size, r, g, b, gradient=True)  # pianeta
+                draw_planet(cr, width / 2, next_center, planet_size, r, g, b, gradient=True)  # pianeta
                 empty_space = round(next_size * random.uniform(0.05, 0.2))  # il buffer è il 5-20% della dimensione totale.
                 space_remaining = next_size - planet_size - empty_space
                 n_rings = random.randint(1, 4)
@@ -1286,11 +1356,11 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     mr, mg, mb = r + random.uniform(-0.1, 0.1), g + random.uniform(-0.1, 0.1), b + random.uniform(-0.1, 0.1)  # modifico un po' il colore
                     draw_orbit(cr, 1, width / 2, next_center, orbit_radius, r=mr, g=mg, b=mb)  # mi disegno l'orbita della luna
                     draw_circle_fill(cr=cr, x=moon_pos[0], y=moon_pos[1], radius=moon_radius, r=mr, g=mg, b=mb, gradient=True)  # disegno luna
-                draw_circle_fill(cr=cr, x=width / 2, y=next_center, radius=planet_radius, r=r, g=g, b=b, gradient=True)
+                draw_planet(cr=cr, x=width / 2, y=next_center, radius=planet_radius, r=r, g=g, b=b, gradient=True)
                 # write_planet_name(cr=cr, x=width / 2, y=next_center, radius=planet_radius, name=p_name, type="moon")
 
             else:
-                draw_circle_fill(cr=cr, x=width / 2, y=next_center, radius=planet_radius, r=r, g=g, b=b, gradient=True)
+                draw_planet(cr=cr, x=width / 2, y=next_center, radius=planet_radius, r=r, g=g, b=b, gradient=True)
                 # write_planet_name(cr=cr, x=width / 2, y=next_center, radius=planet_radius, name=p_name, type="planet")
 
             last_color = rand_color
