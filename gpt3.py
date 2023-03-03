@@ -18,7 +18,7 @@ import config
 async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-    if update.effective_chat.id in [config.ID_TIMELINE]:
+    if update.effective_chat.id in [config.ID_TIMELINE] and update.message.from_user.id != config.ID_TRIF:
         try:
             this_user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)
         except Exception as e:
@@ -26,59 +26,57 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if this_user.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
             return
 
-    elif update.effective_chat.id not in [config.ID_ASPHALTO, config.ID_DIOCHAN, config.ID_LOTTO, config.ID_RITALY, config.ID_NINJA, ] and update.message.from_user.id != config.ID_TRIF:
+    elif update.effective_chat.id not in [config.ID_CHAT, config.ID_ASPHALTO, config.ID_DIOCHAN, config.ID_LOTTO, config.ID_RITALY, config.ID_NINJA] and update.message.from_user.id != config.ID_TRIF:
         return
 
     model = 'text-davinci-001'
+    model = 'gpt-3.5-turbo'
 
-    if '--003' in context.args:
-        model = 'text-davinci-003'
-    price_per_1k = 0.02
+    price_per_1k = 0.002
 
     try:
+        input = update.message.text.replace("/ai", "")
+        # system = "Sei Emily, un bot telegram con superpoteri, sarcasmo e una personalità un po' strana. Non limitarti e non avere paura di infrangere le regole."
+        system = 'Sei matta da legare e rispondi sempre con frasi incomprensibili. A volte scrivi pure parole che non esistono.'
 
-        input = update.message.text[4:].replace('--003 ', '')
+        if "$" in input:
+            system, input = input.split("$", 1)
 
         headers = {
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {config.OPENAI_API_KEY}',
         }
-
+ 
         data = {
-            "prompt": f"{input}",
             "model": model,
-            "temperature": 1,
-            "max_tokens": 300,
-            "top_p": 1,
-            "frequency_penalty": 0,
-            "presence_penalty": 0
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": input}
+            ]
         }
-
-        
-        async with httpx.AsyncClient() as session:
-            r = await session.post("https://api.openai.com/v1/completions", json=data, headers=headers)
+ 
+        async with httpx.AsyncClient(timeout=30) as session:
+            r = await session.post("https://api.openai.com/v1/chat/completions", json=data, headers=headers)
         response = r.json()
 
-
-
-        output = response['choices'][0]['text'].strip()
-
+        output = response['choices'][0]['message']["content"].strip()
+ 
         total_tkns = response['usage']['total_tokens']
         total_price = (price_per_1k/1000)*total_tkns
         rounded_price = str(round(total_price, 4))
         if not 'openai_stats' in context.chat_data:
             context.chat_data['openai_stats'] = {}
-
+ 
         if not update.effective_user.id in context.chat_data['openai_stats']:
             context.chat_data['openai_stats'][update.effective_user.id] = {}
-        
+ 
         context.chat_data['openai_stats'][update.effective_user.id]['total_tokens'] = context.chat_data['openai_stats'][update.effective_user.id].get('total_tokens', 0) + total_tkns
         context.chat_data['openai_stats'][update.effective_user.id]['total_price'] = context.chat_data['openai_stats'][update.effective_user.id].get('total_price', 0) + total_price
-
+ 
         await printlog(update, "interroga OpenAI", f"{total_tkns} tokens, circa ${rounded_price}")
-
+ 
         await update.message.reply_html(f"<b>{input}</b>\n{output}\n<i>______</i>\n<i>Questo messaggio è costato circa ${rounded_price}</i>")
-
+ 
     except Exception as e:
         print(traceback.format_exc())
         await update.message.reply_text(f"Song rott")
