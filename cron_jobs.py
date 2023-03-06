@@ -3,6 +3,7 @@ import httpx
 import peewee
 import time
 import datetime
+import html
 
 from telegram.ext import ContextTypes
 from telegram import  InlineKeyboardButton, InlineKeyboardMarkup
@@ -102,12 +103,13 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
         message = ''
         for thread in threads:
             timestamp = datetime.datetime.fromtimestamp(thread['time']).strftime('%d/%m/%Y %H:%M')
-            text = thread['text'].replace('<br/>','\n').replace('<span class="quote">&gt;','>').replace('</span>','')
-            if len(text) > 1000:
-                text = text[:1000] + "..."
+            if len(text) > 2000:
+                text = text[:2000] + "..."
             link = f"<a href='{thread['thread_url']}'>/{thread['board']}/ | No.{thread['thread']}</a> | {timestamp}"
             if thread['is_video']:
                 link += f"\n<a href='{thread['video_url']}'>[YouTube]</a>"
+            text = html.unescape(text)
+            text = text.replace('<br/>','\n').replace('<span class="quote">', '').replace('<span class="spoiler">', '').replace('</span>', '')
             message += f"{link}\n{text}\n\n"
         for chat_id in DESTINATION_CHATS:
             await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
@@ -115,14 +117,16 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
     else:
         for thread in threads:
             timestamp = datetime.datetime.fromtimestamp(thread['time']).strftime('%d/%m/%Y %H:%M')
-            text = thread['text'].replace('<br/>','\n').replace('<span class="quote">&gt;','>').replace('</span>','')
-            if len(text) > 1000:
-                text = text[:1000] + "..."
+            text = thread['text'].replace('<br/>','\n').replace('<span class="quote">&gt;','>').replace('<span class="spoiler">', '').replace('</span>','')
+            if len(text) > 2000:
+                text = text[:2000] + "..."
             link = f"<a href='{thread['thread_url']}'>/{thread['board']}/ | No.{thread['thread']}</a> | {timestamp}"
             
             if thread['is_video']:
                 link += f"\n<a href='{thread['video_url']}'>[YouTube]</a>"
 
+            text = html.unescape(text)
+            text = text.replace('<br/>','\n').replace('<span class="quote">', '').replace('<span class="spoiler">', '').replace('</span>', '')
             message = f"{link}\n{text}"
             image_url = thread['image_url']
 
@@ -138,13 +142,6 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
                 else:
                     await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
 
-
-
-
-
-
-
-    return
 
 # Never runs
 async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
