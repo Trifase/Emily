@@ -56,7 +56,13 @@ async def zoom_link(update: Update, context: CallbackContext):
         response = requests.get('https://api.zoom.us/v2/users/me/recordings', headers=headers).json()
         return response
 
+    def double_encode(meeeting_uuid):
+        single_encoded = urllib.parse.quote_plus(meeeting_uuid, encoding='utf-8', errors='replace')
+        double_encoded = urllib.parse.quote_plus(single_encoded, encoding='utf-8', errors='replace')
+        return double_encoded
+
     def get_meeting_recordings(token, meeting_uuid):
+
         headers = {
             'Authorization': f'Bearer {token}',
         }
@@ -120,6 +126,8 @@ async def zoom_link(update: Update, context: CallbackContext):
 
     mytoken = get_access_token(acc_id, client_id, client_secret)
     meeting_uuid = get_meeting_uuid_from_url(url)
+    if meeting_uuid.startswith('/') or '//' in meeting_uuid:
+        meeting_uuid = double_encode(meeting_uuid)
     recordings = get_meeting_recordings(mytoken, meeting_uuid)
     oggi = recordings['start_time'][:10]
     share_url = recordings['share_url']
