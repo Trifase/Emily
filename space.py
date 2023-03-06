@@ -42,7 +42,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         (248, 247, 253), (201, 216, 255), (154, 175, 255)
         ]
 
-    list_of_planet_textures = ['craters', 'fibers', 'nubi', 'perlin_poly', 'stripes', 'voronoi']
+    list_of_planet_textures = ['craters', 'fibers', 'nubi', 'perlin_poly', 'stripes', 'voronoi', 'splat', 'splot']
 
     def planet_name():
         part1 = [
