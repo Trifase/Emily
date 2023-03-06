@@ -3,6 +3,10 @@ import json
 import random
 import tempfile
 import requests
+import datetime
+import html
+
+import httpx
 
 from rich import print
 from html import escape as parsequote
@@ -347,6 +351,79 @@ async def mon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await printlog(update, "ha nominato mon", mon)
 
+
+async def get_thread_from_dc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.effective_user.id not in config.ADMINS:
+        return
+    BOARDS = ['b', 's', 'x', 'hd', 'aco', 'v', 'cul', 'yt', 'pol']
+
+    async def get_last_threads_from_board(board):
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.get(f'https://www.diochan.com/{board}/catalog.json')
+            response.raise_for_status()
+            return response.json()
+
+    if context.args[0] not in BOARDS:
+        await update.message.reply_text(f"Board non valida. Devi usare una di queste: {', '.join(BOARDS)}")
+        return
+
+
+    if len(context.args) < 2:
+        await update.message.reply_text("Devi specificare il numero del thread")
+        return
+
+    board = context.args[0]
+    thread_no = int(context.args[1])
+
+    boards = await get_last_threads_from_board(board)
+
+    post = []
+    for page in boards:
+        for thread in page['threads']:
+            if thread['no'] == thread_no:
+                t = {
+                    'board': board,
+                    'thread': thread['no'],
+                    'time': thread['time'],
+                    'title': thread.get('sub'),
+                    'text': thread['com'],
+                    'thread_url' : f"https://www.diochan.com/{board}/res/{thread['no']}.html"
+                }
+
+                if thread.get('tim'):
+                    t['image_url'] = f"https://www.diochan.com/{board}/src/{thread['tim']}{thread['ext']}"
+                    t['is_video'] = False
+
+                elif thread.get('embed'):
+                    t['is_video'] = True
+                    youtube_id = thread['embed'].split('"')[11][39:]
+                    t['image_url'] = f'http://i3.ytimg.com/vi/{youtube_id}/hqdefault.jpg'
+                    t['video_url'] = f"https://www.youtube.com/watch?v={youtube_id}"
+                post.append(t)
+    
+
+    if not post:
+        await update.message.reply_html("Thread non trovato")
+        return
+
+    await printlog(update, 'richiede un post da diochan', f"/{board}/ | No.{thread_no}")
+
+    for thread in post:
+        timestamp = datetime.datetime.fromtimestamp(thread['time']).strftime('%d/%m/%Y %H:%M')
+        text = thread['text']
+        if len(text) > 2000:
+            text = text[:2000] + "..."
+        link = f"<a href='{thread['thread_url']}'>/{thread['board']}/ | No.{thread['thread']}</a> | {timestamp}"
+        
+        if thread['is_video']:
+            link += f"\n<a href='{thread['video_url']}'>[YouTube]</a>"
+
+        text = html.unescape(text)
+        text = text.replace('<br/>','\n').replace('<span class="quote">', '').replace('<span class="spoiler">', '').replace('</span>', '')
+        message = f"{link}\n{text}"
+        image_url = thread['image_url']
+
+        await update.message.reply_html(text=message)
 
 
 # DEPRECATED
