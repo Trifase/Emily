@@ -183,9 +183,9 @@ async def purificatore(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def riscaldamento_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id not in config.ADMINS:
         return
-    if '-new' in context.args:
-        await plot_boiler_stats(context)
-        await printlog(update, "genera un nuovo grafico della caldaia")
+    # if '-new' in context.args:
+    await plot_boiler_stats(context)
+    await printlog(update, "genera un nuovo grafico della caldaia")
     await update.message.reply_photo(open('images/boiler48h.jpg', 'rb'))
 
 

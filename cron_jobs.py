@@ -97,7 +97,11 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
     if not threads:
         return
 
-    print(f"{get_now()} [AUTO] Trovati {len(threads)} nuovi thread su Diochan")
+    lista_threads = []
+    for thread in threads:
+        lista_threads.append(f"/{thread['board']}/{thread['thread']}")
+
+    print(f"{get_now()} [AUTO] Trovati {len(threads)} nuovi thread su Diochan", " | ".join(lista_threads))
 
     if SINGLE_POST:
         message = ''
@@ -229,8 +233,7 @@ async def lotto_member_count(context: ContextTypes.DEFAULT_TYPE) -> None:
 # Runs every hour
 async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
-
-    r_token = config.r_token
+    r_token = context.bot_data.get('netatmo_refresh_token', config.r_token)
     home_id = config.home_id
     room_id = config.room_id
     user_id = config.user_id
@@ -329,7 +332,10 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     date_start = int(time.time() - 3600*48)
 
-    access_token = (await refresh_token(r_token))['access_token']
+    tokens = await refresh_token(r_token)
+    # print(tokens)
+    access_token = tokens['access_token']
+    context.bot_data['netatmo_refresh_token'] = tokens['refresh_token']
 
     home_status = await get_home_status(access_token, home_id)
     # print(home_status)
