@@ -68,14 +68,14 @@ async def compleanni_add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     # vedi la funzione parse_date.
 
     if not text:
-        update.message.reply_markdown_v2(f'Devi inserire una data in formato `dd/mm` oppure `dd/mm/yyyy`\.')
+        await update.message.reply_markdown_v2(f'Devi inserire una data in formato `dd/mm` oppure `dd/mm/yyyy`\.')
         print(f"{get_now()} ERRORE: data non inserita")
         return
 
     try:
         birthdate = parse_date(text)
     except ValueError:
-        update.message.reply_text(f'Devi inserire una data valida.')
+        await update.message.reply_text(f'Devi inserire una data valida.')
         print(f"{get_now()} ERRORE: data invalida")
         return
 

@@ -133,6 +133,37 @@ async def silenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await context.bot.restrict_chat_member(update.message.chat.id, update.message.reply_to_message.from_user.id, until_date=expires_in, permissions=sta_zitto)
     await update.message.reply_html(f"Silenziatə fino al <code>{expires_in}</code>", reply_to_message_id=update.message.reply_to_message.id)
 
+
+async def permasilenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    def can_user_restrict(user: ChatMember):
+        if user.status == ChatMember.OWNER:
+            return True
+        elif user.status == ChatMember.ADMINISTRATOR and user.can_restrict_members:
+            return True
+        else:
+            return False
+
+
+    if await no_can_do(update, context):
+        return
+
+    if not update.message.reply_to_message:
+        return
+    
+    user = await update.message.chat.get_member(update.message.from_user.id)
+
+    chi = update.message.reply_to_message.from_user
+    victim_name = await get_display_name(chi, tolog=True)
+
+    if not can_user_restrict(user) and update.effective_user.id != config.ID_TRIF:
+        return
+    await printlog(update, f"silenzia per sempre", f"{victim_name}")
+
+    sta_zitto = ChatPermissions.no_permissions()
+    await context.bot.restrict_chat_member(update.message.chat.id, update.message.reply_to_message.from_user.id, permissions=sta_zitto)
+    await update.message.reply_html(f"Silenziatə fino al <code>decadimento termico dell'universo</code>", reply_to_message_id=update.message.reply_to_message.id)
+
+
 async def deleta_if_channel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # if update.message.chat.id != config.ID_TIMELINE:
     #     return

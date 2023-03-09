@@ -28,7 +28,7 @@ from admin import (cancella, commandlist, count_lines, echo, esci, executecode,
     send_custom_media, check_temp, flush_arbitrary_callback_data)
 from asphalto import azzurro
 from banca import bot_get_saldo, bot_get_transazioni
-from best_timeline import scrape_tweet_bt, silenzia, deleta_if_channel
+from best_timeline import scrape_tweet_bt, silenzia, deleta_if_channel, permasilenzia
 from compleanni import compleanni_add, compleanni_list, compleanni_manual_check, compleanno_del
 from cron_jobs import check_reminders, check_compleanni, lotto_member_count, do_global_backup, plot_boiler_stats, autolurkers, parse_diochan
 from diochan import save_tensor, random_tensor, search_quote, add_quote, diochan, mon, ascendi, get_thread_from_dc
@@ -167,6 +167,7 @@ def main():
         filters.Regex(re.compile(r"(?:(?:http|https):\/\/)?(?:www.|mobile.)?(?:twitter.com)\/(?:\w+)\/status\/(\w+)", re.IGNORECASE)), scrape_tweet_bt
         ), group=929)
     app.add_handler(CommandHandler(['silenzia', 'silenzio', 'taci', 'shhh'], silenzia, filters=~filters.UpdateType.EDITED))
+    app.add_handler(CommandHandler(['permasilenzia', 'permasilenzio', 'permataci', 'shhhhhhhh', 'permamute'], permasilenzia, filters=~filters.UpdateType.EDITED))
     app.add_handler(MessageHandler(filters.SenderChat.CHANNEL, deleta_if_channel), -99)
     app.add_handler(CommandHandler(['aoc', 'leaderboard'], aoc_leaderboard, filters=~filters.UpdateType.EDITED))
 
@@ -340,7 +341,7 @@ def main():
 
 
     # testing.py
-    app.add_handler(CommandHandler('test', test, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
+    app.add_handler(CommandHandler(['test', 'ping'], test, filters=~filters.UpdateType.EDITED))
     app.add_handler(CommandHandler('getfile', getfile, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
 
 

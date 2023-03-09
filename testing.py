@@ -2,6 +2,7 @@ import time
 import re
 import tempfile
 import pprint
+import time
 
 from telegram import Update, Bot
 from telegram.ext import CallbackContext, ContextTypes
@@ -12,6 +13,10 @@ import sys
 
 
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    s = time.time()
+    start = time.perf_counter()
+    m = await update.message.reply_html("Test fallito.")
+    await m.edit_text(f"[{s}] Test fallito in {round((time.perf_counter() - start) * 1000)}ms")
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} testa tantissimo!')
     await printlog(update, "testa tantissimo")
 
@@ -23,7 +28,6 @@ async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # await alert(update, context, "ha testato tantissimo", "errore di prova")
 
     # pprint.pprint(sys.modules['space'])
-    await update.message.reply_text("Test fallito.")
 
 async def getfile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     picture = update.message.reply_to_message.photo[-1]
