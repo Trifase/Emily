@@ -31,7 +31,7 @@ from banca import bot_get_saldo, bot_get_transazioni
 from best_timeline import scrape_tweet_bt, silenzia, deleta_if_channel, permasilenzia
 from compleanni import compleanni_add, compleanni_list, compleanni_manual_check, compleanno_del
 from cron_jobs import check_reminders, check_compleanni, lotto_member_count, do_global_backup, plot_boiler_stats, autolurkers, parse_diochan
-from diochan import save_tensor, random_tensor, search_quote, add_quote, diochan, mon, ascendi, get_thread_from_dc
+from diochan import save_tensor, random_tensor, search_quote, add_quote, diochan, mon, ascendi, get_thread_from_dc, greet, set_greet
 from donazioni import donazioni, precheckout_callback, successful_payment_callback
 from games import sassocartaforbici
 from gpt3 import ai, openai_stats
@@ -185,6 +185,8 @@ def main():
     app.add_handler(CommandHandler(['tensor', 'tensorbot'], random_tensor, filters=~filters.UpdateType.EDITED))
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & filters.TEXT & filters.User(username="@Tensor1987"), save_tensor), 19)
     app.add_handler(CommandHandler('get_thread', get_thread_from_dc, filters=~filters.UpdateType.EDITED))
+    app.add_handler(ChatMemberHandler(greet, ChatMemberHandler.CHAT_MEMBER))
+    app.add_handler(CommandHandler('setgreet', set_greet, filters=~filters.UpdateType.EDITED))
     
     # app.add_handler(MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(r'\bmon\b', re.IGNORECASE)), mon), 25)
 

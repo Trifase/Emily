@@ -17,7 +17,7 @@ from telegram.helpers import escape_markdown
 import peewee
 
 import config
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do, expand
+from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do, expand, extract_status_change
 
 
 # Per le quote
@@ -424,6 +424,52 @@ async def get_thread_from_dc(update: Update, context: ContextTypes.DEFAULT_TYPE)
         image_url = thread['image_url']
 
         await update.message.reply_html(text=message)
+
+
+async def greet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.effective_chat.id != config.ID_DIOCHAN2:
+        return
+
+    # https://docs.python-telegram-bot.org/en/stable/examples.chatmemberbot.html
+    result = extract_status_change(update.chat_member)
+
+    if result is None:
+        return
+    was_member, is_member = result
+
+    greetings = context.chat_data.get('greeting', 'Benvenuto $FIRST_NAME!')
+
+    first_name = update.chat_member.new_chat_member.user.first_name if update.chat_member.new_chat_member.user.first_name else ''
+    last_name = update.chat_member.new_chat_member.user.last_name if update.chat_member.new_chat_member.user.last_name else ''
+    username = update.chat_member.new_chat_member.user.username if update.chat_member.new_chat_member.user.username else ''
+    chat_title = update.effective_chat.title if update.effective_chat.title else ''
+
+    greetings = greetings.replace('$FIRST_NAME', update.chat_member.new_chat_member.user.first_name)
+    greetings = greetings.replace('$LAST_NAME', update.chat_member.new_chat_member.user.last_name)
+    greetings = greetings.replace('$USERNAME', update.chat_member.new_chat_member.user.username)
+    greetings = greetings.replace('$CHAT_TITLE', update.effective_chat.title)
+
+    if not was_member and is_member:
+        await printlog(update, 'è entrato su diochan2')
+        await update.effective_chat.send_message(greetings)
+    elif was_member and not is_member:
+        await printlog(update, 'è uscito da diochan2')
+        await update.effective_chat.send_message('👋')
+
+async def set_greet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.effective_chat.id != config.ID_DIOCHAN2:
+        return
+
+    if len(context.args) < 1:
+        await update.message.reply_text("Devi specificare il messaggio di benvenuto")
+        return
+    
+    if '-help' in context.args:
+        await update.message.reply_text("Puoi usare le seguenti variabili:\n$FIRST_NAME\n$LAST_NAME\n$USERNAME\n$CHAT_TITLE")
+        return
+
+    context.chat_data['greeting'] = ' '.join(context.args)
+    await update.message.reply_text("Messaggio di benvenuto impostato")
 
 
 # DEPRECATED
