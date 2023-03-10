@@ -438,20 +438,24 @@ async def greet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     was_member, is_member = result
 
     greetings = context.chat_data.get('greeting', 'Benvenuto $FIRST_NAME!')
+    greeting_pic = context.chat_data.get('greeting_pic')
 
     first_name = update.chat_member.new_chat_member.user.first_name if update.chat_member.new_chat_member.user.first_name else ''
     last_name = update.chat_member.new_chat_member.user.last_name if update.chat_member.new_chat_member.user.last_name else ''
     username = update.chat_member.new_chat_member.user.username if update.chat_member.new_chat_member.user.username else ''
     chat_title = update.effective_chat.title if update.effective_chat.title else ''
 
-    greetings = greetings.replace('$FIRST_NAME', update.chat_member.new_chat_member.user.first_name)
-    greetings = greetings.replace('$LAST_NAME', update.chat_member.new_chat_member.user.last_name)
-    greetings = greetings.replace('$USERNAME', update.chat_member.new_chat_member.user.username)
-    greetings = greetings.replace('$CHAT_TITLE', update.effective_chat.title)
+    greetings = greetings.replace('$FIRST_NAME', first_name)
+    greetings = greetings.replace('$LAST_NAME', last_name)
+    greetings = greetings.replace('$USERNAME', username)
+    greetings = greetings.replace('$CHAT_TITLE', chat_title)
 
     if not was_member and is_member:
         await printlog(update, 'è entrato su diochan2')
-        await update.effective_chat.send_message(greetings)
+        if greeting_pic:
+            await update.effective_chat.send_photo(greeting_pic, caption=greetings, parse_mode='HTML')
+        else:
+            await update.effective_chat.send_message(greetings)
     elif was_member and not is_member:
         await printlog(update, 'è uscito da diochan2')
         await update.effective_chat.send_message('👋')
@@ -471,7 +475,27 @@ async def set_greet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     context.chat_data['greeting'] = ' '.join(context.args)
     await update.message.reply_text("Messaggio di benvenuto impostato")
 
+async def set_greet_pic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.effective_chat.id != config.ID_DIOCHAN2:
+        return
 
+    if '-delete' in context.args:
+        context.chat_data['greeting_pic'] = None
+        await update.message.reply_text("Immagine di benvenuto rimossa")
+        return
+
+    if update.message.reply_to_message:
+        if update.message.reply_to_message.photo:
+            greeting_pic_id = f"{update.message.reply_to_message.photo[-1].file_id}"
+
+            context.chat_data['greeting_pic'] = greeting_pic_id
+            await update.message.reply_text("Immagine di benvenuto impostata")
+        else:
+            await update.message.reply_text("Devi rispondere ad un'immagine")
+    else:
+        await update.message.reply_text("Devi rispondere ad un'immagine")
+
+    
 # DEPRECATED
 # def infartino(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 #     update.message.reply_animation(open('images/infartino.mp4', 'rb'), quote=False)
