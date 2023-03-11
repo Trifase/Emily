@@ -25,7 +25,7 @@ from utils import printlog, get_now, no_can_do, is_member_in_group
 from admin import (cancella, commandlist, count_lines, echo, esci, executecode,
     getchat, ip, lista_chat, listen_to, restart, _eval, set_group_picture,
     set_title, tg_info, wakeup, banlist, add_ban, del_ban, trigger_backup, parla,
-    send_custom_media, check_temp, flush_arbitrary_callback_data)
+    send_custom_media, check_temp, flush_arbitrary_callback_data, clean_db)
 from asphalto import azzurro
 from banca import bot_get_saldo, bot_get_transazioni
 from best_timeline import scrape_tweet_bt, silenzia, deleta_if_channel, permasilenzia
@@ -149,6 +149,8 @@ def main():
     app.add_handler(CommandHandler('backup', trigger_backup, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
     # app.add_handler(CommandHandler("show_chats", show_chats), 48)
     app.add_handler(CommandHandler(['send_media', 'send_custom_media', 'send'], send_custom_media, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
+    app.add_handler(CommandHandler('clean_db', clean_db, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
+    
 
     app.add_handler(ChatMemberHandler(track_chats, ChatMemberHandler.MY_CHAT_MEMBER), 44)
 

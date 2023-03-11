@@ -646,4 +646,62 @@ async def do_manual_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f"{get_now()} [AUTO] Backup eseguito")
     await update.message.reply_text("Fatto!")
 
+async def clean_db(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if update.message.from_user.id not in config.ADMINS:
+        return
+
+    # ====== CHAT DATA ======
+    chat_data_remove = ['jackpot','highest_wins', 'count']
+    for chat, chat_value in list(context.application.chat_data.items()):
+
+        # remove empty keys
+        if not chat_value:
+            context.application.drop_chat_data(chat)
+        
+
+        # remove empty subkeys
+        for c_subkey, c_subvalue in list(chat_value.items()):
+            if not c_subvalue:
+                context.application.chat_data[chat].pop(c_subkey, None)
+                
+
+        # remove chat_data_remove
+        for c_k in chat_data_remove:
+            context.application.chat_data[chat].pop(c_k, None)
+    
+    await update.message.reply_text("chat_data pulito!")
+
+
+    # ====== USER DATA ======
+    user_data_remove = ['last_time','balance', 'last_time_scommessa', 'time_scommessa', 'time_indovina', 'time_slot', 'soldi_gratis', 'time_bowling', 'ippodromo', 'perfavore', 'lavoro', 'banca', 'prelievo_banca', 'time_dado', 'stats']
+
+    for user, user_value in list(context.application.user_data.items()):
+
+        # remove empty keys
+        if not user_value:
+            context.application.drop_user_data(user)
+        
+
+        # remove empty subkeys
+        for u_subkey, u_subvalue in list(user_value.items()):
+            if not u_subvalue:
+                context.application.user_data[user].pop(u_subkey, None)
+                
+
+        # remove chat_data_remove
+        for u_k in user_data_remove:
+            context.application.user_data[user].pop(u_k, None)
+    
+    await update.message.reply_text("user_data pulito!")
+
+
+    # ====== BOT DATA ======
+    bot_data_remove = ['cavalli_esistenti', 'gara_in_corso', 'odds_list', 'scommesse_aperte', 'scommesse_ippodromo', 'scommesse_emily', 'asph_timestamps', 'user_ids', 'channel_ids', 'group_ids']
+
+    for chiave in bot_data_remove:
+        context.application.bot_data.pop(chiave, None)
+
+    await update.message.reply_text("bot_data pulito!")
+
 

@@ -3,6 +3,11 @@ import asyncio
 from rich import print
 from telegram.ext import  PicklePersistence
 
+import json
+def dump_json_custom(data, file_name):
+    filename = f"{file_name}.json"
+    with open(filename, "w") as f:
+        json.dump(data, f, indent=4)
 
 file = "db/picklepersistence"
 
@@ -13,7 +18,64 @@ def pickle_persistence():
         on_flush=False,
     )
 
-# bot_data = asyncio.run(pickle_persistence().get_bot_data())
+async def main():
+    chat_data = await pickle_persistence().get_chat_data()
+    # bot_data = await pickle_persistence().get_bot_data()
+    user_data = await pickle_persistence().get_user_data()
+
+    # ====== CHAT DATA ======
+    chat_data_remove = ['jackpot','highest_wins', 'count']
+    for chat, chat_value in list(chat_data.items()):
+        this_chat_id = chat
+        this_chat_data = chat_data[chat]
+        this_chat_value = chat_value
+        # remove empty keys
+        if not chat_value:
+            await pickle_persistence().drop_chat_data(this_chat_id)
+        
+
+        # remove empty subkeys
+        for c_subkey, c_subvalue in list(this_chat_value.items()):
+            if not c_subvalue:
+                this_chat_data.pop(c_subkey, None)
+                
+
+        # remove chat_data_remove
+        for c_k in chat_data_remove:
+            this_chat_data.pop(c_k, None)
+
+        await pickle_persistence().update_chat_data(chat_id=this_chat_id, data=this_chat_data)
+
+    # ====== USER DATA ======
+    user_data_remove = ['last_time','balance', 'last_time_scommessa', 'time_scommessa', 'time_indovina', 'time_slot', 'soldi_gratis', 'time_bowling', 'ippodromo', 'perfavore', 'lavoro', 'banca', 'prelievo_banca', 'time_dado', 'stats']
+
+    for user, user_value in list(user_data.items()):
+        this_user_id = user
+        this_user_data = user_data[user]
+        this_user_value = user_value
+
+        # remove empty keys
+        if not user_value:
+            await pickle_persistence().drop_user_data(this_user_id)
+
+        # remove empty subkeys
+        for u_subkey, u_subvalue in list(this_user_value.items()):
+            if not u_subvalue:
+                this_user_data.pop(u_subkey, None)
+
+        # remove chat_data_remove
+        for u_k in user_data_remove:
+            this_user_data.pop(u_k, None)
+
+        await pickle_persistence().update_user_data(user_id=this_user_id, data=this_user_data)
+
+    # await pickle_persistence().update_bot_data(bot_data)
+
+
+
+asyncio.run(main())
+
+
 
 # lotto_history = bot_data['lotto_history']
 
