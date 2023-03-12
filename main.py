@@ -45,7 +45,7 @@ from misc import (bioritmo, fascio, fatfingers, scacchi, square, traduci, sponge
     greet_BT_user, random_trifase, aoc_leaderboard, wikihow, lurkers, lurkers_callbackqueryhandlers,
     markovs)
 from parse_everything import (exit_from_banned_groups, nuova_chat_rilevata, update_timestamps_asphalto, check_for_sets,
-    drop_update_from_banned_users, new_admin_buttons, messaggio_spiato, track_chats) 
+    drop_update_from_banned_users, new_admin_buttons, messaggio_spiato, track_chats, save_messages_stats) 
 from pyrog import reaction_karma
 from quiz import classifica, make_poll, ricevi_risposta_quiz, punteggio
 from reddit import reddit
@@ -119,6 +119,7 @@ def main():
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, update_timestamps_asphalto), -18)
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, messaggio_spiato), -17)
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, check_for_sets), -16)
+    app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL, save_messages_stats), -15)
 
     # Error handler
     app.add_error_handler(error_handler)
