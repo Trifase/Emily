@@ -341,3 +341,32 @@ async def track_chats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         elif was_member and not is_member:
             await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha rimosso Emily dal canale: {chat.title} [{chat.id}]")
             # context.bot_data.setdefault("channel_ids", set()).discard(chat.id)
+
+
+async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    def extract_day(timestamp):
+        return timestamp.strftime("%Y-%m-%d")
+
+    def extract_hour(timestamp):
+        return timestamp.strftime("%H")
+
+    if not update.message or update.effective_chat.id in [0]:
+        return
+    
+    if 'stats' not in context.chat_data:
+        context.chat_data['stats'] = {}
+
+    day = extract_day(update.message.date)
+    hour = extract_hour(update.message.date)
+
+    if day not in context.chat_data['stats']:
+        context.chat_data['stats'][day] = {}
+    
+    if 'total' not in context.chat_data['stats'][day]:
+        context.chat_data['stats'][day]['total'] = 0
+    
+    if hour not in context.chat_data['stats'][day]:
+        context.chat_data['stats'][day][hour] = 0
+    
+    context.chat_data['stats'][day][hour] += 1
+    context.chat_data['stats'][day]['total'] += 1
