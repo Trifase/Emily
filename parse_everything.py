@@ -2,6 +2,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import time
+import pytz
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Chat, ChatMember, ChatMemberUpdated
 from telegram.constants import ParseMode, ChatMemberStatus
@@ -345,10 +346,10 @@ async def track_chats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
 async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     def extract_day(timestamp):
-        return timestamp.strftime("%Y-%m-%d")
+        return timestamp.astimezone(pytz.timezone('Europe/Rome')).strftime("%Y-%m-%d")
 
     def extract_hour(timestamp):
-        return timestamp.strftime("%H")
+        return timestamp.astimezone(pytz.timezone('Europe/Rome')).strftime("%H")
 
     if not update.message or update.effective_chat.id in [0]:
         return

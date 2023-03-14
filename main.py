@@ -57,6 +57,7 @@ from sets import addset, deleteset, jukebox, listaset
 from smarthome import luci_status, toggle_light, get_light_label, consumo, purificatore, riscaldamento_stats
 from space import solarsystem, launches
 from spotify import spoty
+from stats import send_stats
 from tarots import tarot, oroscopo, tarotschema
 from testing import test, getfile
 from torrent import lista_torrent
@@ -339,6 +340,9 @@ def main():
         filters.Regex(re.compile(r"(?:(?:http|https):\/\/)?(?:open\.)(?:spotify\.com)\/(?:track|album)\/(?:\S+)", re.IGNORECASE)), spoty
         ))
 
+
+    # stats.py
+    app.add_handler(CommandHandler(['stats', 'statistiche'], send_stats, filters=~filters.UpdateType.EDITED))
 
     # tarots.py
     app.add_handler(CommandHandler(['tarot', 'tarots', 'tarocchi'], tarot, filters=~filters.UpdateType.EDITED))

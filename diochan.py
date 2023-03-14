@@ -207,7 +207,7 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     if update.effective_chat.id not in [config.ID_DIOCHAN, config.ID_TESTING, config.ID_NINJA]:  # Solo su diochan
         return
-
+    chiave = config.CHIAVE_DIOCHAN
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} vuole postare su diochan')
     await printlog(update, "vuole postare su diochan")
     listaboard = ['b', 's', 'x', 'hd', '420', 'aco', 'v', 'cul', 'yt', 'ck', 'mu', 'pol', 'p', 'sug']
@@ -247,7 +247,8 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             }
             import string
             import random
-            delpass = ''.join(random.choice(string.ascii_letters + string.digits + string.punctuation) for _ in range(8))
+            # delpass = ''.join(random.choice(string.ascii_letters + string.digits + string.punctuation) for _ in range(8))
+            delpass = chiave
             # delpass = f"emily-{update.message.reply_to_message.id}"
             payload = {
                 "name": "",

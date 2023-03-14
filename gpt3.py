@@ -55,7 +55,7 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             ]
         }
  
-        async with httpx.AsyncClient(timeout=30) as session:
+        async with httpx.AsyncClient(timeout=120) as session:
             r = await session.post("https://api.openai.com/v1/chat/completions", json=data, headers=headers)
         response = r.json()
         try:
