@@ -102,22 +102,43 @@ def make_triplot(stats, name):
 
     plt.rcParams["figure.figsize"] = (12.8, 8)
     fig = plt.figure(tight_layout=True)
-    gs = gridspec.GridSpec(2, 2)
+    gs = gridspec.GridSpec(2, 3)
     ax = fig.add_subplot(gs[0, :])
-    ax.bar(messages_days, messages_tot, color=messages_colors, width=0.6)
+    ax.spines.right.set_visible(False)
+    ax.spines.top.set_visible(False)
+    ax.spines.left.set_visible(False)
+    ax.grid(axis='y', color='lightgray', linestyle='-', linewidth=0.5, zorder=1)
+    ax.bar(messages_days, messages_tot, color=messages_colors, width=0.6, zorder=2)
     ax.set_title('Messaggi giornalieri', fontsize=18, pad=10)
-    ax.tick_params(axis='x', labelrotation=45, labelright=True)
+    # ax.set_xticklabels(messages_days, rotation = 45, ha="right")
+    # ax.tick_params(axis='x', labelrotation=45)
+    for label in ax.get_xticklabels():
+        label.set_ha("right")
+        label.set_rotation(45)
+    ax.tick_params(axis='y', left=False)
 
-    ax = fig.add_subplot(gs[1, 0])
+    ax = fig.add_subplot(gs[1, 0:2])
+    ax.spines.right.set_visible(False)
+    ax.spines.top.set_visible(False)
+    ax.spines.left.set_visible(False)
+    ax.grid(axis='y', color='lightgray', linestyle='-', linewidth=0.5, zorder=1)
     ax.set_title("Ore di attività", fontsize=18, pad=10)
-    ax.bar(hours, hours_tot, width=0.6, color=hours_colors)
+    ax.bar(hours, hours_tot, width=0.6, color=hours_colors, zorder=2)
+    ax.tick_params(axis='x', bottom=False)
+    ax.tick_params(axis='y', left=False)
 
-    ax = fig.add_subplot(gs[1, 1])
+    ax = fig.add_subplot(gs[1, 2])
+    ax.spines.right.set_visible(False)
+    ax.spines.top.set_visible(False)
+    ax.spines.bottom.set_visible(False)
+    ax.grid(axis='x', color='lightgray', linestyle='-', linewidth=0.5, zorder=1)
     ax.set_title("Giorni di attività", fontsize=18, pad=10)
-    ax.barh(weekdays, weekdays_tot, height=0.3, color=weekdays_colors)
+    ax.barh(weekdays, weekdays_tot, height=0.3, color=weekdays_colors, zorder=2)
+    ax.tick_params(axis='y', left=False)
+    ax.tick_params(axis='x', bottom=False)
     ax.invert_yaxis() 
 
-    fig.align_labels()  # same as fig.align_xlabels(); fig.align_ylabels()
+    # fig.align_labels()  # same as fig.align_xlabels(); fig.align_ylabels()
     plt.savefig(f'images/charts/{name}.png')
     return f'images/charts/{name}.png'
 
@@ -150,12 +171,25 @@ async def send_stats(update: Update, context: CallbackContext) -> None:
     await update.message.reply_photo(open(filename, 'rb'))
 
 
-## cose da fare o me le dimentico
-# - [ ] fare un grafico con i messaggi giornalieri
-# - [ ] fare un grafico con i messaggi orari
-# - [ ] fare un grafico con i messaggi in base ai giorni della settimana
 
-# di default, ultimi 30 gg
-# nel grafico non mettere oggi
-# fai una lista di giorni da ieri a 30 gg prima, quera stats per ogni giorno, fai media oraria, media dei giorni della settimana, fai triplo grafico
+# TODO: Fare un comando populate_stats che prende i dati dal json (chiamato come l'ID della chat) e li mette in chat_data - dal 2023 in poi
+def try_this_at_home():
+    stats = json_to_stats('db/stats/stats_diochan2_raw.json')
+    name = "diochan2"
+    list_days = last_30_days()
+    list_hours = list_24_hours()
 
+    stats['average_hours'] = {'00': 0, '01': 0, '02': 0, '03': 0, '04': 0, '05': 0, '06': 0, '07': 0, '08': 0, '09': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0, '16': 0, '17': 0, '18': 0, '19': 0, '20': 0, '21': 0, '22': 0, '23': 0}
+
+    stats['average_weekdays'] = {'Lunedì': 0, 'Martedì': 0, 'Mercoledì': 0, 'Giovedì': 0, 'Venerdì': 0, 'Sabato': 0, 'Domenica': 0}
+
+    for day in list_days:
+        if day in stats:
+            weekday = datetime.datetime.strptime(day, "%Y-%m-%d").strftime("%A").capitalize()
+            stats['average_weekdays'][weekday] += stats[day].get('total', 0)
+            for hour in list_hours:
+                stats['average_hours'][hour] += stats[day].get(hour, 0)
+
+    filename = make_triplot(stats, name)
+
+# try_this_at_home()
