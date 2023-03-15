@@ -91,8 +91,6 @@ def make_triplot(stats, name):
     ax.grid(axis='y', color='lightgray', linestyle='-', linewidth=0.5, zorder=1)
     ax.bar(messages_days, messages_tot, color=messages_colors, width=0.6, zorder=2)
     ax.set_title('Messaggi giornalieri', fontsize=18, pad=10)
-    # ax.set_xticklabels(messages_days, rotation = 45, ha="right")
-    # ax.tick_params(axis='x', labelrotation=45)
     for label in ax.get_xticklabels():
         label.set_ha("right")
         label.set_rotation(45)
@@ -119,7 +117,6 @@ def make_triplot(stats, name):
     ax.tick_params(axis='x', bottom=False)
     ax.invert_yaxis() 
 
-    # fig.align_labels()  # same as fig.align_xlabels(); fig.align_ylabels()
     plt.savefig(f'images/charts/{name}.png')
     return f'images/charts/{name}.png'
 
@@ -204,10 +201,11 @@ async def populate_chat_data_from_jsons(update: Update, context: ContextTypes.DE
             stats = json_to_stats(f'db/stats/{filename}')
             if not context.application.chat_data[chat_id].get('stats'):
                 context.application.chat_data[chat_id]['stats'] = {}
+            print(f"{filename} {chat_id} {len(stats)}")
             context.application.chat_data[chat_id]['stats'] = stats
-            await update.message.reply_text(f'[TEST] Ho popolato il chat_data con le statistiche di {filename}, ID: {chat_id}')
+            await update.message.reply_text(f'Ho popolato il chat_data con le statistiche di {filename}, ID: {chat_id}')
             statistiche = context.application.chat_data[chat_id]
-            # print(statistiche['stats'])
+            print(statistiche['stats'])
 
 
 # try_this_at_home()

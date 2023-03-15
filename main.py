@@ -57,7 +57,7 @@ from sets import addset, deleteset, jukebox, listaset
 from smarthome import luci_status, toggle_light, get_light_label, consumo, purificatore, riscaldamento_stats
 from space import solarsystem, launches
 from spotify import spoty
-from stats import send_stats
+from stats import send_stats, populate_chat_data_from_jsons
 from tarots import tarot, oroscopo, tarotschema
 from testing import test, getfile
 from torrent import lista_torrent
@@ -314,7 +314,7 @@ def main():
         ))
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(r"(?:https:\/\/)?clips\.twitch\.tv\/(\S+)", re.IGNORECASE)), twitch_clips))
 
-    # 
+
     # sets.py
     app.add_handler(CommandHandler(['set', 'addset'], addset, filters=~filters.UpdateType.EDITED))
     app.add_handler(CommandHandler(['listaset', 'setlist'], listaset, filters=~filters.UpdateType.EDITED))
@@ -343,6 +343,7 @@ def main():
 
     # stats.py
     app.add_handler(CommandHandler(['stats', 'statistiche'], send_stats, filters=~filters.UpdateType.EDITED))
+    # app.add_handler(CommandHandler(['populate_chat_data_from_jsons'], populate_chat_data_from_jsons, filters=~filters.UpdateType.EDITED))
 
     # tarots.py
     app.add_handler(CommandHandler(['tarot', 'tarots', 'tarocchi'], tarot, filters=~filters.UpdateType.EDITED))
