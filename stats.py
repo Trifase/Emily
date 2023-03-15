@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 locale.setlocale(locale.LC_ALL, 'it_IT.utf8')
 from utils import no_can_do, printlog
+import os
 
 
 def extract_day(timestamp):
@@ -16,26 +17,6 @@ def extract_day(timestamp):
 
 def extract_hour(timestamp):
     return timestamp.strftime("%H")
-
-async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if 'stats' not in context.chat_data:
-        context.chat_data['stats'] = {}
-
-    day = extract_day(update.message.date)
-    hour = extract_hour(update.message.date)
-
-    if day not in context.chat_data['stats']:
-        context.chat_data['stats'][day] = {}
-    
-    if 'total' not in context.chat_data['stats'][day]:
-        context.chat_data['stats'][day]['total'] = 0
-    
-    if hour not in context.chat_data['stats'][day]:
-        context.chat_data['stats'][day][hour] = 0
-    
-    context.chat_data['stats'][day][hour] += 1
-    context.chat_data['stats'][day]['total'] += 1
-
 
 def last_30_days():
     start = datetime.datetime.today()
@@ -142,7 +123,48 @@ def make_triplot(stats, name):
     plt.savefig(f'images/charts/{name}.png')
     return f'images/charts/{name}.png'
 
-async def send_stats(update: Update, context: CallbackContext) -> None:
+def try_this_at_home():
+    stats = json_to_stats('db/stats/stats_diochan2_raw.json')
+    name = "diochan2"
+    list_days = last_30_days()
+    list_hours = list_24_hours()
+
+    stats['average_hours'] = {'00': 0, '01': 0, '02': 0, '03': 0, '04': 0, '05': 0, '06': 0, '07': 0, '08': 0, '09': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0, '16': 0, '17': 0, '18': 0, '19': 0, '20': 0, '21': 0, '22': 0, '23': 0}
+
+    stats['average_weekdays'] = {'Lunedì': 0, 'Martedì': 0, 'Mercoledì': 0, 'Giovedì': 0, 'Venerdì': 0, 'Sabato': 0, 'Domenica': 0}
+
+    for day in list_days:
+        if day in stats:
+            weekday = datetime.datetime.strptime(day, "%Y-%m-%d").strftime("%A").capitalize()
+            stats['average_weekdays'][weekday] += stats[day].get('total', 0)
+            for hour in list_hours:
+                stats['average_hours'][hour] += stats[day].get(hour, 0)
+
+    filename = make_triplot(stats, name)
+
+
+
+async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if 'stats' not in context.chat_data:
+        context.chat_data['stats'] = {}
+
+    day = extract_day(update.message.date)
+    hour = extract_hour(update.message.date)
+
+    if day not in context.chat_data['stats']:
+        context.chat_data['stats'][day] = {}
+    
+    if 'total' not in context.chat_data['stats'][day]:
+        context.chat_data['stats'][day]['total'] = 0
+    
+    if hour not in context.chat_data['stats'][day]:
+        context.chat_data['stats'][day][hour] = 0
+    
+    context.chat_data['stats'][day][hour] += 1
+    context.chat_data['stats'][day]['total'] += 1
+
+
+async def send_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
     
@@ -171,25 +193,21 @@ async def send_stats(update: Update, context: CallbackContext) -> None:
     await update.message.reply_photo(open(filename, 'rb'))
 
 
+async def populate_chat_data_from_jsons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await no_can_do(update, context):
+        return
+    for filename in os.listdir('db/stats'):
+        if filename.endswith('.json'):
+            with open(f'db/stats/{filename}', encoding='utf') as json_file:
+                data = json.load(json_file)
+            chat_id = int(f"-100{data['id']}")
+            stats = json_to_stats(f'db/stats/{filename}')
+            if not context.application.chat_data[chat_id].get('stats'):
+                context.application.chat_data[chat_id]['stats'] = {}
+            context.application.chat_data[chat_id]['stats'] = stats
+            await update.message.reply_text(f'[TEST] Ho popolato il chat_data con le statistiche di {filename}, ID: {chat_id}')
+            statistiche = context.application.chat_data[chat_id]
+            # print(statistiche['stats'])
 
-# TODO: Fare un comando populate_stats che prende i dati dal json (chiamato come l'ID della chat) e li mette in chat_data - dal 2023 in poi
-def try_this_at_home():
-    stats = json_to_stats('db/stats/stats_diochan2_raw.json')
-    name = "diochan2"
-    list_days = last_30_days()
-    list_hours = list_24_hours()
-
-    stats['average_hours'] = {'00': 0, '01': 0, '02': 0, '03': 0, '04': 0, '05': 0, '06': 0, '07': 0, '08': 0, '09': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0, '16': 0, '17': 0, '18': 0, '19': 0, '20': 0, '21': 0, '22': 0, '23': 0}
-
-    stats['average_weekdays'] = {'Lunedì': 0, 'Martedì': 0, 'Mercoledì': 0, 'Giovedì': 0, 'Venerdì': 0, 'Sabato': 0, 'Domenica': 0}
-
-    for day in list_days:
-        if day in stats:
-            weekday = datetime.datetime.strptime(day, "%Y-%m-%d").strftime("%A").capitalize()
-            stats['average_weekdays'][weekday] += stats[day].get('total', 0)
-            for hour in list_hours:
-                stats['average_hours'][hour] += stats[day].get(hour, 0)
-
-    filename = make_triplot(stats, name)
 
 # try_this_at_home()
