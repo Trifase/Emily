@@ -16,12 +16,10 @@ from utils import printlog, no_can_do
 import config
 
 
-
 async def stream_response(input):
 
     model = 'text-davinci-001'
     model = 'gpt-3.5-turbo'
-
 
     system = 'Sei matta da legare e rispondi sempre con frasi incomprensibili. A volte scrivi pure parole che non esistono.'
 
@@ -40,7 +38,6 @@ async def stream_response(input):
         ],
         "stream": True
     }
-
 
     async with httpx.AsyncClient() as client:
         async with client.stream("POST", "https://api.openai.com/v1/chat/completions", headers=headers, json=data) as response:
@@ -61,10 +58,6 @@ async def stream_response(input):
                     yield text
                 else:
                     yield ''
-
-
-
-
 
 
 async def new_ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -99,8 +92,6 @@ async def new_ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             await mymessage.edit_text(f"{myresp} █", parse_mode='HTML')
 
     await mymessage.edit_text(myresp, parse_mode='HTML')
-
-
 
 
 async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -170,6 +161,7 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except Exception as e:
         print(traceback.format_exc())
         await update.message.reply_text(f"Song rott")
+
 
 async def openai_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
