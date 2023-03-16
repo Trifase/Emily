@@ -22,7 +22,6 @@ async def stream_response(input):
     model = 'text-davinci-001'
     model = 'gpt-3.5-turbo'
 
-    price_per_1k = 0.002
 
     system = 'Sei matta da legare e rispondi sempre con frasi incomprensibili. A volte scrivi pure parole che non esistono.'
 
@@ -47,11 +46,15 @@ async def stream_response(input):
         async with client.stream("POST", "https://api.openai.com/v1/chat/completions", headers=headers, json=data) as response:
             async for chunk in response.aiter_text():
                 # print(chunk)
+                chunk = chunk.strip()
                 chunk = chunk.replace("data: ", "")
                 if not chunk or '[DONE]' in chunk:
                     yield ''
                     break
-                result = json.loads(chunk)
+                try:
+                    result = json.loads(chunk)
+                except:
+                    yield ''
                 text = result['choices'][0]['delta'].get('content')
 
                 if text is not None:
@@ -82,11 +85,10 @@ async def new_ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if "$" in input:
         system, prompt = input.split("$", 1)
-        myresp = f"{prompt}:\n\n"
+        myresp = f"<b>{input}:</b>\n\n"
     else:
-        myresp = f"{input}:\n\n"
-    mymessage = await update.message.reply_text(myresp)
-
+        myresp = f"<b>{input}:</b>\n\n"
+    mymessage = await update.message.reply_html(myresp)
     t = time.time()
 
     async for text in stream_response(input):
@@ -94,9 +96,9 @@ async def new_ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         if time.time() - t > 1.5:
             t = time.time()
-            await mymessage.edit_text(myresp)
+            await mymessage.edit_text(f"{myresp} █", parse_mode='HTML')
 
-    await mymessage.edit_text(myresp)
+    await mymessage.edit_text(myresp, parse_mode='HTML')
 
 
 
