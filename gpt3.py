@@ -4,6 +4,8 @@ import re
 import random
 import httpx
 import traceback
+import time
+import json
 
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -12,6 +14,90 @@ from rich import print
 from utils import printlog, no_can_do
 
 import config
+
+
+
+async def stream_response(input):
+
+    model = 'text-davinci-001'
+    model = 'gpt-3.5-turbo'
+
+    price_per_1k = 0.002
+
+    system = 'Sei matta da legare e rispondi sempre con frasi incomprensibili. A volte scrivi pure parole che non esistono.'
+
+    if "$" in input:
+        system, input = input.split("$", 1)
+    headers = {
+        'Accept': 'text/event-stream',
+        'Authorization': f'Bearer {config.OPENAI_API_KEY}',
+    }
+
+    data = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": input}
+        ],
+        "stream": True
+    }
+
+
+    async with httpx.AsyncClient() as client:
+        async with client.stream("POST", "https://api.openai.com/v1/chat/completions", headers=headers, json=data) as response:
+            async for chunk in response.aiter_text():
+                # print(chunk)
+                chunk = chunk.replace("data: ", "")
+                if not chunk or '[DONE]' in chunk:
+                    yield ''
+                    break
+                result = json.loads(chunk)
+                text = result['choices'][0]['delta'].get('content')
+
+                if text is not None:
+                    yield text
+                else:
+                    yield ''
+
+
+
+
+
+
+async def new_ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await no_can_do(update, context):
+        return
+    if update.effective_chat.id in [config.ID_TIMELINE] and update.message.from_user.id != config.ID_TRIF:
+        try:
+            this_user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)
+        except Exception as e:
+            return
+        if this_user.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+            return
+
+    elif update.effective_chat.id not in [config.ID_CHAT, config.ID_ASPHALTO, config.ID_DIOCHAN, config.ID_LOTTO, config.ID_RITALY, config.ID_NINJA] and update.message.from_user.id != config.ID_TRIF:
+        return
+    cmd = update.message.text.split(" ")[0]
+    input = update.message.text.replace(f'{cmd} ', "")
+
+    if "$" in input:
+        system, prompt = input.split("$", 1)
+        myresp = f"{prompt}:\n\n"
+    else:
+        myresp = f"{input}:\n\n"
+    mymessage = await update.message.reply_text(myresp)
+
+    t = time.time()
+
+    async for text in stream_response(input):
+        myresp += text
+
+        if time.time() - t > 1.5:
+            t = time.time()
+            await mymessage.edit_text(myresp)
+
+    await mymessage.edit_text(myresp)
+
 
 
 
