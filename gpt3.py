@@ -53,7 +53,7 @@ async def stream_response(input):
                     try:
                         result = json.loads(chunk)
                     except:
-                        print(f"Errore: [{chunk}]")
+                        pass
                     if result:
                         text = result['choices'][0]['delta'].get('content', '')
                         yield text
