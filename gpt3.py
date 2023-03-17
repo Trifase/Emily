@@ -39,23 +39,25 @@ async def stream_response(input):
         "stream": True
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=120) as client:
         async with client.stream("POST", "https://api.openai.com/v1/chat/completions", headers=headers, json=data) as response:
             async for chunk in response.aiter_text():
-                # print(chunk)
+                result = None
                 chunk = chunk.strip()
-                chunk = chunk.replace("data: ", "")
-                if not chunk or '[DONE]' in chunk:
+                if chunk == 'data: [DONE]' or '[DONE]' in chunk.strip():
                     yield ''
-                    break
-                try:
-                    result = json.loads(chunk)
-                except:
-                    yield ''
-                text = result['choices'][0]['delta'].get('content')
+                elif chunk.startswith('data: '):
+                    chunk = chunk[6:]
 
-                if text is not None:
-                    yield text
+                    try:
+                        result = json.loads(chunk)
+                    except:
+                        print(f"Errore: [{chunk}]")
+                    if result:
+                        text = result['choices'][0]['delta'].get('content', '')
+                        yield text
+                    else:
+                        yield ''
                 else:
                     yield ''
 
@@ -78,16 +80,16 @@ async def new_ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if "$" in input:
         system, prompt = input.split("$", 1)
-        myresp = f"<b>{input}:</b>\n\n"
+        myresp = f"<b>{prompt.strip().capitalize()}</b>\n\n"
     else:
-        myresp = f"<b>{input}:</b>\n\n"
+        myresp = f"<b>{input.strip().capitalize()}</b>\n\n"
     mymessage = await update.message.reply_html(myresp)
     t = time.time()
 
     async for text in stream_response(input):
         myresp += text
 
-        if time.time() - t > 1.5:
+        if time.time() - t > 3:
             t = time.time()
             await mymessage.edit_text(f"{myresp} █", parse_mode='HTML')
 
