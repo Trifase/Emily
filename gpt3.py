@@ -7,6 +7,7 @@ import traceback
 import time
 import json
 
+from telegram.error import BadRequest
 from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import ChatMemberStatus
@@ -91,9 +92,15 @@ async def new_ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         if time.time() - t > 3:
             t = time.time()
-            await mymessage.edit_text(f"{myresp} █", parse_mode='HTML')
+            try:
+                await mymessage.edit_text(f"{myresp} █", parse_mode='HTML')
+            except BadRequest:
+                pass
 
-    await mymessage.edit_text(myresp, parse_mode='HTML')
+    try:
+        await mymessage.edit_text(myresp, parse_mode='HTML')
+    except BadRequest:
+        pass
 
 
 async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
