@@ -64,8 +64,10 @@ async def stream_response(input):
 
 
 async def new_ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
     if await no_can_do(update, context):
         return
+
     if update.effective_chat.id in [config.ID_TIMELINE] and update.message.from_user.id != config.ID_TRIF:
         try:
             this_user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)

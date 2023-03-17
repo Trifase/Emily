@@ -244,7 +244,10 @@ async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             await update.inline_query.answer(results)
             return
         else:
-            
+            caption = video_info['caption']
+            for word in caption.split():
+                if word.startswith('#'):
+                    caption = caption.replace(word, '')
             results = [
                     InlineQueryResultVideo(
                         id=str(uuid4()),
@@ -253,7 +256,7 @@ async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                         thumb_url=video_info['thumbnail_url'],
                         # thumb_url="https://imgur.com/BIWJZPG.jpg",
                         title=video_info['title'],
-                        caption=video_info['caption'],
+                        caption=caption,
                         parse_mode="HTML"
                     )]
             await update.inline_query.answer(results)
