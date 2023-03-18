@@ -281,7 +281,7 @@ def main():
     # scrapers.py
     app.add_handler(CommandHandler(["wikipedia", "wiki"], wikipedia, filters=~filters.UpdateType.EDITED))
     app.add_handler(CommandHandler('ninofrassica', ninofrassica, filters=~filters.UpdateType.EDITED))
-    # app.add_handler(MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(r"(\b\S+(:?instagram\.com|instagr\.am)\S+\b)",  re.IGNORECASE)), new_instagram))
+    app.add_handler(MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(r"(\b\S+(:?instagram\.com|instagr\.am)\S+\b)",  re.IGNORECASE)), new_instagram))
     app.add_handler(CommandHandler(["stories", "storie"], instagram_stories, filters=~filters.UpdateType.EDITED))
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(r"(?:https?://vm.tiktok.com\/(\w+))", re.IGNORECASE)), tiktok))
     app.add_handler(MessageHandler(
