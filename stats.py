@@ -64,6 +64,7 @@ def json_to_stats(json_filename):
     return stats
 
 def make_triplot(stats, name):
+    
     messages_days = last_30_days()
     for x in messages_days:
         if x not in stats:
@@ -162,6 +163,7 @@ async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 
 async def send_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    locale.setlocale(locale.LC_ALL, 'it_IT.utf8')
     if await no_can_do(update, context):
         return
     
