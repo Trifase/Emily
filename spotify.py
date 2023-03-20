@@ -1,8 +1,12 @@
 import os
 import asyncio
+import tempfile
+import urllib
 
 from spotdl import Spotdl
 from spotdl.types.options import DownloaderOptions
+
+from PIL import Image
 
 from telegram import Update
 from telegram.constants import ChatAction
@@ -71,6 +75,7 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         try:
             songs = spotdl.search([url])
             results = spotdl.get_download_urls(songs)[0]
+
         except Exception as e: 
             await update.message.reply_text(f"Non capisco:  {e}")
 
@@ -85,13 +90,36 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     blocking_download = asyncio.to_thread(downloader.search_and_download, songs[0])
     song, path = await blocking_download
+    # print(song)
 
     caption = f"{song.display_name}\nfrom {song.album_name} ({song.year})"
+
+    # Thumbnail  
+    if song.cover_url:
+        # Download the thumbnail
+        tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
+        urllib.request.urlretrieve(song.cover_url, tempphoto.name)
+
+        # Resize the thumbnail 
+        size = 320, 320
+        im = Image.open(tempphoto.name)
+        im.thumbnail(size, Image.Resampling.LANCZOS)
+        im.save(tempphoto.name)
+
+        # Set the thumbnail
+        thumbnail = open(tempphoto.name, "rb")
+    else:
+        thumbnail = None
+
     try:
-        await update.message.reply_audio(audio=open(path, "rb"), caption=caption)
+        await update.message.reply_audio(audio=open(path, "rb"), caption=caption, thumb=thumbnail)
     except Exception as e:
         await update.message.reply_text(f"Niente non riesco a mandare il file, amen.")
 
     await msg.delete()
-    os.remove(path) 
+
+    # Lil' bit of cleaning
+    os.remove(path)
+    if song.cover_url:
+        tempphoto.close()
  
