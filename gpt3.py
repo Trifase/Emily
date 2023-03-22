@@ -47,6 +47,24 @@ async def stream_response(input):
                 chunk = chunk.strip()
                 if chunk == 'data: [DONE]' or '[DONE]' in chunk.strip():
                     yield ''
+
+                # Sometimes multiple chunks are bundled together
+                elif '\n\n' in chunk:
+                    subchunks = chunk.split('\n\n')
+
+                    for subchunk in subchunks:
+                        subchunk = subchunk.strip()
+                        if subchunk.startswith('data: '):
+                            subchunk = subchunk[6:]
+                            try:
+                                result = json.loads(subchunk)
+                            except:
+                                pass
+                            if result:
+                                text = result['choices'][0]['delta'].get('content', '')
+                                yield text
+
+
                 elif chunk.startswith('data: '):
                     chunk = chunk[6:]
 
