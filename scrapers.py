@@ -158,8 +158,8 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str, debug: bool
     data = response["aweme_list"][0]
 
     video_url = data["video"]["play_addr"]["url_list"][0]
-    caption = f"<a href='https://www.tiktok.com/{username}'>{username}</a>\n"
-    caption += data["desc"]
+    caption = f"<a href='https://www.tiktok.com/{username}/video/{video_ID}'>{username}</a>\n"
+    caption += ' '.join([x for x in data["desc"].split() if not x.startswith('#')])
     thumbnail_jpg = data["video"]["cover"]["url_list"][0]
     title = f"Tiktok Video from {username}"
     height = data["video"]["height"]
@@ -245,9 +245,7 @@ async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             return
         else:
             caption = video_info['caption']
-            for word in caption.split():
-                if word.startswith('#'):
-                    caption = caption.replace(word, '')
+            caption = ' '.join([x for x in caption.split() if not x.startswith('#')])
             results = [
                     InlineQueryResultVideo(
                         id=str(uuid4()),
