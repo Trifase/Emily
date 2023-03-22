@@ -921,7 +921,7 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     token = config.LICHESS_API
     nick = " ".join(context.args)
     apiurl = "https://lichess.org/api/challenge/open"
-    limit = 60 * 10
+    limit = 60 * 5
     increment = 3
     if nick == "aurora":
         nick = "orezesirunusss"
@@ -938,7 +938,7 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         response = requests.post('https://lichess.org/api/challenge/open', data=post_data)
         reply = response.json()
         url = reply['challenge']['url']
-        await update.message.reply_html(f'Nuova partita creata!\n{url}\nTipo di partita: amichevole 10+3', disable_web_page_preview=True)
+        await update.message.reply_html(f'Nuova partita creata!\n{url}\nTipo di partita: amichevole 5+3', disable_web_page_preview=True)
         return
 
     if nick == "corrispondenza":
