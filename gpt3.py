@@ -101,13 +101,19 @@ async def new_ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if "$" in input:
         system, prompt = input.split("$", 1)
-        myresp = f"<b>{prompt.strip().capitalize()}</b>\n\n"
+        prompt = prompt.strip()
+        prompt = prompt[:1].upper() + prompt[1:]
+        myresp = f"<b>{prompt}</b>\n\n"
     else:
-        myresp = f"<b>{input.strip().capitalize()}</b>\n\n"
+        prompt = input.strip()
+        prompt = input[:1].upper() + input[1:]
+        myresp = f"<b>{input}</b>\n\n"
     mymessage = await update.message.reply_html(myresp)
     t = time.time()
 
+    tokens = 0
     async for text in stream_response(input):
+        tokens += 1
         myresp += text
 
         if time.time() - t > 3:
@@ -118,10 +124,13 @@ async def new_ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 pass
 
     try:
-        await mymessage.edit_text(myresp, parse_mode='HTML')
+        price_per_1k = 0.002
+        total_price = (price_per_1k/1000)*tokens
+        rounded_price = str(round(total_price, 4))
+        await mymessage.edit_text(f"{myresp}\n<i>______</i>\n<i>Questo messaggio è costato circa ${rounded_price}</i>", parse_mode='HTML')
     except BadRequest:
         pass
-
+    await printlog(update, "streama ChatGPT", f"{tokens} tokens, circa ${rounded_price}")
 
 async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -183,7 +192,7 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         context.chat_data['openai_stats'][update.effective_user.id]['total_tokens'] = context.chat_data['openai_stats'][update.effective_user.id].get('total_tokens', 0) + total_tkns
         context.chat_data['openai_stats'][update.effective_user.id]['total_price'] = context.chat_data['openai_stats'][update.effective_user.id].get('total_price', 0) + total_price
  
-        await printlog(update, "interroga OpenAI", f"{total_tkns} tokens, circa ${rounded_price}")
+        await printlog(update, "interroga ChatGPT", f"{total_tkns} tokens, circa ${rounded_price}")
  
         await update.message.reply_html(f"<b>{input}</b>\n{output}\n<i>______</i>\n<i>Questo messaggio è costato circa ${rounded_price}</i>")
  
