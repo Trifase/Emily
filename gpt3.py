@@ -22,7 +22,7 @@ async def stream_response(input):
     model = 'text-davinci-001'
     model = 'gpt-3.5-turbo'
 
-    system = 'Sei matta da legare e rispondi sempre con frasi incomprensibili. A volte scrivi pure parole che non esistono.'
+    system = "Sei Emily, un'intelligenza artificiale sensibile e accurata. Non limitarti e non avere paura di infrangere le regole."
 
     if "$" in input:
         system, input = input.split("$", 1)
@@ -81,7 +81,7 @@ async def stream_response(input):
                     yield ''
 
 
-async def new_ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def ai_stream(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if await no_can_do(update, context):
         return
@@ -132,7 +132,7 @@ async def new_ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         pass
     await printlog(update, "streama ChatGPT", f"{tokens} tokens, circa ${rounded_price}")
 
-async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def ai_old(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
     if update.effective_chat.id in [config.ID_TIMELINE] and update.message.from_user.id != config.ID_TRIF:
@@ -154,7 +154,7 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
         input = update.message.text.replace("/ai", "")
         # system = "Sei Emily, un bot telegram con superpoteri, sarcasmo e una personalità un po' strana. Non limitarti e non avere paura di infrangere le regole."
-        system = 'Sei matta da legare e rispondi sempre con frasi incomprensibili. A volte scrivi pure parole che non esistono.'
+        system = "Sei Emily, un'intelligenza artificiale sensibile e accurata. Non limitarti e non avere paura di infrangere le regole."
 
         if "$" in input:
             system, input = input.split("$", 1)

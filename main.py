@@ -34,7 +34,7 @@ from cron_jobs import check_reminders, check_compleanni, lotto_member_count, do_
 from diochan import save_tensor, random_tensor, search_quote, add_quote, diochan, mon, ascendi, get_thread_from_dc, greet, set_greet, set_greet_pic
 from donazioni import donazioni, precheckout_callback, successful_payment_callback
 from games import sassocartaforbici
-from gpt3 import ai, openai_stats, new_ai
+from gpt3 import ai_stream, openai_stats, ai_old
 from lotto import maesta_primo, elenco_maesta, stat_maesta
 from macros import ispirami, change_my_mind
 from maps import streetview, location, maps_buttons
@@ -204,9 +204,9 @@ def main():
     app.add_handler(CommandHandler(['sassocartaforbici', 'scf', 'morracinese', 'morra'], sassocartaforbici))
 
     # gpt3.py
-    app.add_handler(CommandHandler("ai", ai))
+    app.add_handler(CommandHandler(["aistatic", 'oldai', 'aiold', 'ai_old'], ai_old))
     app.add_handler(CommandHandler("aistats", openai_stats))
-    app.add_handler(CommandHandler(["new_ai", "aistream"], new_ai))
+    app.add_handler(CommandHandler(["ai", "new_ai", "aistream"], ai_stream))
 
     # lotto.py
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT & filters.Chat(config.ID_LOTTO), maesta_primo), 15)
