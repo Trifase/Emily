@@ -34,7 +34,7 @@ from cron_jobs import check_reminders, check_compleanni, lotto_member_count, do_
 from diochan import save_tensor, random_tensor, search_quote, add_quote, diochan, mon, ascendi, get_thread_from_dc, greet, set_greet, set_greet_pic
 from donazioni import donazioni, precheckout_callback, successful_payment_callback
 from games import sassocartaforbici
-from gpt3 import ai_stream, openai_stats, ai_old
+from openai import ai_stream, openai_stats, ai_old
 from lotto import maesta_primo, elenco_maesta, stat_maesta
 from macros import ispirami, change_my_mind
 from maps import streetview, location, maps_buttons
