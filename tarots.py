@@ -3,7 +3,7 @@ import json
 import pyaztro
 import random
 from PIL import Image
-import pprint
+import httpx
 import random
 import tempfile
 import subprocess
@@ -1146,6 +1146,18 @@ async def oroscopo(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return all_signs[sign]
         return None
 
+    async def get_horoscope_from_aztro(sign: str) -> str:
+        
+        data = {
+            "sign": sign,
+            "day": "today",
+        }
+
+        async with httpx.AsyncClient() as session:
+            # this uses http://astrology.kudosmedia.net/ - dead at 2023-03-29
+            r = await session.post(f"https://aztro.sameerkumar.website/?sign={sign}&day=today")
+        return r.json()
+
     parser = ArgumentParser(description='Oroscopo Parser')
     parser.add_argument("segno", nargs='?', default=None)
     parser.add_argument('-setdefault', '-set', type=str)
@@ -1178,7 +1190,9 @@ async def oroscopo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     await printlog(update, "consulta l'oroscopo", segno)
-    horoscope = pyaztro.Aztro(sign=segno)
+    # horoscope = pyaztro.Aztro(sign=segno)
+    horoscope = await get_horoscope_from_aztro(segno)
+    print(horoscope)
     sign = horoscope.sign
     color = horoscope.color
     compatibility = horoscope.compatibility
