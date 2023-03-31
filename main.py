@@ -6,6 +6,7 @@ import peewee
 import re
 import time
 import datetime
+import traceback
 import json
 import instaloader
 import platform
@@ -371,9 +372,6 @@ def main():
 
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
-
-    import traceback
-
     tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
     tb_string = "".join(tb_list)
     await printlog(update, f"{tb_string}", error=True)
