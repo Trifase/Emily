@@ -1,15 +1,20 @@
 import datetime
 import inspect
-from typing import Callable, Optional, Tuple
-import config
 import io
+import logging
+import logging.handlers
+import sys
 import time
+from typing import Callable, Optional, Tuple
 
-
-from rich import print
-from telegram import Update, Bot, CallbackQuery, User, Update, InlineKeyboardMarkup, InlineKeyboardButton, ChatMember, ChatMemberUpdated
-from telegram.ext import CallbackContext, ChatMemberHandler
 from dataclassy import dataclass
+from rich import print
+from telegram import (Bot, CallbackQuery, ChatMember, ChatMemberUpdated,
+                      InlineKeyboardButton, InlineKeyboardMarkup, Update, User)
+from telegram.ext import CallbackContext, ChatMemberHandler
+
+import config
+
 
 @dataclass
 class InlineButton:
@@ -27,6 +32,19 @@ class ForgeCommand:
     new_args: list[str] = []
     callable: Callable
 
+
+# Logging setup
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+fh = logging.handlers.RotatingFileHandler('logs/log.log', maxBytes=1000000, backupCount=5)
+fh.setLevel(logging.INFO)
+
+
+formatter = logging.Formatter('%(asctime)s %(message)s', datefmt='[%Y-%m-%d %H:%M:%S]')
+fh.setFormatter(formatter)
+
+logger.addHandler(fh)
 
 async def crea_sondaggino(context, update, max_votes, callable, domanda=''):
         current_votes = round(max_votes/2)
@@ -156,7 +174,28 @@ async def is_user(update):
         return True
     return False
 
+
 async def printlog(update, action, additional_data=None):
+
+    if isinstance(update, CallbackQuery):
+        user = update.from_user
+        chat_id = update.message.chat.id
+    else:
+        user = update.effective_user
+        chat_id = update.effective_chat.id
+
+    if additional_data:
+        print(f'{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}: {additional_data}')
+        message_log = f"{await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}: {additional_data}"
+    else:
+        print(f'{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}')
+        message_log = f"{await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}"
+
+    logging.info(message_log)
+
+
+
+async def old_printlog(update, action, additional_data=None):
 
     if isinstance(update, CallbackQuery):
         user = update.from_user
