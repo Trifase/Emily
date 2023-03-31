@@ -174,9 +174,12 @@ async def is_user(update):
         return True
     return False
 
-
-async def printlog(update, action, additional_data=None):
-
+async def printlog(update, action, additional_data=None, error=False):
+    if error:
+        print(f"{get_now()} [red1]ERROR[/red1]\n{action}")
+        logging.error(f"{action}")
+        return
+    
     if isinstance(update, CallbackQuery):
         user = update.from_user
         chat_id = update.message.chat.id
@@ -192,8 +195,6 @@ async def printlog(update, action, additional_data=None):
         message_log = f"{await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}"
 
     logging.info(message_log)
-
-
 
 async def old_printlog(update, action, additional_data=None):
 

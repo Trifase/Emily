@@ -371,18 +371,12 @@ def main():
 
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # from rich.console import Console
-    # from rich.traceback import Traceback
-    # from rich import print
-    # console = Console()
-    # tcb = Traceback.from_exception(type(context.error), context.error, context.error.__traceback__, show_locals=False, width=140, max_frames=8, extra_lines=1, locals_max_string=140)
-    # console.print(tcb)
 
     import traceback
 
     tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
     tb_string = "".join(tb_list)
-    print(f"{get_now()} {tb_string}")
+    await printlog(update, f"{tb_string}", error=True)
 
 async def webserver_logs(request):
     current_m = datetime.date.today().strftime("%Y-%m")
