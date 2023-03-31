@@ -1,20 +1,25 @@
 
-import openai
-import re
-import random
-import httpx
-import traceback
-import time
 import json
+import os
+import random
+import re
+import tempfile
+import time
+import traceback
 
-from telegram.error import BadRequest
-from telegram import Update
-from telegram.ext import ContextTypes
-from telegram.constants import ChatMemberStatus
+import httpx
+import openai
+
+from pydub import AudioSegment
 from rich import print
-from utils import printlog, no_can_do
+from telegram import Update
+from telegram.constants import ChatMemberStatus
+from telegram.error import BadRequest
+from telegram.ext import ContextTypes
 
 import config
+import openai
+from utils import no_can_do, printlog
 
 
 async def stream_response(input):
@@ -132,6 +137,7 @@ async def ai_stream(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         pass
     await printlog(update, "streama ChatGPT", f"{tokens} tokens, circa ${rounded_price}")
 
+
 async def ai_old(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
@@ -200,6 +206,61 @@ async def ai_old(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         print(traceback.format_exc())
         await update.message.reply_text(f"Song rott")
 
+
+async def whisper_transcribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await no_can_do(update, context):
+        return
+    if update.effective_chat.id in [config.ID_TIMELINE] and update.message.from_user.id != config.ID_TRIF:
+        try:
+            this_user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)
+        except Exception as e:
+            return
+        if this_user.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+            return
+    elif update.effective_chat.id not in [config.ID_CHAT, config.ID_ASPHALTO, config.ID_DIOCHAN, config.ID_LOTTO, config.ID_RITALY, config.ID_NINJA] and update.message.from_user.id != config.ID_TRIF:
+        return
+    if not update.message.reply_to_message or not update.message.reply_to_message.voice:
+        await update.message.reply_text("Mi dispiace, devi rispondere ad un messaggio vocale.")
+        print("non c'è reply")
+        return
+
+    PRICE_PER_MINUTE = 0.006
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+
+    reply = update.message.reply_to_message
+
+    price = round((PRICE_PER_MINUTE / 60) * reply.effective_attachment.duration, 4)
+
+    await printlog(update, "vuole trascrivere un messaggio vocale", f"{reply.effective_attachment.duration} secondi, circa ${price}")
+
+    og_filename = tempfile.NamedTemporaryFile(suffix='.mp3')
+    filename_mp3 = tempfile.NamedTemporaryFile(suffix='.mp3')
+    media_file = await context.bot.get_file(reply.effective_attachment.file_id)
+    await media_file.download_to_drive(og_filename.name)
+
+    try:
+        audio_track = AudioSegment.from_file(og_filename.name)
+        audio_track.export(filename_mp3.name, format="mp3")
+
+    except Exception as e:
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            reply_to_message_id=update.message.message_id,
+            text='Unsupported file type'
+        )
+        return
+
+    
+    openai.api_key = config.OPENAI_API_KEY
+    f = open(filename_mp3.name, "rb")
+    transcript = await openai.Audio.atranscribe("whisper-1", f)
+    text = transcript.text
+    text += f"\n<i>______</i>\n<i>Questo messaggio è costato circa ${price}</i>"
+    await update.message.reply_html(text)
+
+    og_filename.close()
+    filename_mp3.close()
 
 async def openai_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):

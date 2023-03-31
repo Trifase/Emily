@@ -34,7 +34,6 @@ from cron_jobs import check_reminders, check_compleanni, lotto_member_count, do_
 from diochan import save_tensor, random_tensor, search_quote, add_quote, diochan, mon, ascendi, get_thread_from_dc, greet, set_greet, set_greet_pic
 from donazioni import donazioni, precheckout_callback, successful_payment_callback
 from games import sassocartaforbici
-from openai import ai_stream, openai_stats, ai_old
 from lotto import maesta_primo, elenco_maesta, stat_maesta
 from macros import ispirami, change_my_mind
 from maps import streetview, location, maps_buttons
@@ -44,6 +43,7 @@ from misc import (bioritmo, fascio, fatfingers, scacchi, square, traduci, sponge
     set_auto_reaction, send_auto_reaction, bomb_react, start, polls_callbackqueryhandlers, condominioweb, is_safe,
     greet_BT_user, random_trifase, aoc_leaderboard, wikihow, lurkers, lurkers_callbackqueryhandlers,
     markovs)
+from open_ai import ai_stream, openai_stats, ai_old, whisper_transcribe
 from parse_everything import (exit_from_banned_groups, nuova_chat_rilevata, update_timestamps_asphalto, check_for_sets,
     drop_update_from_banned_users, new_admin_buttons, messaggio_spiato, track_chats, save_messages_stats) 
 from pyrog import reaction_karma
@@ -203,16 +203,10 @@ def main():
     # games.py
     app.add_handler(CommandHandler(['sassocartaforbici', 'scf', 'morracinese', 'morra'], sassocartaforbici))
 
-    # gpt3.py
-    app.add_handler(CommandHandler(["aistatic", 'oldai', 'aiold', 'ai_old'], ai_old))
-    app.add_handler(CommandHandler("aistats", openai_stats))
-    app.add_handler(CommandHandler(["ai", "new_ai", "aistream"], ai_stream))
-
     # lotto.py
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT & filters.Chat(config.ID_LOTTO), maesta_primo), 15)
     app.add_handler(CommandHandler("maesta", elenco_maesta))
     app.add_handler(CommandHandler(["stats_maesta", 'maesta_stats', 'maestats', 'maestat'], stat_maesta))
-    
 
     # macros.py
     app.add_handler(CommandHandler('ispirami', ispirami, filters=~filters.UpdateType.EDITED))
@@ -259,6 +253,12 @@ def main():
     app.add_handler(CommandHandler(['doveguardo', 'dove_guardo'], doveguardo, filters=~filters.UpdateType.EDITED))
     app.add_handler(CallbackQueryHandler(doveguardo_buttons, pattern=r'^dvg_'))
     app.add_handler(CommandHandler(['imdb', 'torrent'], imdb, filters=~filters.UpdateType.EDITED))
+
+    # openai.py
+    app.add_handler(CommandHandler(["aistatic", 'oldai', 'aiold', 'ai_old'], ai_old))
+    app.add_handler(CommandHandler("aistats", openai_stats))
+    app.add_handler(CommandHandler(["ai", "new_ai", "aistream"], ai_stream))
+    app.add_handler(CommandHandler(["transcribe", "speech", "scrivi", "trascrivi"], whisper_transcribe))
 
     # pyrog.py
     app.add_handler(CommandHandler(['karma', 'reactionlist', 'reactkarma'], reaction_karma, filters=~filters.UpdateType.EDITED))

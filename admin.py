@@ -271,7 +271,7 @@ async def tg_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 import html
                 # pprint.pprint(update.message.__str__())
                 import ast
-                rawtext = pprint.pformat(update.message.to_dict())
+                rawtext = pprint.pformat(update.message.reply_to_message.to_dict())
                 # print(rawtext)
                 rawtext = html.escape(rawtext)
                 if len(rawtext) > 4096:
