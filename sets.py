@@ -7,7 +7,7 @@ from rich import print
 import json
 
 import config
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do, crea_sondaggino
+from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do, crea_sondaggino, make_delete_button
 
 jukebox_id = 0
 
@@ -154,7 +154,7 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             message += f"{cat_names[cat]}:\n"
             message += f"{' · '.join(sorted(medialist[cat]))}\n\n"
 
-    await update.message.reply_text(f'{message}', disable_notification=True, disable_web_page_preview=True)
+    await update.message.reply_text(f'{message}', disable_notification=True, disable_web_page_preview=True, reply_markup=make_delete_button(update))
 
 async def deleteset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=False) -> None:
     if await no_can_do(update, context):

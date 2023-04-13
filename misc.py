@@ -32,6 +32,14 @@ from pyrog import get_user_from_username, send_reaction, pyro_bomb_reaction, get
 
 from telegram import InputMediaPhoto
 
+async def self_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    if query.message.reply_to_message.from_user.id != query.from_user.id:
+        await query.answer(text="Giù le mani", show_alert=False)
+        return
+    await query.answer()
+    await query.message.delete()
+
 async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     def get_corpus(filename, user_id):

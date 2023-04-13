@@ -45,7 +45,7 @@ class Compleanni(peewee.Model):
 
 
 async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
-    DESTINATION_CHATS = [-1001406546688, -1001619525581]
+    DESTINATION_CHATS = [-1001619525581]
 
     MINUTES = 30
     SINGLE_POST = False

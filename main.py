@@ -43,7 +43,7 @@ from movies import doveguardo, imdb, doveguardo_buttons
 from misc import (bioritmo, fascio, fatfingers, scacchi, square, traduci, spongebob, voice, alexa, get_user_info,
     set_auto_reaction, send_auto_reaction, bomb_react, start, polls_callbackqueryhandlers, condominioweb, is_safe,
     greet_BT_user, random_trifase, aoc_leaderboard, wikihow, lurkers, lurkers_callbackqueryhandlers,
-    markovs)
+    markovs, self_delete)
 from open_ai import ai_stream, openai_stats, ai_old, whisper_transcribe
 from parse_everything import (exit_from_banned_groups, nuova_chat_rilevata, update_timestamps_asphalto, check_for_sets,
     drop_update_from_banned_users, new_admin_buttons, messaggio_spiato, track_chats, save_messages_stats) 
@@ -190,9 +190,9 @@ def main():
     app.add_handler(CommandHandler(['tensor', 'tensorbot'], random_tensor, filters=~filters.UpdateType.EDITED))
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & filters.TEXT & filters.User(username="@Tensor1987"), save_tensor), 19)
     app.add_handler(CommandHandler('get_thread', get_thread_from_dc, filters=~filters.UpdateType.EDITED))
-    app.add_handler(ChatMemberHandler(greet, ChatMemberHandler.CHAT_MEMBER))
-    app.add_handler(CommandHandler('setgreet', set_greet, filters=~filters.UpdateType.EDITED))
-    app.add_handler(CommandHandler('setgreetpic', set_greet_pic, filters=~filters.UpdateType.EDITED))
+    # app.add_handler(ChatMemberHandler(greet, ChatMemberHandler.CHAT_MEMBER))
+    # app.add_handler(CommandHandler('setgreet', set_greet, filters=~filters.UpdateType.EDITED))
+    # app.add_handler(CommandHandler('setgreetpic', set_greet_pic, filters=~filters.UpdateType.EDITED))
     
     # app.add_handler(MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(r'\bmon\b', re.IGNORECASE)), mon), 25)
 
@@ -225,6 +225,7 @@ def main():
     app.add_handler(CommandHandler(['forecast', 'previsioni'], forecast, filters=~filters.UpdateType.EDITED))
 
     # misc.py
+    app.add_handler(CallbackQueryHandler(self_delete, pattern=r'^deleteme_'))
     app.add_handler(CommandHandler('wikihow', wikihow, filters=~filters.UpdateType.EDITED))
     app.add_handler(CommandHandler('markov', markovs, filters=~filters.UpdateType.EDITED))
     # app.add_handler(CommandHandler('chiedi_opinione', chiedi_opinione))

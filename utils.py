@@ -81,6 +81,15 @@ async def crea_sondaggino(context, update, max_votes, callable, domanda=''):
             await to_pin.pin(disable_notification=True)
         return
 
+def make_delete_button(update) -> InlineKeyboardMarkup:
+    keyboard = [
+        [
+            InlineKeyboardButton("🗑️", callback_data=f"deleteme_{update.effective_user.id}")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    return reply_markup
+
 def is_inline_button(callback_data):
     if isinstance(callback_data, InlineButton):
         return True
