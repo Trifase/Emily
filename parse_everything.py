@@ -1,20 +1,17 @@
-import warnings
-warnings.filterwarnings("ignore")
-
 import time
-import pytz
-
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Chat, ChatMember, ChatMemberUpdated
-from telegram.constants import ParseMode, ChatMemberStatus
-from telegram.ext import ContextTypes, ApplicationHandlerStop
+import warnings
 from typing import Optional, Tuple
 
+import pytz
+from telegram import Chat, ChatMember, ChatMemberUpdated, InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.constants import ChatMemberStatus
+from telegram.ext import ApplicationHandlerStop, ContextTypes
+
 import config
+from admin import add_ban, getchat, lista_chat, listen_to
+from utils import ForgeCommand, is_member_in_group, is_user, no_can_do, printlog
 
-from admin import getchat, lista_chat, listen_to, add_ban
-from smarthome import toggle_light, get_light_label
-from utils import printlog, no_can_do, is_member_in_group, is_user, ForgeCommand
-
+warnings.filterwarnings("ignore")
 
 async def drop_update_from_banned_users(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_user.id in context.bot_data.get('global_bans'):
@@ -121,7 +118,6 @@ async def messaggio_spiato(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         context.bot_data['listen_to'] = []
 
     chat_id = int(update.effective_chat.id)
-    SPY = True
 
     # Se è nella lista spiati, inoltra il messaggio su emily spia
     if chat_id in context.bot_data['listen_to']:

@@ -1,17 +1,13 @@
-import random
-import tempfile
 import subprocess
+import tempfile
+import urllib.request
+from pathlib import Path
 
 from telegram import Update
-from telegram.ext import CallbackContext, ContextTypes
-from rich import print
-from pathlib import Path
-import urllib.request
-import config
-import PIL
+from telegram.ext import ContextTypes
 
+from utils import no_can_do, printlog
 
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
 
 # Inspirational
 async def ispirami(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -162,10 +158,7 @@ async def ispirami(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await printlog(update, "fa un poster motivazionale")
     if context.args:
         if context.args[0] in ["-a", "-anonimo", "-anon"]:
-            anonimi = [
-                "Anonimo",
-                ""
-            ]
+            pass
     with tempfile.TemporaryDirectory() as tmp_dir:
         photo = make_photo(text, nickname, Path(tmp_dir))
         await context.bot.send_photo(chat_id=update.effective_chat.id, photo=photo.open('rb'))
@@ -175,7 +168,7 @@ async def change_my_mind(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     def make_photo(text: str, destination_dir: Path) -> Path:
-        THIS_DIR = Path(__file__).parent
+        Path(__file__).parent
         template_photo = "templates/changemymind.jpg"
         font_file = "fonts/calibri.ttf"
         destination_photo = destination_dir / "changemymind.jpg"

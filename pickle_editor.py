@@ -1,9 +1,9 @@
-import pickle
 import asyncio
-from rich import print
-from telegram.ext import  PicklePersistence
-
 import json
+
+from telegram.ext import PicklePersistence
+
+
 def dump_json_custom(data, file_name):
     filename = f"{file_name}.json"
     with open(filename, "w") as f:

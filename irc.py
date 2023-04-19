@@ -20,7 +20,7 @@ def send_tg_message(sender: str, message: str, chat_id=chat_id):
             "parse_mode": "HTML",
         }
 
-        response = requests.post(
+        requests.post(
             f"{TELEGRAM_URL}{ircbot_TOKEN}/sendMessage", data=data
         )
 

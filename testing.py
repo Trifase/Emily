@@ -1,15 +1,10 @@
-import time
-import re
-import tempfile
 import pprint
 import time
 
-from telegram import Update, Bot
-from telegram.ext import CallbackContext, ContextTypes
-from rich import print
-from utils import printlog, get_display_name, no_can_do, get_now, get_chat_name, alert
-import config
-import sys
+from telegram import Update
+from telegram.ext import ContextTypes
+
+from utils import printlog
 
 
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

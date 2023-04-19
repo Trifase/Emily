@@ -1,10 +1,10 @@
 from rich import print
-from telegram import Update, Bot
-from telegram.ext import CallbackContext, ContextTypes
-import time
+from telegram import Update
+from telegram.ext import ContextTypes
 
 import config
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
+from utils import no_can_do, printlog
+
 
 # Asphalto
 async def azzurro(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -18,7 +18,7 @@ async def azzurro(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     testo = " ".join(context.args)
 
     try:
-        member = await context.bot.get_chat_member(config.ID_ASPHALTO, update.effective_user.id)
+        await context.bot.get_chat_member(config.ID_ASPHALTO, update.effective_user.id)
         # print(member)
         # print(type(member))
         # if isinstance(member, telegram.chatmember.ChatMemberLeft):
@@ -39,5 +39,5 @@ async def azzurro(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if update.message.chat.id == config.ID_ASPHALTO:
             await bot.delete_message(update.message.chat.id, update.message.message_id)
     else:
-        await update.message.reply_text(f'Per azzurrare manda un messaggio tipo /azzurro nickname@messaggio')
+        await update.message.reply_text('Per azzurrare manda un messaggio tipo /azzurro nickname@messaggio')
     return

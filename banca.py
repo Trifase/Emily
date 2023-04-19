@@ -1,13 +1,13 @@
-import requests
-import config
-import os.path
 import json
+import os.path
 
+import requests
 from requests.models import HTTPError
 from rich import print
-
 from telegram import Update
-from telegram.ext import CallbackContext, ContextTypes
+from telegram.ext import ContextTypes
+
+import config
 from utils import printlog
 
 # BANK_ID = "BANCA_CARIGE_CRGEITGG"
@@ -57,8 +57,8 @@ def refresh_token(refresh_token):
         response.raise_for_status()
 
 def get_or_refresh_token(SECRET_ID, SECRET_KEY):
-    import os.path
     import json
+    import os.path
     if os.path.isfile(f'banca/{SECRET_ID}.json'):  # c'è già un file token con questo ID
         with open(f'banca/{SECRET_ID}.json') as json_file:
             data = json.load(json_file)
@@ -118,7 +118,7 @@ def get_requisition_list(token):
     import requests
     from requests.structures import CaseInsensitiveDict
 
-    url = f"https://ob.nordigen.com/api/v2/requisitions/"
+    url = "https://ob.nordigen.com/api/v2/requisitions/"
 
     headers = CaseInsensitiveDict()
     headers["accept"] = "application/json"
@@ -197,7 +197,7 @@ def refresh_requisition(token):
         account_dict = dict()
         link, requisition_id = build_requisition(token, bank_id, "http://127.0.0.1:12666")  # creo un agreement
 
-        from http.server import HTTPServer, BaseHTTPRequestHandler
+        from http.server import BaseHTTPRequestHandler, HTTPServer
 
         class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             def do_GET(self):
@@ -227,14 +227,14 @@ def get_account_id(token, BANK_ID, redirect):
             data = json.load(json_file)
 
         acc_id = data['acc_id']
-        bank_id = data['bank_id']
+        data['bank_id']
         requisition_id = data['requisition_id']
         return acc_id
     else:  # non c'è un file accounts
         account_dict = dict()
         link, requisition_id = build_requisition(token, BANK_ID, "http://127.0.0.1:12666")  # creo un agreement
 
-        from http.server import HTTPServer, BaseHTTPRequestHandler
+        from http.server import BaseHTTPRequestHandler, HTTPServer
 
         class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             def do_GET(self):
@@ -304,8 +304,8 @@ def get_saldo(token, acc_id, just_the_number=1):
 
 
 def transactions_nice_table(token, acc_id):
-    from rich.table import Table
     from rich import box
+    from rich.table import Table
     table = Table(title="Lista Transazioni", box=box.SQUARE_DOUBLE_HEAD)
 
     table.add_column("Data")

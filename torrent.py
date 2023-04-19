@@ -1,14 +1,10 @@
 import humanize
+import qbittorrentapi
 from telegram import Update
-from telegram.ext import CallbackContext, ContextTypes
-from rich import print
-
+from telegram.ext import ContextTypes
 
 import config
-
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do, print_progressbar
-
-import qbittorrentapi
+from utils import no_can_do, print_progressbar, printlog
 
 _localize = humanize.i18n.activate("it_IT")
 
@@ -38,6 +34,10 @@ async def lista_torrent(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # retrieve and show all torrents
     message = ""
     try:
+        if qbt_client.torrents_info() is None:
+            await update.message.reply_text("Nessun torrent in download")
+            return
+
         for torrent in qbt_client.torrents_info():
             progress_perc = round(torrent.progress * 100, 2)
             message += f'<b>{torrent.name}</b> (<i>{torrent.state}</i>)\n↓ {str(round(torrent.dlspeed/1024/1024, 2))} MB/s · ↑ {str(round(torrent.upspeed/1024/1024, 2))} MB/s\nETA: {"∞" if torrent.eta == 8640000 else (str(humanize.precisedelta(torrent.eta, suppress=["days"], minimum_unit="seconds")))}\nProgress: {print_progressbar(progress_perc, suffix="", prefix="")} - {str(progress_perc)}%\n\n'

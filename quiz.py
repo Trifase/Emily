@@ -1,15 +1,15 @@
-from telegram import Update
-from telegram.ext import CallbackContext, ContextTypes
-from telegram.constants import PollType
-from html import unescape
 import asyncio
+import random
+from html import unescape
+
+import requests
+from rich import print
+from telegram import Update
+from telegram.constants import PollType
+from telegram.ext import ContextTypes
 
 import config
-from utils import printlog, get_display_name, print_to_string, get_now, get_chat_name, no_can_do
-from rich import print
-import random
-import requests
-import json
+from utils import get_display_name, get_now, no_can_do, printlog
 
 
 async def make_poll(update: Update, context: ContextTypes.DEFAULT_TYPE):

@@ -12,18 +12,13 @@
     # )
 
 
-from telegram import LabeledPrice, ShippingOption, Update
-import config
+from telegram import LabeledPrice, Update
 from telegram.ext import (
-    Application,
-    CommandHandler,
     ContextTypes,
-    MessageHandler,
-    PreCheckoutQueryHandler,
-    ShippingQueryHandler,
-    filters,
 )
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
+
+import config
+from utils import printlog
 
 PAYMENT_PROVIDER_TOKEN = config.TOKEN_PAGAMENTO
 

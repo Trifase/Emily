@@ -1,24 +1,20 @@
-import datetime
-import requests
-import math
 import json
-import time
-import random
-import asyncpraw
 import pprint
+import random
+import time
 
+import asyncpraw
+import requests
+from asyncprawcore.exceptions import Forbidden, NotFound, Redirect
 from rich import print
-from telegram import Update, Bot, InputMediaVideo
-from telegram.ext import CallbackContext, ContextTypes
-from telegram import InputMediaPhoto
+from telegram import InputMediaPhoto, InputMediaVideo, Update
 from telegram.error import BadRequest
-from asyncprawcore.exceptions import Redirect, NotFound, Forbidden
+from telegram.ext import ContextTypes
 
 import config
-
-
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
 from scrapers import file_in_limits
+from utils import get_now, no_can_do, printlog
+
 
 async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -89,11 +85,11 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await reddit.close()
         return
     except NotFound:
-        await update.message.reply_html(f"Errore: subreddit non trovato")
+        await update.message.reply_html("Errore: subreddit non trovato")
         await reddit.close()
         return
     except Forbidden:
-        await update.message.reply_html(f"Errore: subreddit privato")
+        await update.message.reply_html("Errore: subreddit privato")
         await reddit.close()
         return
     # except Exception as e:
@@ -180,8 +176,9 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
                     if download:
 
-                        import ffmpy
                         import urllib
+
+                        import ffmpy
                         video_file = "reddit/video.mp4"
                         audio_file = "reddit/audio.mp4"
 

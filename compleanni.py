@@ -1,14 +1,13 @@
 import datetime
 import re
-import peewee
 
+import peewee
 from rich import print
 from telegram import Update
-from telegram.ext import CallbackContext, ContextTypes
-from telegram.helpers import mention_html
-import config
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
+from telegram.ext import ContextTypes
 
+import config
+from utils import get_now, no_can_do, printlog
 
 db = peewee.SqliteDatabase(config.DBPATH)
 
@@ -68,14 +67,14 @@ async def compleanni_add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     # vedi la funzione parse_date.
 
     if not text:
-        await update.message.reply_markdown_v2(f'Devi inserire una data in formato `dd/mm` oppure `dd/mm/yyyy`\.')
+        await update.message.reply_markdown_v2('Devi inserire una data in formato `dd/mm` oppure `dd/mm/yyyy`\.')
         print(f"{get_now()} ERRORE: data non inserita")
         return
 
     try:
         birthdate = parse_date(text)
     except ValueError:
-        await update.message.reply_text(f'Devi inserire una data valida.')
+        await update.message.reply_text('Devi inserire una data valida.')
         print(f"{get_now()} ERRORE: data invalida")
         return
 
@@ -97,7 +96,7 @@ async def compleanni_add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         Compleanni.create(user_id=user_id, chat_id=chat_id, birthdate=birthdate)
 
 
-    await update.message.reply_text(f'Compleanno aggiunto!')
+    await update.message.reply_text('Compleanno aggiunto!')
 
 async def compleanni_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -110,7 +109,6 @@ async def compleanni_list(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} chiede la lista dei compleanni')
     await printlog(update, "chiede la lista dei compleanni")
     # print(update.message.chat.id)
-    reminders = ""
     for row in Compleanni.select().where(Compleanni.chat_id == update.message.chat.id):
         if row:
             member = await context.bot.get_chat_member(update.message.chat.id, row.user_id)
@@ -123,7 +121,7 @@ async def compleanni_list(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             compleannilist.append([nickname, date])
             counter += 1
     if counter == 0:
-        await update.message.reply_html(f'Non trovo un cazzo, onestamente', quote=True)
+        await update.message.reply_html('Non trovo un cazzo, onestamente', quote=True)
     else:
     #     # print(compleannilist)
         compleannilist.sort(key=lambda x: (x[1].month, x[1].day))
@@ -150,12 +148,12 @@ async def compleanno_del(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     if found:
         Compleanni.delete().where((Compleanni.user_id == user_id) & (Compleanni.chat_id == chat_id)).execute()
-        await update.message.reply_text(f'Come vuoi.', quote=True)
+        await update.message.reply_text('Come vuoi.', quote=True)
         # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} ha cancellato il suo compleanno')
         await printlog(update, "cancella il proprio compleanno")
         
     else:
-        await update.message.reply_markdown_v2(f'Non trovo un cazzo onestamente', quote=True)
+        await update.message.reply_markdown_v2('Non trovo un cazzo onestamente', quote=True)
 
 async def compleanni_manual_check(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:  
     if await no_can_do(update, context):

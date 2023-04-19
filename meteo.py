@@ -1,13 +1,12 @@
-import requests
 import datetime
 
+import requests
 from rich import print
 from telegram import Update
-from telegram.ext import CallbackContext, ContextTypes
+from telegram.ext import ContextTypes
 
 import config
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
-
+from utils import no_can_do, printlog
 
 
 async def ora(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -60,8 +59,8 @@ async def ora(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
         meteo = data['current']
     except KeyError:
-        errore = data['error']
-        update.message.reply_text("Errore.")
+        data['error']
+        await update.message.reply_text("Errore.")
         return
 
     ora = f"Sono le {datetime.datetime.utcfromtimestamp(meteo['dt'] + data['timezone_offset']).strftime('%H:%M')} del {datetime.datetime.utcfromtimestamp(meteo['dt']+ data['timezone_offset']).strftime('%d/%m')}"
@@ -130,7 +129,7 @@ async def prometeo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     try:
         meteo = data['current']
     except KeyError:
-        errore = data['error']
+        data['error']
         await update.message.reply_text("Errore.")
         return
 
@@ -275,7 +274,7 @@ async def meteo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     try:
         meteo = data['current']
     except KeyError:
-        errore = data['error']
+        data['error']
         await update.message.reply_text("Errore.")
         return
 
@@ -359,8 +358,8 @@ async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         try:
             meteo = data['daily'][day]
         except KeyError:
-            errore = data['error']
-            update.message.reply_text("Errore.")
+            data['error']
+            await update.message.reply_text("Errore.")
             return
         min = round(meteo['temp']['min'])
         max = round(meteo['temp']['max'])

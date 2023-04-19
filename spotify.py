@@ -1,22 +1,16 @@
-import os
 import asyncio
+import os
 import tempfile
 import urllib
 
-from spotdl import Spotdl
-from spotdl.types.options import DownloaderOptions
-
 from PIL import Image
-
-from telegram import Update
-from telegram.constants import ChatAction
-from telegram.ext import CallbackContext, ContextTypes
-
-import config
-
+from spotdl import Spotdl
 from spotdl.download.downloader import Downloader
+from spotdl.types.options import DownloaderOptions
+from telegram import Update
+from telegram.ext import ContextTypes
 
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
+from utils import no_can_do, printlog
 
 # Questi erano dentro il codice di spotdl, prima o poi uso i miei
 client_id = "5f573c9620494bae87890c0f08a60293"
@@ -80,11 +74,11 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             await update.message.reply_text(f"Non capisco:  {e}")
 
     if not results:
-        await update.message.reply_text(f"Non riesco a trovarla su youtube music per scaricarla, scusami.")
+        await update.message.reply_text("Non riesco a trovarla su youtube music per scaricarla, scusami.")
         return
 
     await printlog(update, "posta una canzone di spotify", results)
-    msg = await update.message.reply_text(f"Arriva, dammi un minuto.")
+    msg = await update.message.reply_text("Arriva, dammi un minuto.")
     
     downloader = Downloader(loop=asyncio.get_event_loop(), settings=dlder_options)
 
@@ -113,8 +107,8 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     try:
         await update.message.reply_audio(audio=open(path, "rb"), caption=caption, thumb=thumbnail)
-    except Exception as e:
-        await update.message.reply_text(f"Niente non riesco a mandare il file, amen.")
+    except Exception:
+        await update.message.reply_text("Niente non riesco a mandare il file, amen.")
 
     await msg.delete()
 

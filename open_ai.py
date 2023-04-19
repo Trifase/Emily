@@ -1,6 +1,5 @@
 
 import json
-import os
 import random
 import re
 import tempfile
@@ -9,7 +8,6 @@ import traceback
 
 import httpx
 import openai
-
 from pydub import AudioSegment
 from rich import print
 from telegram import Update
@@ -18,7 +16,6 @@ from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
 import config
-import openai
 from utils import no_can_do, printlog
 
 
@@ -63,7 +60,8 @@ async def stream_response(input):
                             subchunk = subchunk[6:]
                             try:
                                 result = json.loads(subchunk)
-                            except:
+                            except Exception as e:
+                                print(e)
                                 pass
                             if result:
                                 text = result['choices'][0]['delta'].get('content', '')
@@ -75,7 +73,8 @@ async def stream_response(input):
 
                     try:
                         result = json.loads(chunk)
-                    except:
+                    except Exception as e:
+                        print(e)
                         pass
                     if result:
                         text = result['choices'][0]['delta'].get('content', '')
@@ -94,7 +93,7 @@ async def ai_stream(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_chat.id in [config.ID_TIMELINE] and update.message.from_user.id != config.ID_TRIF:
         try:
             this_user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)
-        except Exception as e:
+        except Exception:
             return
         if this_user.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
             return
@@ -144,7 +143,7 @@ async def ai_old(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_chat.id in [config.ID_TIMELINE] and update.message.from_user.id != config.ID_TRIF:
         try:
             this_user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)
-        except Exception as e:
+        except Exception:
             return
         if this_user.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
             return
@@ -183,16 +182,17 @@ async def ai_old(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         response = r.json()
         try:
             output = response['choices'][0]['message']["content"].strip()
-        except: 
+        except Exception as e:
+            print(e)
             print(response)
  
         total_tkns = response['usage']['total_tokens']
         total_price = (price_per_1k/1000)*total_tkns
         rounded_price = str(round(total_price, 4))
-        if not 'openai_stats' in context.chat_data:
+        if 'openai_stats' not in context.chat_data:
             context.chat_data['openai_stats'] = {}
  
-        if not update.effective_user.id in context.chat_data['openai_stats']:
+        if update.effective_user.id not in context.chat_data['openai_stats']:
             context.chat_data['openai_stats'][update.effective_user.id] = {}
  
         context.chat_data['openai_stats'][update.effective_user.id]['total_tokens'] = context.chat_data['openai_stats'][update.effective_user.id].get('total_tokens', 0) + total_tkns
@@ -202,9 +202,9 @@ async def ai_old(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
  
         await update.message.reply_html(f"<b>{input}</b>\n{output}\n<i>______</i>\n<i>Questo messaggio è costato circa ${rounded_price}</i>")
  
-    except Exception as e:
+    except Exception:
         print(traceback.format_exc())
-        await update.message.reply_text(f"Song rott")
+        await update.message.reply_text("Song rott")
 
 
 async def whisper_transcribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -213,7 +213,7 @@ async def whisper_transcribe(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if update.effective_chat.id in [config.ID_TIMELINE] and update.message.from_user.id != config.ID_TRIF:
         try:
             this_user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)
-        except Exception as e:
+        except Exception:
             return
         if this_user.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
             return
@@ -225,8 +225,6 @@ async def whisper_transcribe(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
 
     PRICE_PER_MINUTE = 0.006
-    chat_id = update.effective_chat.id
-    user_id = update.effective_user.id
 
     reply = update.message.reply_to_message
 
@@ -243,7 +241,7 @@ async def whisper_transcribe(update: Update, context: ContextTypes.DEFAULT_TYPE)
         audio_track = AudioSegment.from_file(og_filename.name)
         audio_track.export(filename_mp3.name, format="mp3")
 
-    except Exception as e:
+    except Exception:
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
             reply_to_message_id=update.message.message_id,
@@ -268,7 +266,7 @@ async def openai_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if update.effective_chat.id in [config.ID_TIMELINE]:
         try:
             this_user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)
-        except Exception as e:
+        except Exception:
             return
         if this_user.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
             return

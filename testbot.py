@@ -1,7 +1,6 @@
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, filters
 
-from telegram.ext import ApplicationBuilder, filters, MessageHandler, ContextTypes, CommandHandler
-import re
-from telegram import Update, Bot, InputMediaPhoto
 import config
 
 

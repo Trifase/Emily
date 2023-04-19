@@ -1,24 +1,26 @@
-import json
-
-import random
-import tempfile
-import requests
 import datetime
 import html
+import json
+import random
+import tempfile
+from html import escape as parsequote
 
 import httpx
-
-from rich import print
-from html import escape as parsequote
-from bs4 import BeautifulSoup
-from telegram import Update, Bot, InlineQueryResultArticle
-from telegram.ext import Updater, CommandHandler, CallbackContext, ContextTypes
-from telegram.helpers import escape_markdown
 import peewee
+import requests
+from bs4 import BeautifulSoup
+from rich import print
+from telegram import Update
+from telegram.ext import ContextTypes
 
 import config
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do, expand, extract_status_change
-
+from utils import (
+    expand,
+    extract_status_change,
+    get_now,
+    no_can_do,
+    printlog,
+)
 
 # Per le quote
 last_search = ""
@@ -186,7 +188,7 @@ async def add_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             quote_to_add = "<" + nickname + "> " + text_to_add
 
         else:  # non è una reply
-            await update.message.reply_text(f'Addami sta minchia')
+            await update.message.reply_text('Addami sta minchia')
             return
 
     else:  # il messaggio è dopo il comando
@@ -198,7 +200,7 @@ async def add_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     newquote = Quote.create(quote_text=quote_to_add)
     newquote.save()
 
-    await update.message.reply_text(f'Fatto', quote=False)
+    await update.message.reply_text('Fatto', quote=False)
 
 
 # Diochan
@@ -245,8 +247,6 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36',
                 'referer': referurl
             }
-            import string
-            import random
             # delpass = ''.join(random.choice(string.ascii_letters + string.digits + string.punctuation) for _ in range(8))
             delpass = chiave
             # delpass = f"emily-{update.message.reply_to_message.id}"
@@ -348,7 +348,7 @@ async def mon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_html(f'<i>({mon})</i>', quote=False)
 
     if mon % 100 == 0:
-        await update.message.reply_text(f'PEPPEREPÈ!!! - Si vede che vi manca, eh?!', quote=False)
+        await update.message.reply_text('PEPPEREPÈ!!! - Si vede che vi manca, eh?!', quote=False)
 
     await printlog(update, "ha nominato mon", mon)
 
@@ -422,7 +422,7 @@ async def get_thread_from_dc(update: Update, context: ContextTypes.DEFAULT_TYPE)
         text = html.unescape(text)
         text = text.replace('<br/>','\n').replace('<span class="quote">', '').replace('<span class="spoiler">', '').replace('</span>', '')
         message = f"{link}\n{text}"
-        image_url = thread['image_url']
+        thread['image_url']
 
         await update.message.reply_html(text=message)
 

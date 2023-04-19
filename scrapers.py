@@ -1,36 +1,36 @@
 import datetime
-import requests
-import urllib.request
+import json
+import pprint
+import random
 import shutil
 import tempfile
-import pytz
-import instaloader
-import pymediainfo
-import random
 import time
-import asyncpraw
-import pprint
-import json
 import traceback
-import pprint
-import httpx
-import random
-import pprint
-
-
-from instaloader import BadResponseException, Profile, StoryItem
+import urllib.request
 from urllib import parse
-
-
-from rich import print
-from telegram import Update, InputMediaPhoto, InputMediaVideo, InlineQueryResultVideo, InlineQueryResultArticle, InputTextMessageContent
-from telegram.ext import ContextTypes
-from telegram.error import  BadRequest
 from uuid import uuid4
 
-import config
+import asyncpraw
+import httpx
+import instaloader
+import pymediainfo
+import pytz
+import requests
+from instaloader import BadResponseException, Profile, StoryItem
+from rich import print
+from telegram import (
+    InlineQueryResultArticle,
+    InlineQueryResultVideo,
+    InputMediaPhoto,
+    InputMediaVideo,
+    InputTextMessageContent,
+    Update,
+)
+from telegram.error import BadRequest
+from telegram.ext import ContextTypes
 
-from utils import printlog, get_display_name, get_now, no_can_do, alert
+import config
+from utils import alert, get_display_name, get_now, no_can_do, printlog
 
 local_tz = pytz.timezone('Europe/Rome')
 
@@ -42,6 +42,7 @@ def utc_to_local(utc_dt):
 async def get_facebook_video_info(url) -> dict:
     video_data = {}
     import re
+
     from requests_html import AsyncHTMLSession
     asession = AsyncHTMLSession()
     try:
@@ -59,17 +60,17 @@ async def get_facebook_video_info(url) -> dict:
 
         try:
             hd_url = re.search(hd_url_pattern, response.html.html).group(1).replace('\/', '/').replace('\\u0025', '%')
-        except Exception as e:
+        except Exception:
             pass
 
         try:
             sd_url = re.search(sd_url_pattern, response.html.html).group(1).replace('\/', '/').replace('\\u0025', '%')
-        except Exception as e:
+        except Exception:
             pass
 
         try:
             title = re.search(title_pattern, response.html.html).group(1)
-        except Exception as e:
+        except Exception:
             pass
 
         # print(hd_url)
@@ -259,7 +260,7 @@ async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                     )]
             await update.inline_query.answer(results)
             return
-    except Exception as e:
+    except Exception:
         return
 
 async def tiktok(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -274,7 +275,7 @@ async def tiktok(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     video_info = await get_tiktok_video_infos_aweme(username, id)
 
     if not video_info:
-        await update.message.reply_text(f"Non riesco, forse tiktok è rotto, o forse sono programmata male.")
+        await update.message.reply_text("Non riesco, forse tiktok è rotto, o forse sono programmata male.")
         return
 
     if video_info["slideshow"]:
@@ -288,7 +289,7 @@ async def tiktok(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         deleteme = await update.message.reply_html(f"Il video è più di 50MB\nNon posso caricarlo, ecco il <a href=\'{video_info['video_url']}\'>link</a>")
         return
     elif int(info.headers["Content-Length"]) >= 20000000:
-        deleteme = await update.message.reply_text(f"Il video è più di 20MB\nTocca caricarlo a mano, un attimo.")
+        deleteme = await update.message.reply_text("Il video è più di 20MB\nTocca caricarlo a mano, un attimo.")
         try:
             with urllib.request.urlopen(video_info["video_url"]) as response:
                 with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
@@ -315,7 +316,7 @@ async def tiktok_long(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     video_info = await get_tiktok_video_infos_aweme(username, id)
 
     if not video_info:
-        await update.message.reply_text(f"Non riesco, forse tiktok è rotto, o forse sono programmata male.")
+        await update.message.reply_text("Non riesco, forse tiktok è rotto, o forse sono programmata male.")
         return
 
     info = requests.head(video_info["video_url"])
@@ -324,7 +325,7 @@ async def tiktok_long(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         deleteme = await update.message.reply_html(f"Il video è più di 50MB\nNon posso caricarlo, ecco il <a href=\'{video_info['video_url']}\'>link</a>")
         return
     elif int(info.headers["Content-Length"]) >= 20000000:
-        deleteme = await update.message.reply_text(f"Il video è più di 20MB\nTocca caricarlo a mano, un attimo.")
+        deleteme = await update.message.reply_text("Il video è più di 20MB\nTocca caricarlo a mano, un attimo.")
         try:
             with urllib.request.urlopen(video_info["video_url"]) as response:
                 with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
@@ -381,13 +382,14 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                                 pass
                             else:
                                 medialist.append(InputMediaVideo(media=p.video_url))
-                        else: continue
-                        
+                        else:
+                            continue
 
                     else:
                         if await file_in_limits(p.display_url):
                             medialist.append(InputMediaPhoto(media=p.display_url))
-                        else: continue
+                        else:
+                            continue
                 
                 await context.bot.send_media_group(reply_to_message_id=update.message.message_id, chat_id=update.message.chat.id, media=medialist)
 
@@ -497,13 +499,15 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                                 else:
                                     medialist.append(InputMediaVideo(media=p.video_url))
                                     i += 1
-                            else: continue
+                            else:
+                                continue
 
                         else:
                             if await file_in_limits(p.display_url):
                                 medialist.append(InputMediaPhoto(media=p.display_url))
                                 i += 1
-                            else: continue
+                            else:
+                                continue
 
                 elif post.typename == "GraphImage":
 
@@ -532,7 +536,8 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                             caption = caption.replace("<", "&lt;").replace(">", "&gt;")
                             medialist.append(InputMediaVideo(media=url, caption=caption, parse_mode='HTML'))
                             i += 1
-                    else: continue
+                    else:
+                        continue
 
                 else:
                     print("Boh")
@@ -553,7 +558,7 @@ async def instagram_stories(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     L.load_session_from_file(USER, "db/session-emilia_superbot")
 
     if not context.args or (len(context.args) != 1):
-        await update.message.reply_html(f"Uso: <code>/stories @profile</code>")
+        await update.message.reply_html("Uso: <code>/stories @profile</code>")
         return
     username = context.args[0].replace("@", "")
 
@@ -697,11 +702,11 @@ async def ninofrassica(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                 url = post.url
                 username = post.owner_username
                 medialist.append(InputMediaPhoto(media=post.url, caption=caption, parse_mode='HTML'))
-                print(f" Foto")
+                print(" Foto")
             elif post.typename == "GraphVideo":
                 url = post.video_url
                 username = post.owner_username
-                print(f" Video")
+                print(" Video")
                 medialist.append(InputMediaVideo(media=url, caption=caption, parse_mode='HTML'))
             else:
                 print("Boh")
@@ -757,8 +762,8 @@ async def facebook_video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     # print("zero", context.match.group(0))
     # print("uno", context.match.group(1))
     link = context.match.group(0)
+
     import yt_dlp
-    import json
     # from rich import print
 
     ydl_opts = {
@@ -820,7 +825,7 @@ async def scrape_tweet_media(update: Update, context: ContextTypes.DEFAULT_TYPE)
     try:
         t = my_tweet[0]
     except IndexError:
-        await update.message.reply_html(f"Tweet non trovato.")
+        await update.message.reply_html("Tweet non trovato.")
         return
 
     # print(my_tweet[0]._json)
@@ -998,8 +1003,9 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
                     if download:
 
-                        import ffmpy
                         import urllib
+
+                        import ffmpy
                         video_file = "reddit/video.mp4"
                         audio_file = "reddit/audio.mp4"
 
@@ -1188,7 +1194,7 @@ async def twitch_clips(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     response = httpx.get(API_URL, params=params, headers=headers).json()
 
     if not response.get('data'):
-        await update.message.reply_html(f"Non trovo niente")
+        await update.message.reply_html("Non trovo niente")
         return
     
     await printlog(update, "posta una clip di twitch", context.match.group(0))

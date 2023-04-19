@@ -1,19 +1,14 @@
 import asyncio
 import random
-import time
-
 from collections import defaultdict
-from rich import print
 
 from pyrogram import Client
-
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.constants import ChatAction
-from telegram.ext import CallbackContext, ContextTypes
+from rich import print
+from telegram import Update
+from telegram.ext import ContextTypes
 
 import config
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
-
+from utils import no_can_do, printlog
 
 api_id = config.API_ID
 api_hash = config.API_HASH
@@ -58,7 +53,7 @@ async def get_reaction_count(user_id, chat_id):
             try:
                 if message.date.year <= 2021:
                     continue
-            except Exception as e:
+            except Exception:
                 continue
 
             else:
@@ -96,7 +91,7 @@ async def pyro_bomb_reaction(chat_id, user_id, limit=100, sample=20):
         for message in random.sample(msglist, sample):
             try:
                 await pyro.send_reaction(chat_id, message.id, random.choice(["👎", "💩", "🤡", "🤮"]))
-            except Exception as e:
+            except Exception:
                 continue
             await asyncio.sleep(0.5)
 

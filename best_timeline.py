@@ -1,17 +1,11 @@
 import datetime
 import random
 
-
-from rich import print
-from telegram import Update, InputMediaPhoto, InputMediaVideo, ChatPermissions, ChatMember
+from telegram import ChatMember, ChatPermissions, InputMediaPhoto, InputMediaVideo, Update
 from telegram.ext import ContextTypes
 
 import config
-
-from utils import no_can_do, printlog, get_display_name
-from pyrog import send_reaction
-
-
+from utils import get_display_name, no_can_do, printlog
 
 
 async def scrape_tweet_bt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -45,7 +39,7 @@ async def scrape_tweet_bt(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     try:
         t = my_tweet[0]
     except IndexError:
-        await update.message.reply_html(f"Tweet non trovato.")
+        await update.message.reply_html("Tweet non trovato.")
         return
 
     # print(my_tweet[0]._json)
@@ -116,7 +110,7 @@ async def silenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     else:
         try:
             minutes = int(context.args[0])
-        except Exception as e:
+        except Exception:
             minutes = 30
 
     user = await update.message.chat.get_member(update.message.from_user.id)
@@ -157,11 +151,11 @@ async def permasilenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     if not can_user_restrict(user) and update.effective_user.id != config.ID_TRIF:
         return
-    await printlog(update, f"silenzia per sempre", f"{victim_name}")
+    await printlog(update, "silenzia per sempre", f"{victim_name}")
 
     sta_zitto = ChatPermissions.no_permissions()
     await context.bot.restrict_chat_member(update.message.chat.id, update.message.reply_to_message.from_user.id, permissions=sta_zitto)
-    await update.message.reply_html(f"Silenziatə fino al <code>decadimento termico dell'universo</code>", reply_to_message_id=update.message.reply_to_message.id)
+    await update.message.reply_html("Silenziatə fino al <code>decadimento termico dell'universo</code>", reply_to_message_id=update.message.reply_to_message.id)
 
 
 async def deleta_if_channel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

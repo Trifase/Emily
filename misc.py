@@ -1,36 +1,32 @@
-import time
-import deepl 
-import tempfile
-import upsidedown
 import datetime
-import requests
-import lichess.api
-import random
-import os
-import httpx
-import markovify
 import json
+import os
+import random
+import tempfile
+import time
 
-import numpy as np
-import matplotlib.pyplot as plt
+import deepl
+import httpx
+import lichess.api
+import markovify
 import matplotlib.dates as mdates
-
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatMember
+import matplotlib.pyplot as plt
+import numpy as np
+import requests
+import upsidedown
+from aiohttp_client_cache import CachedSession, FileBackend
+from dateutil.parser import parse, parserinfo
+from gtts import gTTS
+from PIL import Image
+from pydub import AudioSegment
+from rich import print
+from telegram import ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.ext import ContextTypes
 
-from PIL import Image
-from rich import print
-from gtts import gTTS
-from pydub import AudioSegment
-from dateutil.parser import parse, parserinfo
-from aiohttp_client_cache import CachedSession, FileBackend
-
 import config
+from pyrog import get_all_chatmembers, get_user_from_username, pyro_bomb_reaction, send_reaction
+from utils import expand, get_display_name, no_can_do, print_progressbar, printlog
 
-from utils import printlog, no_can_do, expand, get_display_name, print_progressbar
-from pyrog import get_user_from_username, send_reaction, pyro_bomb_reaction, get_all_chatmembers
-
-from telegram import InputMediaPhoto
 
 async def self_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -72,12 +68,12 @@ async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     corpus = get_corpus(f'db/corpuses/{filename}', user_id)
     text_model = markovify.NewlineText(corpus)
-    stopwords = [l.strip() for l in open('db/stopwords-it.txt', encoding='utf8').readlines()]
+    stopwords = [lin.strip() for lin in open('db/stopwords-it.txt', encoding='utf8').readlines()]
     startword = random.choice([word for word in update.message.reply_to_message.text.split() if word not in stopwords])
     await printlog(update, f"genera markov chain che inizia con la parola '{startword}' per", user_id)
     try:
         markov_message = text_model.make_sentence_with_start(startword, strict=False, min_words=20)
-    except Exception as e:
+    except Exception:
         markov_message = text_model.make_sentence()
     await update.message.reply_text(markov_message, quote=False)
 
@@ -157,7 +153,7 @@ async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         keyboard = [
             [
-                InlineKeyboardButton(f"👎 Kick", callback_data=listona),
+                InlineKeyboardButton("👎 Kick", callback_data=listona),
                 InlineKeyboardButton("👍 Passo", callback_data=["LURKERS_LIST", None])
             ]
         ]
@@ -198,7 +194,7 @@ async def lurkers_callbackqueryhandlers(update: Update, context: ContextTypes.DE
         await query.delete_message()
         return
     else:
-        await printlog(update, f"banna i lurkers", f"{listona[1:]}")
+        await printlog(update, "banna i lurkers", f"{listona[1:]}")
         await query.answer("Fai conto che li ho bannati tutti")
         await query.delete_message()
         for user_id in listona[1:]:
@@ -250,7 +246,7 @@ async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         return
 
     if update.message.chat.id == config.ID_TIMELINE:
-        await update.message.reply_html(f"<code>https://www.youtube.com/watch?v=6Z3QJ4L1Bg0</code>")
+        await update.message.reply_html("<code>https://www.youtube.com/watch?v=6Z3QJ4L1Bg0</code>")
         return
         LB_ID = 799277
     else:
@@ -352,7 +348,7 @@ async def polls_callbackqueryhandlers(update: Update, context: ContextTypes.DEFA
 
         try:
             context.args = mybutton.original_update.message.text.split()[1:]
-        except Exception as e:
+        except Exception:
             context.args = []
 
         function_to_call = mybutton.callable
@@ -394,7 +390,6 @@ async def is_safe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     unsafeness = results[tempphoto.name]['unsafe']
     safeness = results[tempphoto.name]['safe']
-    limit = 0.80
 
     text = f"Safe: ({str(safeness * 100)[:4]}%)\nUnsafe: ({str(unsafeness * 100)[:4]}%)\n\n{'❌ NOT' if unsafeness > safeness else '✅'} SAFE"
     msg = await update.message.reply_html(text)
@@ -403,7 +398,6 @@ async def is_safe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         detector = NudeDetector()
         results = detector.detect(tempphoto.name)
         text += "\n\n"
-        original_text = text
 
         if results:
             for r in results:
@@ -497,7 +491,6 @@ async def bomb_react(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     if not update.message.reply_to_message:
         return
 
-    user_id = update.message.reply_to_message.from_user.id
     username = update.message.reply_to_message.from_user.username
     displayname = await get_display_name(update.message.reply_to_message.from_user)
     await printlog(update, "lancia una bombreact a", displayname)
@@ -587,15 +580,14 @@ async def bioritmo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def condominioweb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     import io
     import json
-    from dataclassy import dataclass
-    from datetime import datetime
     import random
-    import pprint
     import time
-    import asyncio
-    from codetiming import Timer
-    import zstandard
+    from datetime import datetime
+
     import jsonlines
+    import zstandard
+    from codetiming import Timer
+    from dataclassy import dataclass
 
 
     @dataclass
@@ -656,7 +648,7 @@ async def condominioweb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     title = thread.get('name')
     text = thread.get('text')
     message = f"<a href='{url}'><b>{title}</b></a>\n{author} ha scritto:\n{text}"
-    og = await context.bot.send_message(config.ID_RITALY, message, parse_mode='HTML', disable_web_page_preview=True)
+    await context.bot.send_message(config.ID_RITALY, message, parse_mode='HTML', disable_web_page_preview=True)
     # print(message)
     # print("=====")
     time.sleep(1)
@@ -739,7 +731,7 @@ async def fatfingers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         # lines = "1234567890'ì", "qwertyuiopè+", "asdfghjklòàù", "<zxcvbnm,.-"
         lines = "qwertyuiopè+", "asdfghjklòàù", "<zxcvbnm,.-"
         try:
-            line_index, index = [(i, l.find(key)) for i, l in enumerate(lines) if key in l][0]
+            line_index, index = [(i, lin.find(key)) for i, lin in enumerate(lines) if key in lin][0]
         except IndexError:
             return [key]
         lines = lines[line_index - 1: line_index + 2] if line_index else lines[0: 2]
@@ -770,8 +762,13 @@ async def fatfingers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         insertion_rate = 2.68
         substitution_rate = 6.60
 
+    if text is None:
+        return
+    
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} digita con le dita ciccione!')
     await printlog(update, "digita con le dita ciccionazze")
+
+
 
     for c in text:
         ifupper = c.isupper()
@@ -867,7 +864,7 @@ async def square(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:  #
 
     text = " ".join(context.args)  # SQUARE (6) "S Q U A R E" (6*2)-1 = 11
     if len(text) == 1:
-        await update.message.reply_text(f'Fallo tu un quadrato con un carattere solo, coglione')
+        await update.message.reply_text('Fallo tu un quadrato con un carattere solo, coglione')
         return
     inversetext = text[::-1]  # ERAUQS
     lung = (len(text) * 2) - 1
@@ -928,7 +925,6 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     token = config.LICHESS_API
     nick = " ".join(context.args)
-    apiurl = "https://lichess.org/api/challenge/open"
     limit = 60 * 5
     increment = 3
     if nick == "aurora":
@@ -942,7 +938,6 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             'variant': 'standard', 
             'name': 'r/italy scacchi'
         }
-        is_rated = "false"
         response = requests.post('https://lichess.org/api/challenge/open', data=post_data)
         reply = response.json()
         url = reply['challenge']['url']
@@ -957,7 +952,6 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             'variant': 'standard', 
             'name': 'r/italy scacchi'
         }
-        is_rated = "false"
         response = requests.post('https://lichess.org/api/challenge/open', data=post_data)
         reply = response.json()
         url = reply['challenge']['url']
@@ -972,7 +966,6 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             'variant': 'standard', 
             'name': 'r/italy scacchi'
         }
-        is_rated = "true"
         response = requests.post('https://lichess.org/api/challenge/open', data=post_data)
         reply = response.json()
         url = reply['challenge']['url']
@@ -980,7 +973,7 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     if not nick:
-        await update.message.reply_text(f'Inserisci un nick per le statistiche, oppure "rated" per una 10+3 rated, oppure "amichevole" per una 10+3 amichevole')
+        await update.message.reply_text('Inserisci un nick per le statistiche, oppure "rated" per una 10+3 rated, oppure "amichevole" per una 10+3 amichevole')
         return
     try:
         user = lichess.api.user(nick, auth=token)
@@ -990,7 +983,7 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # print(user['perfs'])
     # print(user['count'])
     giocate = user['count']['all']
-    perse = user['count']['loss']
+    user['count']['loss']
     vinte = user['count']['win']
     last_seen = datetime.datetime.fromtimestamp(int(str(user['seenAt'])[:10])).strftime('%Y-%m-%d %H:%M:%S')
     if int(giocate) == 0:

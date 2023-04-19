@@ -4,11 +4,10 @@ import traceback
 
 from rich import print
 from telegram import Update
-from telegram.ext import CallbackContext, ContextTypes
+from telegram.ext import ContextTypes
 
 import config
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do, crea_sondaggino
-
+from utils import crea_sondaggino, no_can_do, printlog
 
 # async def chiedi_opinione(update, context, original_update=None, poll_passed=False):
 
@@ -43,7 +42,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
     message = " ".join(context.args)
 
     if not update.message.reply_to_message and not message:
-        await update.message.reply_html(f'Uso: <code>/tweet messaggio</code> oppure <code>/tweet</code> in risposta a qualcosa.')
+        await update.message.reply_html('Uso: <code>/tweet messaggio</code> oppure <code>/tweet</code> in risposta a qualcosa.')
         return
 
     max_votes = 4
@@ -69,7 +68,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
     api = tweepy.API(auth)
-    client = tweepy.Client(bearer_token=BEARER_TOKEN, access_token=ACCESS_KEY, access_token_secret=ACCESS_SECRET, consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
+    tweepy.Client(bearer_token=BEARER_TOKEN, access_token=ACCESS_KEY, access_token_secret=ACCESS_SECRET, consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
 
 
 
@@ -98,7 +97,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                     post_result = api.update_status(status=message, media_ids=[media.media_id])
                     status_id = post_result.id_str
                     tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
-                except Exception as e:
+                except Exception:
                     print(traceback.format_exc())
 
             if MASTODON:
@@ -107,7 +106,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                     mast_response = mastodon.status_post(message, media_ids=mast_media)
                     mastodon_url = mast_response.get('url')
                     mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
-                except Exception as e:
+                except Exception:
                     print(traceback.format_exc())
 
             if tw_url or mast_url:
@@ -139,7 +138,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                     post_result = api.update_status(status=message, media_ids=[media.media_id])
                     status_id = post_result.id_str
                     tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
-                except Exception as e:
+                except Exception:
                     print(traceback.format_exc())
 
             if MASTODON:
@@ -148,7 +147,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                     mast_response = mastodon.status_post(message, media_ids=mast_media)
                     mastodon_url = mast_response.get('url')
                     mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
-                except Exception as e:
+                except Exception:
                     print(traceback.format_exc())
 
             if tw_url or mast_url:
@@ -168,7 +167,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
         # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} vuole inviare un tweet:\n{message}')
         await printlog(update, "vuole inviare un tweet", message)
         if len(message) > 270:
-            await update.message.reply_text(f"it's too long man!")
+            await update.message.reply_text("it's too long man!")
             return
 
         if TWITTER:
@@ -176,7 +175,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 status = api.update_status(status=message)
                 status_id = status.id_str
                 tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
-            except Exception as e:
+            except Exception:
                 print(traceback.format_exc())
 
         if MASTODON:
@@ -184,7 +183,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 mast_response = mastodon.status_post(message)
                 mastodon_url = mast_response.get('url')
                 mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
-            except Exception as e:
+            except Exception:
                 print(traceback.format_exc())
 
         if tw_url or mast_url:
@@ -193,7 +192,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
         else:
             await update.message.reply_html("Qualcosa è andato storto, scusa")
     else:
-        await update.message.reply_markdown_v2(f'Uso: `/tweet messaggio`')
+        await update.message.reply_markdown_v2('Uso: `/tweet messaggio`')
         return
 
 
@@ -284,7 +283,7 @@ async def tweet_pm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text('Usa: /tweet_pm @username messaggio.')
         return
     if text[0][0] != "@":
-        await update.message.reply_text(f'L\'username deve iniziare con @.')
+        await update.message.reply_text('L\'username deve iniziare con @.')
         return
     else:
         pm_dest = pm_dest[1:]
@@ -297,7 +296,7 @@ async def tweet_pm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         #     f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} vuole inviare un PM su twitter a {pm_dest}: {recipient_id}')
         try:
             api.send_direct_message(recipient_id, pm_text)
-            await update.message.reply_html(f'Fatto!', disable_web_page_preview=True)
+            await update.message.reply_html('Fatto!', disable_web_page_preview=True)
         except tweepy.TweepError as e:
             await update.message.reply_html(f"Something went wrong! {e.reason}", disable_web_page_preview=True)
 

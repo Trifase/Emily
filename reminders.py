@@ -1,15 +1,13 @@
 import datetime
-import peewee
 
+import peewee
 from dateparser.search import search_dates
-from telegram import Update, Bot
-from telegram.ext import CallbackContext, ContextTypes
 from rich import print
-from dateutil.parser import parse as parse_date
+from telegram import Update
+from telegram.ext import ContextTypes
 
 import config
-
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
+from utils import get_now, no_can_do, printlog
 
 db = peewee.SqliteDatabase(config.DBPATH)
 
@@ -32,7 +30,7 @@ async def reminder_helper(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     if await no_can_do(update, context):
         return
     await update.message.reply_markdown_v2(
-        f'Uso: \n`/remindme 3d15h25m messaggio`\n`/remindme 5m butta la pasta`\nUsa `/reminderlist` per la lista dei tuoi reminder e \n`/remindelete <ID>` per eliminare un reminder',
+        'Uso: \n`/remindme 3d15h25m messaggio`\n`/remindme 5m butta la pasta`\nUsa `/reminderlist` per la lista dei tuoi reminder e \n`/remindelete <ID>` per eliminare un reminder',
         quote=True)
     return
 
@@ -45,7 +43,7 @@ async def send_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
     print(f'{get_now()} Trovato un reminder: "{message}" del {date_now}')
 
     if not message:
-        missiva = f'Bip Bop Bup! Mi avevi chiesto di blipparti!'
+        missiva = 'Bip Bop Bup! Mi avevi chiesto di blipparti!'
     else:
         missiva = f'Ciao, mi avevi chiesto di ricordarti questo: {message}'
 
@@ -66,7 +64,7 @@ async def remindme(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if not context.args:
         await update.message.reply_markdown_v2(
-            f'Devi inserire un lasso di tempo\.\nTempo relativo:\n`/remindme 3 giorni 15 ore messaggio`\n`/remindme 10m butta la pasta`\nTempo assoluto:\n`/remindme 23:59 vai a dormire`\n`/remindme 25/12/2024 Natale`\n`/remindme 31/12/2026 23:56 Capodanno!`\n\nUsa `/reminderlist` per la lista dei tuoi reminder e \n`/remindelete <ID>` per eliminare un reminder',
+            'Devi inserire un lasso di tempo\.\nTempo relativo:\n`/remindme 3 giorni 15 ore messaggio`\n`/remindme 10m butta la pasta`\nTempo assoluto:\n`/remindme 23:59 vai a dormire`\n`/remindme 25/12/2024 Natale`\n`/remindme 31/12/2026 23:56 Capodanno!`\n\nUsa `/reminderlist` per la lista dei tuoi reminder e \n`/remindelete <ID>` per eliminare un reminder',
             quote=True)
         return
 
@@ -126,14 +124,13 @@ async def reminders_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if counter:
         await context.bot.send_message(update.message.chat.id, reminders, parse_mode='MarkdownV2')
     else:
-        await update.message.reply_markdown_v2(f'Non trovo un cazzo onestamente', quote=True)
+        await update.message.reply_markdown_v2('Non trovo un cazzo onestamente', quote=True)
 
 async def remindelete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
 
 
-    found = False
     reply_id = " ".join(context.args)  # prende l'ID dal comando
     if not reply_id:
         await update.message.reply_html("Non hai specificato un ID")
@@ -160,9 +157,9 @@ async def remindelete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             for job in current_jobs:
                 job.schedule_removal()
 
-            await update.message.reply_html(f'Fatto', quote=True)
+            await update.message.reply_html('Fatto', quote=True)
         else:
-            await update.message.reply_html(f'Non trovo un cazzo onestamente', quote=True)
+            await update.message.reply_html('Non trovo un cazzo onestamente', quote=True)
 
 
 

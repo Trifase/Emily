@@ -1,70 +1,167 @@
-import warnings
-warnings.filterwarnings("ignore")
-import locale
-import pytz
-import peewee
-import re
-import time
 import datetime
-import traceback
 import json
-import instaloader
+import locale
 import platform
+import re
+import traceback
+import warnings
 
-from rich import print
+import instaloader
+import peewee
+import pytz
 from aiohttp import web
-
-from telegram import Update, Bot, InlineKeyboardButton, InlineKeyboardMarkup
+from rich import print
+from telegram import Update
 from telegram import __version__ as TG_VER
 from telegram.constants import ParseMode
-from telegram.ext import Application, ApplicationBuilder, CommandHandler, PicklePersistence, MessageHandler, filters, CallbackQueryHandler, Defaults, CallbackContext, ContextTypes, PollAnswerHandler, InlineQueryHandler, ChatMemberHandler, AIORateLimiter, PreCheckoutQueryHandler, ApplicationHandlerStop
+from telegram.ext import (
+    AIORateLimiter,
+    Application,
+    ApplicationBuilder,
+    CallbackQueryHandler,
+    ChatMemberHandler,
+    CommandHandler,
+    ContextTypes,
+    Defaults,
+    InlineQueryHandler,
+    MessageHandler,
+    PicklePersistence,
+    PollAnswerHandler,
+    PreCheckoutQueryHandler,
+    filters,
+)
 
 import config
-
-from utils import printlog, get_now, no_can_do, is_member_in_group
-
-from admin import (cancella, commandlist, count_lines, echo, esci, executecode,
-    getchat, ip, lista_chat, listen_to, restart, _eval, set_group_picture,
-    set_title, tg_info, wakeup, banlist, add_ban, del_ban, trigger_backup, parla,
-    send_custom_media, check_temp, flush_arbitrary_callback_data, clean_db)
+from admin import (
+    _eval,
+    add_ban,
+    banlist,
+    cancella,
+    check_temp,
+    clean_db,
+    commandlist,
+    count_lines,
+    del_ban,
+    echo,
+    esci,
+    executecode,
+    flush_arbitrary_callback_data,
+    getchat,
+    ip,
+    lista_chat,
+    listen_to,
+    parla,
+    restart,
+    send_custom_media,
+    set_group_picture,
+    set_title,
+    tg_info,
+    trigger_backup,
+    wakeup,
+)
 from asphalto import azzurro
 from banca import bot_get_saldo, bot_get_transazioni
-from best_timeline import scrape_tweet_bt, silenzia, deleta_if_channel, permasilenzia
+from best_timeline import deleta_if_channel, permasilenzia, scrape_tweet_bt, silenzia
 from compleanni import compleanni_add, compleanni_list, compleanni_manual_check, compleanno_del
-from cron_jobs import check_reminders, check_compleanni, lotto_member_count, do_global_backup, plot_boiler_stats, autolurkers, parse_diochan
-from diochan import save_tensor, random_tensor, search_quote, add_quote, diochan, mon, ascendi, get_thread_from_dc, greet, set_greet, set_greet_pic
+from cron_jobs import (
+    check_compleanni,
+    do_global_backup,
+    lotto_member_count,
+    parse_diochan,
+)
+from diochan import (
+    add_quote,
+    ascendi,
+    diochan,
+    get_thread_from_dc,
+    random_tensor,
+    save_tensor,
+    search_quote,
+)
 from donazioni import donazioni, precheckout_callback, successful_payment_callback
 from games import sassocartaforbici
-from lotto import maesta_primo, elenco_maesta, stat_maesta
-from macros import ispirami, change_my_mind
-from maps import streetview, location, maps_buttons
-from meteo import meteo_oggi, ora, prometeo_oggi, forecast
-from movies import doveguardo, imdb, doveguardo_buttons
-from misc import (bioritmo, fascio, fatfingers, scacchi, square, traduci, spongebob, voice, alexa, get_user_info,
-    set_auto_reaction, send_auto_reaction, bomb_react, start, polls_callbackqueryhandlers, condominioweb, is_safe,
-    greet_BT_user, random_trifase, aoc_leaderboard, wikihow, lurkers, lurkers_callbackqueryhandlers,
-    markovs, self_delete)
-from open_ai import ai_stream, openai_stats, ai_old, whisper_transcribe
-from parse_everything import (exit_from_banned_groups, nuova_chat_rilevata, update_timestamps_asphalto, check_for_sets,
-    drop_update_from_banned_users, new_admin_buttons, messaggio_spiato, track_chats, save_messages_stats) 
+from lotto import elenco_maesta, maesta_primo, stat_maesta
+from macros import change_my_mind, ispirami
+from maps import location, maps_buttons, streetview
+from meteo import forecast, meteo_oggi, ora, prometeo_oggi
+from misc import (
+    alexa,
+    aoc_leaderboard,
+    bioritmo,
+    bomb_react,
+    condominioweb,
+    fascio,
+    fatfingers,
+    get_user_info,
+    greet_BT_user,
+    lurkers,
+    lurkers_callbackqueryhandlers,
+    markovs,
+    polls_callbackqueryhandlers,
+    random_trifase,
+    scacchi,
+    self_delete,
+    send_auto_reaction,
+    set_auto_reaction,
+    spongebob,
+    square,
+    start,
+    traduci,
+    voice,
+    wikihow,
+)
+from movies import doveguardo, doveguardo_buttons, imdb
+from open_ai import ai_old, ai_stream, openai_stats, whisper_transcribe
+from parse_everything import (
+    check_for_sets,
+    drop_update_from_banned_users,
+    exit_from_banned_groups,
+    messaggio_spiato,
+    new_admin_buttons,
+    nuova_chat_rilevata,
+    save_messages_stats,
+    track_chats,
+    update_timestamps_asphalto,
+)
 from pyrog import reaction_karma
-from quiz import classifica, make_poll, ricevi_risposta_quiz, punteggio
+from quiz import classifica, make_poll, punteggio, ricevi_risposta_quiz
 from reddit import reddit
 from reminders import remindelete, reminder_helper, reminders_list, remindme, send_reminder
-from scrapers import (tiktok, tiktok_long, new_instagram, instagram_stories,
-    youtube_alts, ninofrassica, wikipedia, tiktok_inline, facebook_video, scrape_tweet_media,
-    parse_reddit_link, twitch_clips)
+from scrapers import (
+    facebook_video,
+    instagram_stories,
+    new_instagram,
+    ninofrassica,
+    parse_reddit_link,
+    scrape_tweet_media,
+    tiktok,
+    tiktok_inline,
+    tiktok_long,
+    twitch_clips,
+    wikipedia,
+    youtube_alts,
+)
 from sets import addset, deleteset, jukebox, listaset
-from smarthome import luci_status, toggle_light, get_light_label, consumo, purificatore, riscaldamento_stats
-from space import solarsystem, launches
+from smarthome import consumo, luci_status, purificatore, riscaldamento_stats, toggle_light
+from space import launches, solarsystem
 from spotify import spoty
-from stats import send_stats, populate_chat_data_from_jsons
-from tarots import tarot, oroscopo, tarotschema
-from testing import test, getfile
+from stats import send_stats
+from tarots import tarot, tarotschema
+from testing import getfile, test
 from torrent import lista_torrent
 from twitter import lista_tweets, tweet
-from utils import is_user, is_inline_button, count_k_v, is_forged_command, is_lurkers_list
+from utils import (
+    count_k_v,
+    get_now,
+    is_forged_command,
+    is_inline_button,
+    is_lurkers_list,
+    printlog,
+)
 from zoom import zoom_link
+
+
+warnings.filterwarnings("ignore")
 
 def main():
 
@@ -436,7 +533,6 @@ async def post_shutdown(app: Application) -> None:
     return
 
 def get_reminders_from_db():
-    import pprint
     reminders_list = []
     reminders_da_processare = 0
     reminders_da_aggiungere = 0

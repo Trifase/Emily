@@ -2,11 +2,11 @@ import requests
 
 from rich import print
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
-from telegram.ext import CallbackContext, ContextTypes
+from telegram.ext import ContextTypes
 from telegram.error import BadRequest
 
 import config
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
+from utils import printlog, no_can_do
 
 
 # Maps
@@ -32,7 +32,7 @@ async def streetview(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         "region": "it",
         "key": config.GMAP_API_KEY
     }
-    geo_url = f'https://maps.googleapis.com/maps/api/geocode/json'
+    geo_url = 'https://maps.googleapis.com/maps/api/geocode/json'
     location = requests.get(geo_url, geo_query).json()
 
     try:
@@ -76,7 +76,7 @@ async def streetview(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         "key": config.GMAP_API_KEY
     }
 
-    map_url = f'https://maps.googleapis.com/maps/api/streetview'
+    map_url = 'https://maps.googleapis.com/maps/api/streetview'
     r = requests.get(map_url, map_query)
     open('images/map.jpg', 'wb').write(r.content)
     await update.message.reply_photo(open('images/map.jpg', 'rb'), quote=False, caption=location_name, reply_markup=reply_markup)
@@ -128,7 +128,7 @@ async def maps_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "key": config.GMAP_API_KEY
     }
 
-    map_url = f'http://maps.googleapis.com/maps/api/streetview'
+    map_url = 'http://maps.googleapis.com/maps/api/streetview'
     r = requests.get(map_url, map_query)
     open('images/new_map.jpg', 'wb').write(r.content)
 
@@ -154,7 +154,7 @@ async def location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "region": "it",
         "key": config.GMAP_API_KEY
     }
-    geo_url = f'https://maps.googleapis.com/maps/api/geocode/json'
+    geo_url = 'https://maps.googleapis.com/maps/api/geocode/json'
     location = requests.get(geo_url, geo_query).json()
 
     try:
@@ -175,7 +175,7 @@ async def location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "key": config.GMAP_API_KEY
     }
 
-    map_url = f'https://maps.googleapis.com/maps/api/staticmap'
+    map_url = 'https://maps.googleapis.com/maps/api/staticmap'
     r = requests.get(map_url, map_query)
     open('images/map.jpg', 'wb').write(r.content)
     await update.message.reply_photo(open('images/map.jpg', 'rb'), quote=False, caption=location_name)

@@ -1,25 +1,18 @@
-import deepl
-import json
-import pyaztro
-import random
-from PIL import Image
-import httpx
-import random
-import tempfile
-import subprocess
-import tempfile
-
-from telegram import Update
-from telegram.ext import CallbackContext, ContextTypes
-from rich import print
-from pathlib import Path
-import urllib.request
-import config
-import PIL
 import argparse
+import json
+import random
+import tempfile
 
+import deepl
+import httpx
+from PIL import Image
+from rich import print
+from telegram import Update
+from telegram.ext import ContextTypes
 
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
+import config
+from utils import no_can_do, printlog
+
 
 class ArgumentParser(argparse.ArgumentParser):
     """
@@ -29,7 +22,8 @@ class ArgumentParser(argparse.ArgumentParser):
     def error(self, message):
         raise ParserError(message)
 
-class ParserError(Exception): pass
+class ParserError(Exception):
+    pass
 
 
 
@@ -778,10 +772,8 @@ async def draw_cards_special(reverse=False, deck='rws', force_obliqua=False):
 
 
 
-    obliquo = False
     carta_obliqua = None
     if centrale in carte_estratte:
-        obliquo = True
         carta_obliqua = centrale
     else:
         carte_estratte.append(centrale)
@@ -817,7 +809,7 @@ async def generate_cards_table(cards_info, imagepath, spread_name, zodiac=False)
 
 
     # print(cards_info)
-    n = cards_info['chosen_cards']
+    cards_info['chosen_cards']
     cards_list = cards_info['cards']
 
     basedir = 'images/tarots'
@@ -868,16 +860,14 @@ async def tarot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     deck = random.choice(['rws', 'morgan'])
     spread_name = 'default_three'
 
-    SPREADS = ['yesno', 'wirth', 'zodiac', 'default_three', 'simple_cross', 'celtic_cross', 'mondo', 'scelta']
-    DECKS = ['marsiglia', 'rws', 'morgan', 'keymaster', 'heaven', 'santamuerte']
 
     k_spreads = ['yesno', '3cards', 'simplecross', 'wirth', 'celtic', 'mondo', 'scelta', 'zodiac', 'year']
     k_decks = ['marsiglia', 'thoth', 'keymaster', 'morgan', 'fyodor', 'heaven', 'shadow', 'santamuerte', 'rws']
 
     if not context.args:
         h = ""
-        h += f"ERRORE: devi scegliere un mazzo e uno schema:\n<code>/tarocchi -[mazzo] -[schema]</code>\n\n"
-        h += f"Usa il comando <code>-help</code> per la lista completa di opzioni:\n<code>/tarocchi -help</code>\n\n"
+        h += "ERRORE: devi scegliere un mazzo e uno schema:\n<code>/tarocchi -[mazzo] -[schema]</code>\n\n"
+        h += "Usa il comando <code>-help</code> per la lista completa di opzioni:\n<code>/tarocchi -help</code>\n\n"
         h += f"Un esempio casuale:\n<code>/tarocchi -{random.choice(k_decks)} -{random.choice(k_spreads)}</code>"
         await update.message.reply_html(h, disable_web_page_preview=True)
         return
@@ -942,41 +932,41 @@ async def tarot(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if help_message:
         h = ""
-        h += f"Uso: <code>/tarocchi [mazzo] [schema] [opzioni]</code>\n\n"
+        h += "Uso: <code>/tarocchi [mazzo] [schema] [opzioni]</code>\n\n"
 
-        h += f"<b>· Mazzi ·</b>\n"
-        h += f"<code>-marsiglia  </code>: usa il mazzo di Marsiglia.\n"
-        h += f"<code>-thoth      </code>: usa il mazzo Thoth/Crowley.\n"
-        h += f"<code>-keymaster  </code>: usa il mazzo Keymaster.\n"
-        h += f"<code>-morgan     </code>: usa il mazzo Morgan-Greer.\n"
-        h += f"<code>-fyodor     </code>: usa il mazzo Fyodor Pavlov.\n"
-        h += f"<code>-heaven     </code>: usa il mazzo Heaven and Earth.\n"
-        h += f"<code>-shadow     </code>: usa il mazzo Shadow and Light.\n"
-        h += f"<code>-santamuerte</code>: Usa il mazzo Santa Muerte.\n"
-        h += f"<code>-rws        </code>: usa il mazzo Rider-Waite-Smith.\n\n"
+        h += "<b>· Mazzi ·</b>\n"
+        h += "<code>-marsiglia  </code>: usa il mazzo di Marsiglia.\n"
+        h += "<code>-thoth      </code>: usa il mazzo Thoth/Crowley.\n"
+        h += "<code>-keymaster  </code>: usa il mazzo Keymaster.\n"
+        h += "<code>-morgan     </code>: usa il mazzo Morgan-Greer.\n"
+        h += "<code>-fyodor     </code>: usa il mazzo Fyodor Pavlov.\n"
+        h += "<code>-heaven     </code>: usa il mazzo Heaven and Earth.\n"
+        h += "<code>-shadow     </code>: usa il mazzo Shadow and Light.\n"
+        h += "<code>-santamuerte</code>: Usa il mazzo Santa Muerte.\n"
+        h += "<code>-rws        </code>: usa il mazzo Rider-Waite-Smith.\n\n"
 
-        h += f"Una galleria dei mazzi può essere vista <a href='https://imgur.com/a/iLIaqC3'>qui</a>.\n\n"
+        h += "Una galleria dei mazzi può essere vista <a href='https://imgur.com/a/iLIaqC3'>qui</a>.\n\n"
 
-        h += f"<b>· Schemi ·</b>\n"
-        h += f"<code>-yesno      </code>: carta singola, con lettura.\n"
-        h += f"<code>-3cards     </code>: Tre carte, con lettura passato presente e futuro.\n"
-        h += f"<code>-simplecross</code>: croce <a href='https://www.sortedsoul.com/wp-content/uploads/2017/10/PSX_20181012_191903-1.jpg'>semplice</a>.\n"
-        h += f"<code>-wirth      </code>: croce <a href='https://i.imgur.com/1KkWTlf.png'>di Wirth modificata</a>.\n"
-        h += f"<code>-celtic     </code>: croce <a href='https://i0.wp.com/angelorum.co/wp-content/uploads/2016/10/The-Celtic-Cross.jpg'>celtica.</a>\n"
-        h += f"<code>-mondo      </code>: schema del <a href='https://i.imgur.com/84zgN5b.png'>mondo</a>.\n"
-        h += f"<code>-scelta     </code>: tarocchi della <a href='https://i.imgur.com/EZdPooH.png'>scelta</a>.\n"
-        h += f"<code>-zodiac     </code>: una carta per <a href='https://i0.wp.com/angelorum.co/wp-content/uploads/2015/12/12-Houses-Zodiac-Tarot-Spread.jpg'>casa zodiacale</a>.\n"
-        h += f"<code>-year       </code>: estrazione annuale a 16 carte.\n\n"
+        h += "<b>· Schemi ·</b>\n"
+        h += "<code>-yesno      </code>: carta singola, con lettura.\n"
+        h += "<code>-3cards     </code>: Tre carte, con lettura passato presente e futuro.\n"
+        h += "<code>-simplecross</code>: croce <a href='https://www.sortedsoul.com/wp-content/uploads/2017/10/PSX_20181012_191903-1.jpg'>semplice</a>.\n"
+        h += "<code>-wirth      </code>: croce <a href='https://i.imgur.com/1KkWTlf.png'>di Wirth modificata</a>.\n"
+        h += "<code>-celtic     </code>: croce <a href='https://i0.wp.com/angelorum.co/wp-content/uploads/2016/10/The-Celtic-Cross.jpg'>celtica.</a>\n"
+        h += "<code>-mondo      </code>: schema del <a href='https://i.imgur.com/84zgN5b.png'>mondo</a>.\n"
+        h += "<code>-scelta     </code>: tarocchi della <a href='https://i.imgur.com/EZdPooH.png'>scelta</a>.\n"
+        h += "<code>-zodiac     </code>: una carta per <a href='https://i0.wp.com/angelorum.co/wp-content/uploads/2015/12/12-Houses-Zodiac-Tarot-Spread.jpg'>casa zodiacale</a>.\n"
+        h += "<code>-year       </code>: estrazione annuale a 16 carte.\n\n"
 
-        h += f"Una galleria degli schemi può essere vista <a href='https://imgur.com/a/lYgEWWX'>qui</a>.\n\n"
+        h += "Una galleria degli schemi può essere vista <a href='https://imgur.com/a/lYgEWWX'>qui</a>.\n\n"
         
-        h += f"<b>· Opzioni ·</b>\n"
-        h += f"<code>-noread     </code>: non fare la lettura.\n"
-        h += f"<code>-info       </code>: la lista, in ordine, delle carte uscite.\n"
-        h += f"<code>-reverse    </code>: abilità la possibilità che le carte siano a testa in giù.\n\n"
+        h += "<b>· Opzioni ·</b>\n"
+        h += "<code>-noread     </code>: non fare la lettura.\n"
+        h += "<code>-info       </code>: la lista, in ordine, delle carte uscite.\n"
+        h += "<code>-reverse    </code>: abilità la possibilità che le carte siano a testa in giù.\n\n"
 
         
-        h += f"Esempio:\n<code>/tarocchi -morgan -wirth</code>: estrazione con schema croce di Wirth e mazzo Morgan-Greer.\n"
+        h += "Esempio:\n<code>/tarocchi -morgan -wirth</code>: estrazione con schema croce di Wirth e mazzo Morgan-Greer.\n"
 
         await printlog(update, "chiede l'help dei tarocchi")
         await update.message.reply_html(h, disable_web_page_preview=True)
@@ -1046,10 +1036,10 @@ async def tarotschema(update: Update, context: ContextTypes.DEFAULT_TYPE):
     a.add_argument('-d', '--deck', nargs='?', default='rws')
 
     if not context.args:
-        await update.message.reply_html(f'Uso:\n<code>/schema [nome dello schema] -c [numeri delle carte] -d [nome del mazzo]</code>\nAd esempio:\n<code>/schema wirth -c 11 0 15 3 7 5 -d marsiglia</code>\nUsa l\'asterisco <code>*</code> per indicare una carta obliqua.')
+        await update.message.reply_html('Uso:\n<code>/schema [nome dello schema] -c [numeri delle carte] -d [nome del mazzo]</code>\nAd esempio:\n<code>/schema wirth -c 11 0 15 3 7 5 -d marsiglia</code>\nUsa l\'asterisco <code>*</code> per indicare una carta obliqua.')
         return
     if '-help' in context.args:
-        await update.message.reply_html(f'Questo comando serve a creare un\'immagine basandosi sull\'estrazione dei tarocchi hce hai già fatto per conto tuo.\nUso:\n<code>/schema [nome dello schema] -c [numeri delle carte] -d [nome del mazzo]</code>\nAd esempio:\n<code>/schema wirth -c 11 0 15 3 7 5 -d marsiglia</code>\nUsa l\'asterisco <code>*</code> per indicare una carta obliqua.')
+        await update.message.reply_html('Questo comando serve a creare un\'immagine basandosi sull\'estrazione dei tarocchi hce hai già fatto per conto tuo.\nUso:\n<code>/schema [nome dello schema] -c [numeri delle carte] -d [nome del mazzo]</code>\nAd esempio:\n<code>/schema wirth -c 11 0 15 3 7 5 -d marsiglia</code>\nUsa l\'asterisco <code>*</code> per indicare una carta obliqua.')
         return
     args, unknown = a.parse_known_args(context.args)
     # print(args)
@@ -1089,7 +1079,7 @@ async def tarotschema(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if '*' in c:
             carta_obliqua = c
         if int(c.replace('*','')) > 21 or int(c.replace('*','')) < 0:
-            await update.message.reply_html(f'Scusa ma i numeri devono essere tra 0 e 21')
+            await update.message.reply_html('Scusa ma i numeri devono essere tra 0 e 21')
             return
 
     returned_cards = []
@@ -1113,7 +1103,7 @@ async def tarotschema(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await generate_cards_table(my_cards, imagepath.name, spread_name, zodiac=zodiac)
     caption = spread['name']
-    msg = await update.message.reply_photo(photo=imagepath, caption=caption)
+    await update.message.reply_photo(photo=imagepath, caption=caption)
     imagepath.close()
 
 # Oroscopulo
@@ -1148,10 +1138,6 @@ async def oroscopo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     async def get_horoscope_from_aztro(sign: str) -> str:
         
-        data = {
-            "sign": sign,
-            "day": "today",
-        }
 
         async with httpx.AsyncClient() as session:
             # this uses http://astrology.kudosmedia.net/ - dead at 2023-03-29
@@ -1178,7 +1164,7 @@ async def oroscopo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not context.args or not args.segno:
         if not context.user_data.get('segno_zodiacale', None):
-            await update.message.reply_html(f"Uso: <code>/oroscopo [segno]</code>\nPuoi anche usare <code>/oroscopo -setdefault [segno]</code> per memorizzare il tuo segno.")
+            await update.message.reply_html("Uso: <code>/oroscopo [segno]</code>\nPuoi anche usare <code>/oroscopo -setdefault [segno]</code> per memorizzare il tuo segno.")
             return
         else:
             segno = context.user_data.get('segno_zodiacale')

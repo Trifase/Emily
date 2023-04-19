@@ -1,13 +1,12 @@
 import datetime
-import config
 
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
-
+from rich import print
 from telegram import Update
 from telegram.constants import ChatMemberStatus
-from telegram.ext import CallbackContext, ContextTypes
-from rich import print
+from telegram.ext import ContextTypes
 
+import config
+from utils import no_can_do, printlog
 
 
 async def maesta_primo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -106,7 +105,7 @@ async def maesta_primo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 
 async def stat_maesta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    from collections import defaultdict, Counter
+    from collections import Counter, defaultdict
 
     if await no_can_do(update, context):
         return
@@ -172,7 +171,7 @@ async def conta_morti(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     # pprint.pprint(update.to_dict())
     try:
         chat_id = update.chat_member.chat.id
-    except Exception as e:
+    except Exception:
         return
     if chat_id not in [config.ID_LOTTO]:
         return

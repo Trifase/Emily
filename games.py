@@ -1,13 +1,12 @@
 
 import random
 
+from rich import print
 from telegram import Update
 from telegram.ext import ContextTypes
-from rich import print
 
 import config
-
-from utils import printlog, no_can_do
+from utils import no_can_do, printlog
 
 
 async def sassocartaforbici(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -99,13 +98,13 @@ def sudoku():
             for r in range(max_len):
                 if (r == 0) or ((r+1) % 3 != 0) or (r == max_len-1):
                     if puzzle[c][r] < 0:
-                        print(f'    ', end='')
+                        print('    ', end='')
                     else:
                         print(f' {puzzle[c][r]}  ', end='')
 
                 else:
                     if puzzle[c][r] < 0:
-                        print(f'   |', end='')
+                        print('   |', end='')
                     else:
                         print(f' {puzzle[c][r]} |', end='')
 
@@ -166,21 +165,8 @@ def sudoku():
 
 
     # 3x3
-    sudoku3x3 = [
-        [  1, -1,  3],
-        [ -1,  3,  1],
-        [ -1, -1, -1]
-        ]
 
     # 6x6
-    sudoku6x6 = [
-        [ -1, -1,  4,  5, -1, -1],
-        [  5,  2, -1,  1,  4,  3],
-        [  2, -1,  5, -1, -1,  4],
-        [ -1, -1, -1, -1, -1, -1],
-        [ -1, -1,  1,  4,  6, -1],
-        [ -1,  4,  2,  4, -1, -1],
-        ]
 
     # 9x9
     sudoku9x9 = [
@@ -197,30 +183,8 @@ def sudoku():
 
     # hardest sudoku
     # https://abcnews.go.com/blogs/headlines/2012/06/can-you-solve-the-hardest-ever-sudoku
-    sudoku_hardest = [
-        [8, -1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, 3, 6, -1, -1, -1, -1, -1],
-        [-1, 7, -1, -1, 9, -1, 2, -1, -1],
-        [-1, 5, -1, -1, -1, 7, -1, -1, -1],
-        [-1, -1, -1, -1, 4, 5, 7, -1, -1],
-        [-1, -1, -1, 1, -1, -1, -1, 3, -1],
-        [-1, -1, 1, -1, -1, -1, -1, 6, 8],
-        [-1, -1, 8, 5, -1, -1, -1, 1, -1],
-        [-1, 9, -1, -1, -1, -1, 4, -1, -1]
-    ]
 
     # blank sudoku
-    sudoku_blank = [
-        [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1, -1, -1]
-    ]
 
     sudoku = sudoku9x9
 

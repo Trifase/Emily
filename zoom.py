@@ -1,27 +1,14 @@
 
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Chat, ChatMember, ChatMemberUpdated
-from telegram.constants import ParseMode, ChatMemberStatus
-from telegram.ext import CallbackContext, ContextTypes, Updater
-from telegram.error import BadRequest
-
-import subprocess
-import tempfile
-import datetime
-import asyncio
-import traceback
-
-import config
-from utils import printlog, get_display_name, print_to_string, get_now, get_chat_name, no_can_do, ForgeCommand
-from scrapers import file_in_limits
-from cron_jobs import do_global_backup
-from rich import print
-import sys
-import os
 import base64
 import urllib
-import requests
-import pprint
 
+import requests
+from telegram import Update
+from telegram.constants import ParseMode
+from telegram.ext import CallbackContext
+
+import config
+from utils import printlog
 
 
 async def zoom_link(update: Update, context: CallbackContext):
@@ -83,9 +70,9 @@ async def zoom_link(update: Update, context: CallbackContext):
     def check_correct_permissions(token, meeting_uuid):
         settings = get_meeting_setting(token, meeting_uuid)
         assert settings['password'] == ''
-        assert settings['viewer_download'] == False
+        assert settings['viewer_download'] is False
         assert settings['topic'] == f'{oggi} Lezione di Yoga'
-        assert settings['on_demand'] == True
+        assert settings['on_demand'] is True
         return True
 
     def patch_default_permissions(token, meeting_uuid, oggi):
@@ -120,7 +107,7 @@ async def zoom_link(update: Update, context: CallbackContext):
 
     url = context.args[0]
     
-    if not 'meeting_id' in url:
+    if 'meeting_id' not in url:
         await update.message.reply_html("Devi mandarmi un link alla registrazione zoom")
         return
 

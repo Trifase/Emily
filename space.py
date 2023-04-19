@@ -1,26 +1,21 @@
-import cairo
-import uuid
-import pytz
 import math
 import random
-import time
 import tempfile
-import io
-
-import numpy as np
+import uuid
 from datetime import datetime, timezone
+
+import cairo
+import numpy as np
+import pytz
 import requests
 from PIL import Image, ImageDraw, ImageFont
-
+from rich import print
 from telegram import Update
 from telegram.constants import ChatAction
-from telegram.ext import CallbackContext, ContextTypes
-from rich import print
+from telegram.ext import ContextTypes
 
 import config
-
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
-
+from utils import no_can_do, printlog
 
 
 async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -813,7 +808,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if s_suffix_type <= 80:
             system_name += f" {gen_system_suffix()}"
         else:
-            system_name += f" System"
+            system_name += " System"
 
         if s_the_chance <= 75:
             system_name = f"The {system_name}"
@@ -1270,7 +1265,6 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         if sun_size > 300 and random.randint(1, 100) > 10 and BINARY:
               # binary
-            BINARY_PADDING = 5
             sun_color_1 = random.choice(list_of_sun_colors)
             sun_color_2 = random.choice(list_of_sun_colors)
             sun_r_1, sun_g_1, sun_b_1 = sun_color_1[0] / 255.0, sun_color_1[1] / 255.0, sun_color_1[2] / 255.0
@@ -1530,8 +1524,8 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(image_path, 'rb'), caption=f"<b>· {system_name.upper()} ·</b>\n<code>{seed}</code>", parse_mode='HTML')
     
     if '-raw' in context.args:
-        import pprint
         import html
+        import pprint
         rawtext = pprint.pformat(stelle, sort_dicts=False)
         rawtext = html.escape(rawtext)
         await context.bot.send_message(chat_id=update.effective_chat.id, text=f"<pre>{rawtext}</pre>", parse_mode='HTML')

@@ -3,15 +3,22 @@ import inspect
 import io
 import logging
 import logging.handlers
-import sys
 import time
 from typing import Callable, Optional, Tuple
 
 from dataclassy import dataclass
 from rich import print
-from telegram import (Bot, CallbackQuery, ChatMember, ChatMemberUpdated,
-                      InlineKeyboardButton, InlineKeyboardMarkup, Update, User)
-from telegram.ext import CallbackContext, ChatMemberHandler
+from telegram import (
+    Bot,
+    CallbackQuery,
+    ChatMember,
+    ChatMemberUpdated,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Update,
+    User,
+)
+from telegram.ext import CallbackContext
 
 import config
 
@@ -118,7 +125,6 @@ def is_function_enabled(chat_id, function, context):
     if chat_id > 0:  # è una chat privata.
         return True
 
-    setting = function
 
     if "settings" not in context.chat_data:
         context.chat_data["settings"] = {}

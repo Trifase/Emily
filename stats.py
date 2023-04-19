@@ -1,15 +1,17 @@
 import datetime
-import locale
-import pytz
 import json
-from telegram import Update
-from telegram.constants import ChatMemberStatus
-from telegram.ext import CallbackContext, ContextTypes
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-locale.setlocale(locale.LC_ALL, 'it_IT.utf8')
-from utils import no_can_do, printlog
+import locale
 import os
+
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
+import pytz
+from telegram import Update
+from telegram.ext import ContextTypes
+
+from utils import no_can_do
+
+locale.setlocale(locale.LC_ALL, 'it_IT.utf8')
 
 
 def extract_day(timestamp):
@@ -138,7 +140,7 @@ def try_this_at_home():
             for hour in list_hours:
                 stats['average_hours'][hour] += stats[day].get(hour, 0)
 
-    filename = make_triplot(stats, name)
+    make_triplot(stats, name)
 
 
 

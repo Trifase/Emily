@@ -1,14 +1,12 @@
-import miio
 import httpx
-
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+import miio
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 from yeelight import Bulb
 
 import config
-
-from utils import printlog, no_can_do, ForgeCommand
 from cron_jobs import plot_boiler_stats
+from utils import ForgeCommand, no_can_do, printlog
 
 
 def get_bulb(name: str):
@@ -112,14 +110,14 @@ async def luci_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-    await update.message.reply_html(f"Luci:", reply_markup=reply_markup, quote=False)
+    await update.message.reply_html("Luci:", reply_markup=reply_markup, quote=False)
 
 async def toggle_light(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         if update.effective_user.id not in config.ADMINS:
             return
-    except Exception as e:
+    except Exception:
         if update.from_user.id not in config.ADMINS:
             return
 

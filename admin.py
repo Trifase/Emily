@@ -1,22 +1,19 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Chat, ChatMember, ChatMemberUpdated
-from telegram.constants import ParseMode, ChatMemberStatus
-from telegram.ext import CallbackContext, ContextTypes, Updater
-from telegram.error import BadRequest
-
-import subprocess
-import tempfile
 import datetime
-import asyncio
+import os
+import subprocess
+import sys
+import tempfile
 import traceback
-import pytz
+
+from rich import print
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.constants import ChatMemberStatus, ParseMode
+from telegram.ext import CallbackContext, ContextTypes
 
 import config
-from utils import printlog, get_display_name, print_to_string, get_now, get_chat_name, no_can_do, ForgeCommand
-from scrapers import file_in_limits
 from cron_jobs import do_global_backup
-from rich import print
-import sys
-import os
+from scrapers import file_in_limits
+from utils import ForgeCommand, get_now, no_can_do, print_to_string, printlog
 
 # await printlog(update, "lancia una bombreact a", displayname)
 
@@ -86,7 +83,7 @@ async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # print(f"setting last_restart: {context.bot_data['last_restart']}")
 
-    await update.message.reply_text(f'Provo a riavviarmi...')
+    await update.message.reply_text('Provo a riavviarmi...')
     args = sys.argv[:]
     args.insert(0, sys.executable)
 
@@ -98,7 +95,6 @@ async def commandlist(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     message = ""
     c = 0
-    import pprint
     for k, v in context.application.handlers.items():
         for h in v:
             if h.__class__.__name__ == "CommandHandler":
@@ -136,7 +132,7 @@ async def cancella(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     else:
         try:
             await context.bot.delete_message(update.message.chat.id, update.message.reply_to_message.message_id)
-        except Exception as e:
+        except Exception:
             pass
 
 async def send_custom_media(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -161,6 +157,7 @@ async def send_custom_media(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def count_lines(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     import platform
     from os import walk
+
     from telegram import __version__ as TG_VER
     if update.message.from_user.id not in config.ADMINS:
         return
@@ -240,37 +237,35 @@ async def tg_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # text += update.message.reply_to_message.effective_attachment
     if update.message.reply_to_message:
         if update.message.reply_to_message.animation:
-            text += f"media type: animation\n"
+            text += "media type: animation\n"
             file_id = f"ID: <code>{update.message.reply_to_message.animation.file_id}</code>\n"
         elif update.message.reply_to_message.document:
-            text += f"media type: document\n"
+            text += "media type: document\n"
             file_id = f"ID: <code>{update.message.reply_to_message.document.file_id}</code>\n"
         elif update.message.reply_to_message.audio:
-            text += f"media type: audio\n"
+            text += "media type: audio\n"
             file_id = f"ID: <code>{update.message.reply_to_message.audio.file_id}</code>\n"
         elif update.message.reply_to_message.photo:
-            text += f"media type: photo\n"
+            text += "media type: photo\n"
             file_id = f"ID: <code>{update.message.reply_to_message.photo[-1].file_id}</code>\n"
         elif update.message.reply_to_message.sticker:
-            text += f"media type: sticker\n"
+            text += "media type: sticker\n"
             file_id = f"ID: <code>{update.message.reply_to_message.sticker.file_id}</code>\n"
         elif update.message.reply_to_message.video:
-            text += f"media type: video\n"
+            text += "media type: video\n"
             file_id = f"ID: <code>{update.message.reply_to_message.video.file_id}</code>\n"
         elif update.message.reply_to_message.voice:
-            text += f"media type: voice\n"
+            text += "media type: voice\n"
             file_id = f"ID: <code>{update.message.reply_to_message.voice.file_id}</code>\n"
         elif update.message.reply_to_message.video_note:
-            text += f"media type: video_note\n"
+            text += "media type: video_note\n"
             file_id = f"ID: <code>{update.message.reply_to_message.video_note.file_id}</code>\n"
 
         try:
             if context.args[0] == "-raw":
-                import pprint
-                import json
                 import html
+                import pprint
                 # pprint.pprint(update.message.__str__())
-                import ast
                 rawtext = pprint.pformat(update.message.reply_to_message.to_dict())
                 # print(rawtext)
                 rawtext = html.escape(rawtext)
@@ -314,13 +309,13 @@ async def getchat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             message += f"Username: @{mychat.username}\n"
         if mychat.linked_chat_id:
             message += f"Linked chat: {mychat.linked_chat_id}\n"
-        message += f"====\n"
+        message += "====\n"
 
         for admin in admins:
             message += f"{admin.status}: {admin.user.first_name} {admin.user.last_name} ({admin.user.id}) @{admin.user.username}\n"
     else:
         mychat = await context.bot.get_chat(chat_id)
-        message += f"Utente di telegram\n"
+        message += "Utente di telegram\n"
         message += f"ID: {mychat.id}\n"
         message += f"Nome: {mychat.first_name} {mychat.last_name}\n"
         message += f"Nickname: @{mychat.username}\n"
@@ -377,14 +372,14 @@ async def lista_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         try:
             my_chat = await context.bot.get_chat(chat_id)
-        except Exception as e: 
+        except Exception: 
                 context.bot_data['lista_chat'].remove(chat_id)
                 continue
 
         if my_chat.type == 'private':
             is_banned = " "
             if chat_id in lista_ban:
-                is_banned = f" [B] "
+                is_banned = " [B] "
 
             username = ''
             if my_chat.username:
@@ -407,7 +402,7 @@ async def listen_to(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         if "-wipe" in context.args:
             context.bot_data['listen_to'] = []
-            await update.message.reply_text(f"Smetto di spiare.")
+            await update.message.reply_text("Smetto di spiare.")
             return
         else:
             chat_id = int(context.args[0])
@@ -427,14 +422,14 @@ async def listen_to(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 try:
                     message = f"ID: <code>{chat_id}</code> - {my_chat.title}\n" + message #[:15]
                     # message += f"{chat_id} - {my_chat.title}\n"
-                except Exception as e:
+                except Exception:
                     message = f"ID: <code>{chat_id}</code> - Nessun accesso\n" + message #[:15]
                     # message += f"{chat_id} - Nessun accesso\n"
             else:
                 mychat = my_chat.to_dict()
                 is_banned = " "
                 if chat_id in lista_ban:
-                    is_banned = f" [B] "
+                    is_banned = " [B] "
                 message += f"👤{is_banned}ID: <code>{chat_id}</code> - @{mychat.get('username')} {mychat.get('first_name')} {mychat.get('last_name')}\n"
                 # message += f"{chat_id} - @{my_chat.username} {my_chat.first_name} {my_chat.last_name}\n"
         message = "Sto spiando:\n" + message
@@ -493,7 +488,7 @@ async def wakeup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     elif stderr:
         await update.message.reply_text(f'{stderr}')
     else: 
-        await update.message.reply_text(f'Fatto')
+        await update.message.reply_text('Fatto')
     return
 
 
@@ -502,7 +497,7 @@ async def banlist(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     await printlog(update, "chiede la lista bannati")
 
-    if not 'global_bans' in context.bot_data:
+    if "global_bans" not in context.bot_data:
         context.bot_data['global_bans'] = []
 
     message = ""
@@ -511,12 +506,12 @@ async def banlist(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if "-wipe" in context.args:
         context.bot_data['global_bans'].clear()
-        await update.message.reply_text(f"ban list vuota.")
+        await update.message.reply_text("ban list vuota.")
         return
 
     if "-removeduplicates" in context.args:
         context.bot_data['global_bans'] = list(set(context.bot_data['global_bans']))
-        await update.message.reply_text(f"Fatto.")
+        await update.message.reply_text("Fatto.")
         return
 
     lista_ban = context.bot_data['global_bans'].copy()
@@ -525,7 +520,7 @@ async def banlist(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         try:
             chat = await context.bot.get_chat(user_id)
 
-        except Exception as e:
+        except Exception:
             context.bot_data['global_bans'].remove(user_id)
             message += f"ID: <code>{user_id}</code> - Cancellato\n"
             continue
@@ -612,7 +607,7 @@ async def set_title(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await printlog(update, "cambia titolo", title)
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} imposta il nome {title}')
     if 0 > len(title) > 255:
-        await update.message.reply_text(f'Troppo lungo.', quote=False)
+        await update.message.reply_text('Troppo lungo.', quote=False)
     else:
         await context.bot.set_chat_title(update.message.chat.id, title)
 
@@ -632,7 +627,7 @@ async def set_group_picture(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             await context.bot.set_chat_photo(update.message.chat.id, tempphoto)
             await printlog(update, "cambia la propic al gruppo")
 
-        except Exception as e:
+        except Exception:
             print(traceback.format_exc())
             await update.message.reply_text("Non posso farlo")
 

@@ -1,14 +1,12 @@
 
-from justwatch import JustWatch
-from imdb import Cinemagoer
 import requests
+from imdb import Cinemagoer
+from justwatch import JustWatch
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
+from telegram.ext import ContextTypes
 
-from rich import print
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
-from telegram.ext import CallbackContext, ContextTypes
+from utils import no_can_do, printlog
 
-
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
 
 async def get_doveguardo_result(titolo: str, index_n):
 
@@ -202,7 +200,7 @@ async def doveguardo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         try:
             await update.message.reply_photo(poster_url, caption=message, reply_markup=reply_markup)
 
-        except Exception as e:
+        except Exception:
                 await update.message.reply_html(message, disable_web_page_preview=True, reply_markup=reply_markup)
     except ValueError:
         await update.message.reply_html("Non ho trovato niente")
@@ -234,7 +232,7 @@ async def doveguardo_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE)
         try:
             await query.edit_message_media(media=InputMediaPhoto(poster_url, caption=message), reply_markup=reply_markup)
 
-        except Exception as e:
+        except Exception:
             await query.edit_message_media(message, reply_markup=reply_markup)
     except ValueError:
         await query.reply_html("Non ho trovato niente")

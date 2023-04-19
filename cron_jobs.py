@@ -1,22 +1,18 @@
 import datetime
-import httpx
-import peewee
-import time
-import datetime
 import html
+import time
 
-from telegram.ext import ContextTypes
-from telegram import  InlineKeyboardButton, InlineKeyboardMarkup
-
+import httpx
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-
+import peewee
 from rich import print
-from rich.progress import track
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ContextTypes
 
 import config
-from utils import get_now
 from pyrog import get_all_chatmembers
+from utils import get_now
 
 db = peewee.SqliteDatabase(config.DBPATH)
 
@@ -107,6 +103,7 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
         message = ''
         for thread in threads:
             timestamp = datetime.datetime.fromtimestamp(thread['time']).strftime('%d/%m/%Y %H:%M')
+            text = thread['text'].replace('<br/>','\n').replace('<span class="quote">&gt;','>').replace('<span class="spoiler">', '').replace('</span>','')
             if len(text) > 2000:
                 text = text[:2000] + "..."
             link = f"<a href='{thread['thread_url']}'>/{thread['board']}/ | No.{thread['thread']}</a> | {timestamp}"
@@ -192,7 +189,7 @@ async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
 
             keyboard = [
                 [
-                    InlineKeyboardButton(f"👎 Kick", callback_data=listona),
+                    InlineKeyboardButton("👎 Kick", callback_data=listona),
                     InlineKeyboardButton("👍 Passo", callback_data=["LURKERS_LIST", None])
                 ]
             ]
@@ -211,7 +208,7 @@ async def check_reminders(context: ContextTypes.DEFAULT_TYPE) -> None:
         if row:
             print(f'{get_now()} Trovato un reminder: "{row.message}" del {row.date_now}',)
             if not row.message:
-                missiva = f'Bip Bop Bup! Mi avevi chiesto di blipparti!'
+                missiva = 'Bip Bop Bup! Mi avevi chiesto di blipparti!'
             else:
                 missiva = f'Ciao, mi avevi chiesto di ricordarti questo: {row.message}'
             user = await context.bot.get_chat_member(chat_id=row.chat_id, user_id=row.user_id)
@@ -236,11 +233,9 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
     r_token = context.bot_data.get('netatmo_refresh_token', config.r_token)
     home_id = config.home_id
     room_id = config.room_id
-    user_id = config.user_id
     bridge_mac = config.bridge_mac
     therm_mac = config.therm_mac
 
-    scale = ['30min', '1hour', '3hours', '1day', '1week', '1month']
 
     async def refresh_token(refresh_token):
         client_id = config.NETATMO_CLIENT_ID
@@ -330,7 +325,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
         return response
 
-    date_start = int(time.time() - 3600*48)
+    int(time.time() - 3600*48)
 
     tokens = await refresh_token(r_token)
     # print(tokens)
@@ -427,9 +422,9 @@ async def do_backup(context: ContextTypes.DEFAULT_TYPE):
 
 # Runs every day at 2:00 (Europe/Rome)
 async def do_global_backup(context: ContextTypes.DEFAULT_TYPE):
+    import datetime
     import os
     import zipfile
-    import datetime
 
     now = datetime.datetime.today().strftime('%Y%m%d_%H%M%S')
 

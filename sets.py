@@ -1,13 +1,12 @@
-from collections import defaultdict
-import shelve
-
-from telegram import Update
-from telegram.ext import CallbackContext, ContextTypes
-from rich import print
 import json
+from collections import defaultdict
+
+from rich import print
+from telegram import Update
+from telegram.ext import ContextTypes
 
 import config
-from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do, crea_sondaggino, make_delete_button
+from utils import crea_sondaggino, get_now, make_delete_button, no_can_do, printlog
 
 jukebox_id = 0
 
@@ -33,7 +32,7 @@ async def addset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed
         trigger = message.split(' ')[0].lower()
         if update.message.reply_to_message:
             if not update.message.reply_to_message.effective_attachment:
-                await update.message.reply_html(f'Usa: <code>/set /trigger messaggio</code>, oppure <code>/set /trigger</code> in risposta ad un media')
+                await update.message.reply_html('Usa: <code>/set /trigger messaggio</code>, oppure <code>/set /trigger</code> in risposta ad un media')
                 return
             else:
                 if update.message.reply_to_message.animation:
@@ -53,12 +52,12 @@ async def addset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed
                 elif update.message.reply_to_message.video_note:
                     comando = f"media:video_note:{update.message.reply_to_message.video_note.file_id}"
         else:
-            await update.message.reply_html(f'Uso: \n<code>/set /trigger [messaggio]</code>\noppure\n<code>/set /trigger</code> in risposta ad un media')
+            await update.message.reply_html('Uso: \n<code>/set /trigger [messaggio]</code>\noppure\n<code>/set /trigger</code> in risposta ad un media')
             return
 
     if update.message.from_user.id not in config.ADMINS:
         if trigger[0] != "/":
-            await update.message.reply_text(f'Il trigger deve essere un /comando.')
+            await update.message.reply_text('Il trigger deve essere un /comando.')
             return
     
     if chatdict.get(trigger.lower()) and not poll_passed:
@@ -70,7 +69,7 @@ async def addset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed
     await printlog(update, "aggiunge un set", f"{trigger} -> {comando}")
 
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} aggiunge un set: {trigger} -> {comando}')
-    await update.message.reply_text(f'Daje.')
+    await update.message.reply_text('Daje.')
 
     json.dump(sets, open('db/sets.json', 'w'), indent=4)
 
@@ -108,7 +107,7 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chatdict = sets.get(chat_id)
 
     if not chatdict:
-        await update.message.reply_text(f'Non ci sono set.')
+        await update.message.reply_text('Non ci sono set.')
         return
 
     cat_names = {'audio': '🔈 Audio', 'photo': '🖼 Immagini', 'video': '🎥 Video', 'voice': '🎙 Registrazioni vocali', 'document': '📎 Files', 'video_note': '📹 Registrazioni video', 'sticker': '🏷 Stickers', 'animation': '🎬 GIFs'}
@@ -122,7 +121,7 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             comando = chatdict[key]
 
             if comando.lower().startswith('nsfw'):
-                    comando = f"[NSFW whitespace]"
+                    comando = "[NSFW whitespace]"
 
             if comando.startswith('media:'):
                 comando = f"[{comando.split(':')[1]}]"
@@ -140,7 +139,7 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         else:
         
             if comando.lower().startswith('nsfw'):
-                comando = f"[NSFW whitespace]"
+                comando = "[NSFW whitespace]"
 
             textlist.append(f"{key} → {(comando[:25] + '...') if len(comando) > 25 else comando}")
 
@@ -180,7 +179,7 @@ async def deleteset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_pas
         try:
             del chatdict[trigger]
             print(f'{get_now()} Fatto!')
-            await update.message.reply_text(f'Fatto.', quote=False)
+            await update.message.reply_text('Fatto.', quote=False)
             json.dump(sets, open('db/sets.json', 'w'), indent=4)
             # we refresh the in-memory copy of sets
             if 'current_sets' not in context.bot_data:
@@ -190,10 +189,10 @@ async def deleteset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_pas
                 context.bot_data['current_sets'] = sets
             return
         except KeyError:
-            await update.message.reply_text(f'Per qualche ragione non riesco.')
+            await update.message.reply_text('Per qualche ragione non riesco.')
             return
     else:
-        await update.message.reply_text(f'Non ci sta, controlla meglio con /listaset')
+        await update.message.reply_text('Non ci sta, controlla meglio con /listaset')
         return
 
 async def jukebox(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -231,6 +230,6 @@ async def jukebox(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
     if message == "":
-        await update.message.reply_text(f'Non ci sono audio.')
+        await update.message.reply_text('Non ci sono audio.')
         return
     await update.message.reply_text(f'{message}', disable_notification=True)
