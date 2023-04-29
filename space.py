@@ -3,11 +3,11 @@ import random
 import tempfile
 import uuid
 from datetime import datetime, timezone
-
 import cairo
 import numpy as np
 import pytz
 import requests
+from dataclassy import dataclass
 from PIL import Image, ImageDraw, ImageFont
 from rich import print
 from telegram import Update
@@ -17,27 +17,20 @@ from telegram.ext import ContextTypes
 import config
 from utils import no_can_do, printlog
 
+@dataclass
+class StelleResult:
+    raw_dict: dict
+    system_name: str
+    system_distance: str
+    description: str
+    planet_list: str
+    seed: str
+    file: tempfile._TemporaryFileWrapper
 
-async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if await no_can_do(update, context):
-        return
-
-    if update.effective_user.id not in config.ADMINS and update.effective_chat.id == config.ID_TIMELINE:
-        return
-
-    list_of_colors = [
-        (145, 185, 141), (229, 192, 121), (210, 191, 88), (140, 190, 178), (255, 183, 10),
-        (189, 190, 220), (221, 79, 91), (16, 182, 98), (227, 146, 80), (241, 133, 123),
-        (110, 197, 233), (235, 205, 188), (197, 239, 247), (190, 144, 212), (41, 241, 195),
-        (101, 198, 187), (255, 246, 143), (243, 156, 18), (189, 195, 199), (243, 241, 239)
-        ]
-
-    list_of_sun_colors = [
-        (255, 95, 83), (253, 209, 162), (255, 243, 161), (252, 255, 212),
-        (248, 247, 253), (201, 216, 255), (154, 175, 255)
-        ]
-
-    list_of_planet_textures = ['craters', 'fibers', 'nubi', 'perlin_poly', 'stripes', 'voronoi', 'splat', 'splot']
+async def make_solar_system(update=None, download:bool=False, width:int=1080, height:int=1920, orbit:bool=True, line:bool=False,
+                            rings:bool=True, moons:bool=True, belts:bool=True, starfield:bool=True, binary:bool=True,
+                            blackholes:bool=True, skips:bool=True, gradients:bool=True, textures:bool=True,
+                            stars:int=50, bordersize:int=50, noise:int=3, seed=None):
 
     def planet_name():
         part1 = [
@@ -1131,71 +1124,50 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         cr.set_source_rgba(0, 0, 0, 0.0)
         return
 
+    list_of_colors = [
+        (145, 185, 141), (229, 192, 121), (210, 191, 88), (140, 190, 178), (255, 183, 10),
+        (189, 190, 220), (221, 79, 91), (16, 182, 98), (227, 146, 80), (241, 133, 123),
+        (110, 197, 233), (235, 205, 188), (197, 239, 247), (190, 144, 212), (41, 241, 195),
+        (101, 198, 187), (255, 246, 143), (243, 156, 18), (189, 195, 199), (243, 241, 239)
+        ]
+
+    list_of_sun_colors = [
+        (255, 95, 83), (253, 209, 162), (255, 243, 161), (252, 255, 212),
+        (248, 247, 253), (201, 216, 255), (154, 175, 255)
+        ]
+
+    list_of_planet_textures = ['craters', 'fibers', 'nubi', 'perlin_poly', 'stripes', 'voronoi', 'splat', 'splot']
+
     stelle = {}
+    
+    WIDTH = width
+    HEIGHT = height
 
-    DOWNLOAD = False
-    WIDTH = 1080
-    HEIGHT = 1920
+    ORBIT = orbit
+    LINE = line
 
-    ORBIT = True
-    LINE = False
+    RINGS = rings
+    MOONS = moons
+    BELTS = belts
+    STARFIELD = starfield
+    BINARY = binary
+    BLACKHOLES = blackholes
+    SKIPS = skips
 
-    RINGS = True
-    MOONS = True
-    BELTS = True
-    STARFIELD = True
-    BINARY = True
-    BLACKHOLES = True
-    SKIPS = True
+    GRADIENTS = gradients
+    TEXTURES = textures
 
-    GRADIENTS = True
-    TEXTURES = True
+    STARS = stars
+    BORDERSIZE = bordersize
+    NOISE = noise
 
-    STARS = 50
-    BORDERSIZE = 50
-    NOISE = 3
+    if not seed:
+        seed = uuid.uuid4()
 
-    seed = uuid.uuid4()
-
-    if context.args:
-        if "-help" in context.args:
-            await update.message.reply_html("<code>/stars 1500 2000</code> (larghezza e altezza) come primi due parametri per specificare una dimensione di rendering\n<code>-seed [stringa]</code> per specificare un seed\n<code>-download</code> per farsi mandare il file full-res\n<code>-tinyborder</code> per un bordo più piccolo\n<code>-noborder</code> per eliminare il bordo completamente\n<code>-nostars</code> per non generare le stelline dietro\n<code>-origin</code> disattiva tutte le feature randomiche e lascia solo i pianeti\n<code>-help</code> visualizza questo messaggio")
-            return
-
-        if "-download" in context.args:
-            DOWNLOAD = True
-
-        if "-seed" in context.args:
-            i = context.args.index("-seed")
-            seed = context.args[i + 1]  
-
-        if "-nostars" in context.args:
-            STARFIELD = False
-
-        if "-origin" in context.args:
-            STARFIELD = False
-            BELTS = False
-            MOONS = False
-            RINGS = False
-            BINARY = False
-            BLACKHOLES = False
-            SKIPS = True
-
-        if "-noborder" in context.args:
-            BORDERSIZE = 0
-
-        if "-tinyborder" in context.args:
-            BORDERSIZE = 5
-
-        if len(context.args) >= 2 and context.args[0].isdigit() and context.args[1].isdigit():
-            if int(context.args[0]) < 500 or int(context.args[1]) < 500 or int(context.args[0]) + int(context.args[1]) > 10000:
-                await update.message.reply_text("Troppo o troppo poco! Minimo 500x500, e le dimensioni sommate non possono superare 10000")
-                return
-            WIDTH = int(context.args[0])
-            HEIGHT = int(context.args[1])
 
     random.seed(str(seed))
-    await printlog(update, "crea un sistema solare con il seed", str(seed))
+    if update:
+        await printlog(update, "crea un sistema solare con il seed", str(seed))
 
     SUNSIZE = random.randint(50, 400)
 
@@ -1203,7 +1175,9 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     border_size = BORDERSIZE
     sun_size = SUNSIZE
     system_name = generate_system()
-    planets_list = f"<b>· {system_name.upper()} ·</b>\n<i>{random.randint(15, 10000)} UA</i>\n\n"
+    system_distance = f"{random.randint(15, 10000)} UA"
+    description = f"<b>· {system_name.upper()} ·</b>\n<i>{system_distance}</i>\n\n"
+    planet_list = ""
 
     stelle['seed'] = str(seed)
     stelle['system_name'] = system_name
@@ -1223,9 +1197,6 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     stelle['settings']['gradients'] = GRADIENTS
     stelle['settings']['textures'] = TEXTURES
     stelle['settings']['n_background_stars'] = STARS
-
-    
-
 
 
     ims = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
@@ -1307,9 +1278,9 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if not(next_center - next_size < border_size):
             if random.randint(0, 100) <= 10 and SKIPS:  # SKIP!
-                if context.args:
-                    if "-star" in context.args:
-                        draw_star(cr, width / 2, next_center, next_size, 1, 1, 1)
+                # if context.args:
+                #     if "-star" in context.args:
+                #         draw_star(cr, width / 2, next_center, next_size, 1, 1, 1)
                 last_color = rand_color
                 last_center = next_center
                 last_size = next_size
@@ -1319,7 +1290,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
             p_name = generate_planet_name()
             planet['name'] = p_name
 
-            planets_list += f"— {p_name}\n"
+            planet_list += f"— {p_name}\n"
             planet_size = next_size
             if random.randint(0, 100) <= 30 and planet_size >= 50 and BELTS:  # asteroid belt
                 # draw_orbit(cr, next_size, width / 2, sun_center, height - next_center - border_size, r, g, b, a=0.05)  # sfondo
@@ -1468,6 +1439,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     draw_border(cr, border_size, sun_r, sun_g, sun_b, width, height)
     fp = tempfile.NamedTemporaryFile(suffix='.png')
+
     image_path = fp.name
     ims.write_to_png(image_path)
 
@@ -1513,13 +1485,91 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         img = noisy_img_pil
 
     img.save(image_path)
+    description += planet_list
+    description += f"\nSeed:\n<code>{seed}</code>"
+
+    res: StelleResult = StelleResult(
+        raw_dict = stelle,
+        system_name = system_name,
+        system_distance = system_distance,
+        description = description,
+        planet_list = planet_list,
+        seed = seed,
+        file = fp
+    )
+    return res
+
+async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if await no_can_do(update, context):
+        return
+
+    if update.effective_user.id not in config.ADMINS and update.effective_chat.id == config.ID_TIMELINE:
+        return
+
+    kwargs = {}
+
+    if context.args:
+        if "-help" in context.args:
+            await update.message.reply_html("<code>/stars 1500 2000</code> (larghezza e altezza) come primi due parametri per specificare una dimensione di rendering\n<code>-seed [stringa]</code> per specificare un seed\n<code>-download</code> per farsi mandare il file full-res\n<code>-tinyborder</code> per un bordo più piccolo\n<code>-noborder</code> per eliminare il bordo completamente\n<code>-nostars</code> per non generare le stelline dietro\n<code>-origin</code> disattiva tutte le feature randomiche e lascia solo i pianeti\n<code>-help</code> visualizza questo messaggio")
+            return
+
+        if "-download" in context.args:
+            kwargs['download'] = True
+
+        if "-seed" in context.args:
+            i = context.args.index("-seed")
+            seed = context.args[i + 1]
+            kwargs['seed'] = seed 
+
+        if "-nostars" in context.args:
+            kwargs['starfield'] = False
+
+        if "-origin" in context.args:
+            kwargs['starfield'] = False
+            kwargs['belts'] = False
+            kwargs['moons'] = False
+            kwargs['rings'] = False
+            kwargs['binary'] = False
+            kwargs['blackholes'] = False
+            kwargs['skips'] = True
+
+
+        if "-noborder" in context.args:
+            kwargs['bordersize'] = 0
+
+        if "-tinyborder" in context.args:
+            kwargs['bordersize'] = 5
+
+        if len(context.args) >= 2 and context.args[0].isdigit() and context.args[1].isdigit():
+            if int(context.args[0]) < 500 or int(context.args[1]) < 500 or int(context.args[0]) + int(context.args[1]) > 10000:
+                await update.message.reply_text("Troppo o troppo poco! Minimo 500x500, e le dimensioni sommate non possono superare 10000")
+                return
+            WIDTH = int(context.args[0])
+            HEIGHT = int(context.args[1])
+            kwargs['width'] = WIDTH
+            kwargs['height'] = HEIGHT
+
+
+
+
+    result: StelleResult = await make_solar_system(update, **kwargs)
+
+    if result is None:
+        await update.message.reply_message("Errore durante la generazione del sistema solare")
+        return
 
     await context.bot.send_chat_action(chat_id=update.message.chat.id, action=ChatAction.UPLOAD_PHOTO)
-    
-    planets_list += f"\nSeed:\n<code>{seed}</code>"
 
-    if DOWNLOAD:
-        await context.bot.send_document(chat_id=update.effective_chat.id, document=open(image_path, 'rb'), caption=planets_list, parse_mode='HTML')
+    image_path = result.file.name
+    system_name = result.system_name
+    description = result.description
+    seed = result.seed
+    fp = result.file
+    stelle = result.raw_dict
+
+
+    if kwargs.get('download'):
+        await context.bot.send_document(chat_id=update.effective_chat.id, document=open(image_path, 'rb'), caption=description, parse_mode='HTML')
     else:
         await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(image_path, 'rb'), caption=f"<b>· {system_name.upper()} ·</b>\n<code>{seed}</code>", parse_mode='HTML')
     
