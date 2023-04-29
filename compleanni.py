@@ -3,6 +3,7 @@ import re
 
 import peewee
 from rich import print
+from telegram.error import BadRequest
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -111,15 +112,20 @@ async def compleanni_list(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     # print(update.message.chat.id)
     for row in Compleanni.select().where(Compleanni.chat_id == update.message.chat.id):
         if row:
-            member = await context.bot.get_chat_member(update.message.chat.id, row.user_id)
-            nickname = member.user.mention_html()
-            data = row.birthdate
-            if len(data) > 5:
-                date = datetime.datetime.strptime(data, '%d/%m/%Y').date()
-            else:
-                date = datetime.datetime.strptime(data, '%d/%m').date()
-            compleannilist.append([nickname, date])
-            counter += 1
+            try:
+                member = await context.bot.get_chat_member(update.message.chat.id, row.user_id)
+
+                nickname = member.user.mention_html()
+                data = row.birthdate
+                if len(data) > 5:
+                    date = datetime.datetime.strptime(data, '%d/%m/%Y').date()
+                else:
+                    date = datetime.datetime.strptime(data, '%d/%m').date()
+                compleannilist.append([nickname, date])
+                counter += 1
+            except BadRequest:
+                print(row.user_id, "non è più nel gruppo")
+                continue
     if counter == 0:
         await update.message.reply_html('Non trovo un cazzo, onestamente', quote=True)
     else:
