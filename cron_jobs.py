@@ -6,12 +6,14 @@ import httpx
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import peewee
+from mastodon import Mastodon
 from rich import print
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 import config
 from pyrog import get_all_chatmembers
+from space import StelleResult, make_solar_system
 from utils import get_now
 
 db = peewee.SqliteDatabase(config.DBPATH)
@@ -38,6 +40,41 @@ class Compleanni(peewee.Model):
         database = db
         table_name = 'compleanni'
         primary_key = False
+
+
+async def post_solarsystem_mastodon(context: ContextTypes.DEFAULT_TYPE) -> None:
+
+    print(f"{get_now()} [AUTO] Posto il sistema solare giornaliero su mastodon")
+
+
+    result: StelleResult = await make_solar_system()
+
+    if result is None:
+        print(f"{get_now()} [AUTO] Errore durante la generazione del sistema solare")
+        return
+
+    image_path = result.file.name
+    system_name = result.system_name
+    system_distance = result.system_distance
+    planet_list = result.planet_list
+    seed = result.seed
+    fp = result.file
+
+    #   Set up Mastodon
+    mastodon = Mastodon(
+        access_token = 'db/mastodon.token',
+        api_base_url = 'https://botsin.space/'
+    )
+
+    message = f"🌌 Sistema solare del giorno: {system_name}\nDistanza: {system_distance}\nSeed: {seed}\n\Orbite:\n{planet_list}"
+
+    mast_media = mastodon.media_post(image_path)
+    mast_response = mastodon.status_post(message, media_ids=mast_media)
+    mastodon_url = mast_response.get('url')
+    print(f"{get_now()} [AUTO] Fatto! {mastodon_url}")
+
+    fp.close()
+    return
 
 
 async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
