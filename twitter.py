@@ -2,6 +2,7 @@
 import tempfile
 import traceback
 
+from mastodon import Mastodon
 from rich import print
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -31,7 +32,6 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
     MASTODON = True
     TWITTER = True
 
-    from mastodon import Mastodon
 
     #   Set up Mastodon
     mastodon = Mastodon(
@@ -64,11 +64,11 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
     # CONSUMER_SECRET = config.DDF_TW_API_SECRET
     # ACCESS_KEY = config.DDF_TW_ACCESS_TOKEN
     # ACCESS_SECRET = config.DDF_TW_ACCESS_TOKEN_SECRET
-
-    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
+    auth = tweepy.OAuth1UserHandler(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
+    # auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
+    # auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
     api = tweepy.API(auth)
-    tweepy.Client(bearer_token=BEARER_TOKEN, access_token=ACCESS_KEY, access_token_secret=ACCESS_SECRET, consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
+    client = tweepy.Client(bearer_token=BEARER_TOKEN, access_token=ACCESS_KEY, access_token_secret=ACCESS_SECRET, consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
 
 
 
@@ -94,8 +94,11 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
             if TWITTER:
                 try:
                     media = api.media_upload(tempphoto.name)
-                    post_result = api.update_status(status=message, media_ids=[media.media_id])
-                    status_id = post_result.id_str
+                    # print(media)
+                    # post_result = api.update_status(status=message, media_ids=[media.media_id])
+                    post_result: tweepy.Response = client.create_tweet(text=message, media_ids=[media.media_id])
+                    # print(post_result)
+                    status_id = post_result.data.get('id')
                     tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
                 except Exception:
                     print(traceback.format_exc())
@@ -135,8 +138,8 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
             if TWITTER:
                 try:
                     media = api.media_upload(tempvideo.name)
-                    post_result = api.update_status(status=message, media_ids=[media.media_id])
-                    status_id = post_result.id_str
+                    post_result: tweepy.Response = client.create_tweet(text=message, media_ids=[media.media_id])
+                    status_id = post_result.data.get('id')
                     tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
                 except Exception:
                     print(traceback.format_exc())
@@ -172,8 +175,8 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
 
         if TWITTER:
             try:
-                status = api.update_status(status=message)
-                status_id = status.id_str
+                post_result: tweepy.Response = client.create_tweet(text=message)
+                status_id = post_result.data.get('id')
                 tw_url = f'<a href="https://twitter.com/Emily_superbot/status/{status_id}">Twitter</a>'
             except Exception:
                 print(traceback.format_exc())
