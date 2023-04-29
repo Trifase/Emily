@@ -68,6 +68,7 @@ from cron_jobs import (
     do_global_backup,
     lotto_member_count,
     parse_diochan,
+    post_solarsystem_mastodon
 )
 from diochan import (
     add_quote,
@@ -201,6 +202,7 @@ def main():
 
     j.run_daily(lotto_member_count, datetime.time(hour=9, minute=0, tzinfo=pytz.timezone('Europe/Rome')), data=None)
     # j.run_daily(autolurkers, datetime.time(hour=9, minute=0, tzinfo=pytz.timezone('Europe/Rome')), data=None)
+    j.run_daily(post_solarsystem_mastodon, datetime.time(hour=8, minute=30, tzinfo=pytz.timezone('Europe/Rome')), data=None)
 
     j.run_daily(check_compleanni, datetime.time(hour=0, minute=0, tzinfo=pytz.timezone('Europe/Rome')), data=None)
     j.run_daily(check_compleanni, datetime.time(hour=12, minute=00, tzinfo=pytz.timezone('Europe/Rome')), data=None)
