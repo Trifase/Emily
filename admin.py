@@ -5,6 +5,7 @@ import sys
 import tempfile
 import traceback
 
+from PIL import ImageGrab
 from rich import print
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ChatMemberStatus, ParseMode
@@ -280,6 +281,18 @@ async def tg_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 await update.message.reply_html(text)
         except IndexError:
             await update.message.reply_html(text)
+
+async def screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.from_user.id not in config.ADMINS:
+        return
+    await printlog(update, "fa uno screenshot del raspi")
+    im = ImageGrab.grab()
+    tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
+    im.save(tempphoto.name, quality=100, subsampling=0)
+
+    await update.message.reply_photo(photo=open(tempphoto.name, "rb"))
+    await update.message.reply_document(document=open(tempphoto.name, "rb"))
+    tempphoto.close()
 
 async def getchat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:

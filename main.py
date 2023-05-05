@@ -52,6 +52,7 @@ from admin import (
     listen_to,
     parla,
     restart,
+    screenshot,
     send_custom_media,
     set_group_picture,
     set_title,
@@ -228,6 +229,7 @@ def main():
     # admin.py
     app.add_handler(CommandHandler(['checktemp', 'check_temp', 'temp', 'temperatura'], check_temp, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
     app.add_handler(CommandHandler('flush_arbitrary_callback_data', flush_arbitrary_callback_data))
+    app.add_handler(CommandHandler(['screenshot', 'ss'], screenshot, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
     app.add_handler(CommandHandler(['parla', 'say'], parla, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
     app.add_handler(CommandHandler('restart', restart, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))
     app.add_handler(CommandHandler('print', _eval, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)))

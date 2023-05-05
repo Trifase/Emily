@@ -66,7 +66,7 @@ async def post_solarsystem_mastodon(context: ContextTypes.DEFAULT_TYPE) -> None:
         api_base_url = 'https://botsin.space/'
     )
 
-    message = f"🌌 Sistema solare del giorno: {system_name}\nDistanza: {system_distance}\nSeed: {seed}\n\Orbite:\n{planet_list}"
+    message = f"🌌 Sistema solare del giorno: {system_name}\nDistanza: {system_distance}\nSeed: {seed}\nOrbite:\n{planet_list}"
 
     mast_media = mastodon.media_post(image_path)
     mast_response = mastodon.status_post(message, media_ids=mast_media)

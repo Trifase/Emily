@@ -220,6 +220,9 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if f'/{b}/' in message[:5]:
             board = b
             message = message[(len(b) + 2):]
+        elif f'/{b}' in message[:5]:
+            board = b
+            message = message[(len(b) + 1):]
 
     if not board:
         await context.bot.send_message(update.message.chat.id, "Devi specificare una board")
@@ -295,6 +298,7 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             richiesta = requests.post(posturl, headers=HEADERS, data=payload, files=files)
             image_file_descriptor.close()
             response = richiesta.json()
+            print(response)
 
             try:
                 thread_id = response["id"]

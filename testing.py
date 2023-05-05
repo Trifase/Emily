@@ -6,7 +6,6 @@ from telegram.ext import ContextTypes
 
 from utils import printlog
 
-
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     s = time.time()
     start = time.perf_counter()
@@ -14,6 +13,12 @@ async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await m.edit_text(f"[{s}] Test fallito in {round((time.perf_counter() - start) * 1000)}ms")
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} testa tantissimo!')
     await printlog(update, "testa tantissimo")
+    # im = ImageGrab.grab()
+    # tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
+    # im.save(tempphoto.name, quality=100, subsampling=0)
+    # await update.message.reply_photo(photo=open(tempphoto.name, "rb"))
+    # await update.message.reply_document(document=open(tempphoto.name, "rb"))
+
     # invite_link = await context.bot.create_chat_invite_link(update.message.chat.id, member_limit=1, name='something')
     # print(invite_link.to_json())
 

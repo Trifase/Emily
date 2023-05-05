@@ -110,10 +110,11 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except Exception:
         await update.message.reply_text("Niente non riesco a mandare il file, amen.")
 
-    await msg.delete()
-
     # Lil' bit of cleaning
     os.remove(path)
     if song.cover_url:
         tempphoto.close()
  
+
+    await msg.delete()
+
