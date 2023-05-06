@@ -3,7 +3,7 @@ import requests
 import config
 
 token = config.BOT_TOKEN_FRAGOLONE
-chat_id = config.ID_DIOCHAN
+# chat_id = config.ID_DIOCHAN
 chat_id = config.ID_TESTING
 
 ircbot = JustIRC.IRCConnection()

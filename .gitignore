@@ -12,7 +12,6 @@ tarocchi/
 tts/
 logs/
 
-.env
 logs.txt
 config.py
 condominioweb.jsonl.zst

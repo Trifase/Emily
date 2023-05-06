@@ -96,7 +96,7 @@ async def commandlist(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     message = ""
     c = 0
-    for k, v in context.application.handlers.items():
+    for _, v in context.application.handlers.items():
         for h in v:
             if h.__class__.__name__ == "CommandHandler":
                 funzione = h.callback.__name__

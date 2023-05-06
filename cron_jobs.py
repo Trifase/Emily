@@ -22,7 +22,7 @@ from database import Chatlog
 # Runs every day at 01:00 (Europe/Rome)
 async def delete_yesterday_chatlog(context: ContextTypes.DEFAULT_TYPE) -> None:
     print(f"{get_now()} [AUTO] Cancello i messaggi di ieri dal db")
-    oggi_dt = datetime.datetime.combine(datetime.date.today(), datetime.datetime.min)
+    oggi_dt = datetime.datetime.combine(datetime.date.today(), datetime.time.min)
     oggi_timestamp = int(datetime.datetime.timestamp(oggi_dt))
     Chatlog.delete().where(Chatlog.timestamp < oggi_timestamp).execute()
 

@@ -57,8 +57,6 @@ def refresh_token(refresh_token):
         response.raise_for_status()
 
 def get_or_refresh_token(SECRET_ID, SECRET_KEY):
-    import json
-    import os.path
     if os.path.isfile(f'banca/{SECRET_ID}.json'):  # c'è già un file token con questo ID
         with open(f'banca/{SECRET_ID}.json') as json_file:
             data = json.load(json_file)

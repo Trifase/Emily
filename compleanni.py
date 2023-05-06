@@ -174,6 +174,7 @@ async def compleanni_manual_check(update: Update, context: ContextTypes.DEFAULT_
                 except Exception as e:
                     Compleanni.delete().where((Compleanni.user_id == row.user_id) & (Compleanni.chat_id == row.chat_id)).execute()
                     print(f"{e}\nCompleanno cancellato (user: {row.user_id}, chat: {row.chat_id})")
+                    continue
                 if y:
                     anni = int(today_y) - int(y)
                     if anni > 100:
