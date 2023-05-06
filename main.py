@@ -7,7 +7,6 @@ import traceback
 import warnings
 
 import instaloader
-import peewee
 import pytz
 from aiohttp import web
 from rich import print
@@ -66,11 +65,13 @@ from best_timeline import deleta_if_channel, permasilenzia, scrape_tweet_bt, sil
 from compleanni import compleanni_add, compleanni_list, compleanni_manual_check, compleanno_del
 from cron_jobs import (
     check_compleanni,
+    delete_yesterday_chatlog,
     do_global_backup,
     lotto_member_count,
     parse_diochan,
-    post_solarsystem_mastodon
+    post_solarsystem_mastodon,
 )
+from database import Chatlog, Compleanni, Quote, Reminders, TensorMessage
 from diochan import (
     add_quote,
     ascendi,
@@ -113,11 +114,12 @@ from misc import (
     wikihow,
 )
 from movies import doveguardo, doveguardo_buttons, imdb
-from open_ai import ai_old, ai_stream, openai_stats, whisper_transcribe
+from open_ai import ai_old, ai_stream, openai_stats, whisper_transcribe, riassuntone
 from parse_everything import (
     check_for_sets,
     drop_update_from_banned_users,
     exit_from_banned_groups,
+    log_message,
     messaggio_spiato,
     new_admin_buttons,
     nuova_chat_rilevata,
@@ -161,7 +163,6 @@ from utils import (
     printlog,
 )
 from zoom import zoom_link
-
 
 warnings.filterwarnings("ignore")
 
@@ -210,6 +211,8 @@ def main():
     j.run_daily(check_compleanni, datetime.time(hour=20, minute=00, tzinfo=pytz.timezone('Europe/Rome')), data=None)
 
     j.run_daily(do_global_backup, datetime.time(hour=2, minute=00, tzinfo=pytz.timezone('Europe/Rome')), data=None)
+    j.run_daily(delete_yesterday_chatlog, datetime.time(hour=1, minute=00, tzinfo=pytz.timezone('Europe/Rome')), data=None)
+
 
     # parse_everything.py
     # app.add_handler(CallbackQueryHandler(admin_buttons, pattern=r'^cmd:'))
@@ -220,8 +223,10 @@ def main():
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, nuova_chat_rilevata), -19)
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, update_timestamps_asphalto), -18)
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, messaggio_spiato), -17)
+    app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.COMMAND & filters.TEXT, log_message),-111)
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, check_for_sets), -16)
     app.add_handler(MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL, save_messages_stats), -15)
+
 
     # Error handler
     app.add_error_handler(error_handler)
@@ -362,6 +367,7 @@ def main():
     app.add_handler(CommandHandler("aistats", openai_stats))
     app.add_handler(CommandHandler(["ai", "new_ai", "aistream"], ai_stream))
     app.add_handler(CommandHandler(["transcribe", "speech", "scrivi", "trascrivi"], whisper_transcribe))
+    app.add_handler(CommandHandler(["riassunto", "riassuntone"], riassuntone))
 
     # pyrog.py
     app.add_handler(CommandHandler(['karma', 'reactionlist', 'reactkarma'], reaction_karma, filters=~filters.UpdateType.EDITED))
@@ -575,46 +581,6 @@ if __name__ == "__main__":
     print(f'{get_now()} Avvio - versione: {config.VERSION}\n--------------------------------------------')
     print(f'{get_now()} Using python-telegram-bot v{TG_VER} on Python {platform.python_version()}')
 
-    db = peewee.SqliteDatabase(config.DBPATH)
-
-    class TensorMessage(peewee.Model):
-        tensor_text = peewee.TextField()
-        tensor_id = peewee.AutoField()
-
-        class Meta:
-            database = db
-            table_name = 'tensor'
-
-    class Quote(peewee.Model):
-        quote_text = peewee.TextField()
-        quote_id = peewee.AutoField()
-
-        class Meta:
-            database = db
-            table_name = 'quotes'
-
-    class Reminders(peewee.Model):
-        reply_id = peewee.TextField()
-        user_id = peewee.TextField()
-        chat_id = peewee.TextField()
-        date_now = peewee.TextField()
-        date_to_remind = peewee.TextField()
-        message = peewee.TextField()
-
-        class Meta:
-            database = db
-            table_name = 'reminders'
-            primary_key = False
-
-    class Compleanni(peewee.Model):
-        user_id = peewee.TextField()
-        chat_id = peewee.TextField()
-        birthdate = peewee.TextField()
-
-        class Meta:
-            database = db
-            table_name = 'compleanni'
-            primary_key = False
 
     # creo le tabelle se non ci sono
     print(f'{get_now()} Controllo e creo le tabelle necessarie...')
@@ -623,6 +589,6 @@ if __name__ == "__main__":
     Quote.create_table()
     Reminders.create_table()
     Compleanni.create_table()
-
+    Chatlog.create_table()
 
     main()

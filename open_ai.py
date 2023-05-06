@@ -1,13 +1,14 @@
 
+import datetime
 import json
 import random
 import re
 import tempfile
 import time
 import traceback
-
 import httpx
 import openai
+import tiktoken
 from pydub import AudioSegment
 from rich import print
 from telegram import Update
@@ -16,8 +17,37 @@ from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
 import config
-from utils import no_can_do, printlog
+from utils import no_can_do, printlog, retrieve_logs_from_db
 
+
+def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301"):
+    """Returns the number of tokens used by a list of messages."""
+    try:
+        encoding = tiktoken.encoding_for_model(model)
+    except KeyError:
+        print("Warning: model not found. Using cl100k_base encoding.")
+        encoding = tiktoken.get_encoding("cl100k_base")
+    if model == "gpt-3.5-turbo":
+        print("Warning: gpt-3.5-turbo may change over time. Returning num tokens assuming gpt-3.5-turbo-0301.")
+        return num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301")
+    elif model == "gpt-4":
+        print("Warning: gpt-4 may change over time. Returning num tokens assuming gpt-4-0314.")
+        return num_tokens_from_messages(messages, model="gpt-4-0314")
+    elif model == "gpt-3.5-turbo-0301":
+        pass
+        # tokens_per_message = 4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
+        # tokens_per_name = -1  # if there's a name, the role is omitted
+    elif model == "gpt-4-0314":
+        pass
+        # tokens_per_message = 3
+        # tokens_per_name = 1
+    else:
+        raise NotImplementedError(f"""num_tokens_from_messages() is not implemented for model {model}. See https://github.com/openai/openai-python/blob/main/chatml.md for information on how messages are converted to tokens.""")
+    num_tokens = 0
+    for message in messages:
+        num_tokens += len(encoding.encode(message))
+    num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
+    return num_tokens
 
 async def stream_response(input):
 
@@ -84,6 +114,66 @@ async def stream_response(input):
                 else:
                     yield ''
 
+async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE)-> None:
+    
+    if await no_can_do(update, context):
+        return
+
+    if update.effective_chat.id not in config.CHAT_LOGS_ENABLED:
+        return
+
+    chat_id = update.effective_chat.id
+
+    if context.args:
+        chat_id = int(context.args[0])
+
+    system = 'Dato il seguente log di una chat di gruppo, produci un resoconto esaustivo e dettagliato delle cose dette e successe nel gruppo di chat.\n'
+
+    hours = int(datetime.datetime.now().hour) + 1
+    max_time = datetime.datetime.timestamp(datetime.datetime.now())
+
+    min_time = datetime.datetime.timestamp(datetime.datetime.now() - datetime.timedelta(hours=hours))
+    prompt = retrieve_logs_from_db(chat_id=chat_id, min_time=min_time, max_time=max_time)
+    n_tokens = num_tokens_from_messages([prompt])
+
+    while n_tokens > 3000:
+        hours -= 1
+        min_time = datetime.datetime.timestamp(datetime.datetime.now() - datetime.timedelta(hours=hours))
+        prompt = retrieve_logs_from_db(chat_id=chat_id, min_time=min_time, max_time=max_time)
+        n_tokens = num_tokens_from_messages([prompt])
+
+    await printlog(update, f"chiede un riassunto ({n_tokens} tokens)", f"ultime {hours} ore")
+
+    myresp = f"RIASSUNTO DELLE ULTIME {hours} ORE:\n\n"
+    input = system + myresp + prompt
+    input = input
+    mymessage = await update.message.reply_html(myresp)
+
+    t = time.time()
+
+    tokens = 0
+    n_tokens_calculated = num_tokens_from_messages([input])
+
+    async for text in stream_response(input):
+        tokens += 1
+        myresp += text
+
+        if time.time() - t > 3:
+            t = time.time()
+            try:
+                await mymessage.edit_text(f"{myresp} █", parse_mode='HTML')
+            except BadRequest:
+                pass
+
+    try:
+        price_per_1k = 0.002
+        total_price = (price_per_1k / 1000) * (tokens + n_tokens_calculated)
+        rounded_price = str(round(total_price, 4))
+        await mymessage.edit_text(f"{myresp}\n<i>______</i>\n<i>Questo messaggio è costato circa ${rounded_price}</i>", parse_mode='HTML')
+    except BadRequest:
+        pass
+    await printlog(update, "streama ChatGPT", f"{tokens + n_tokens_calculated} tokens, circa ${rounded_price}")
+
 
 async def ai_stream(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
@@ -112,10 +202,13 @@ async def ai_stream(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         prompt = input.strip()
         prompt = input[:1].upper() + input[1:]
         myresp = f"<b>{input}</b>\n\n"
+
     mymessage = await update.message.reply_html(myresp)
     t = time.time()
 
     tokens = 0
+    n_tokens_calculated = num_tokens_from_messages([input])
+
     async for text in stream_response(input):
         tokens += 1
         myresp += text
@@ -129,12 +222,14 @@ async def ai_stream(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     try:
         price_per_1k = 0.002
-        total_price = (price_per_1k/1000)*tokens
+        total_price = (price_per_1k / 1000) * (tokens + n_tokens_calculated)
         rounded_price = str(round(total_price, 4))
         await mymessage.edit_text(f"{myresp}\n<i>______</i>\n<i>Questo messaggio è costato circa ${rounded_price}</i>", parse_mode='HTML')
+
     except BadRequest:
         pass
-    await printlog(update, "streama ChatGPT", f"{tokens} tokens, circa ${rounded_price}")
+
+    await printlog(update, "streama ChatGPT", f"{tokens + n_tokens_calculated} tokens, circa ${rounded_price}")
 
 
 async def ai_old(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -259,6 +354,7 @@ async def whisper_transcribe(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     og_filename.close()
     filename_mp3.close()
+
 
 async def openai_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):

@@ -1,7 +1,9 @@
+import datetime
 import time
 import warnings
 from typing import Optional, Tuple
 
+from database import Chatlog
 import pytz
 from telegram import Chat, ChatMember, ChatMemberUpdated, InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ChatMemberStatus
@@ -12,6 +14,7 @@ from admin import add_ban, getchat, lista_chat, listen_to
 from utils import ForgeCommand, is_member_in_group, is_user, no_can_do, printlog
 
 warnings.filterwarnings("ignore")
+
 
 async def drop_update_from_banned_users(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_user.id in context.bot_data.get('global_bans'):
@@ -274,7 +277,6 @@ async def new_admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     await function_to_call(query, context)
 
-
 def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
     """Takes a ChatMemberUpdated instance and extracts whether the 'old_chat_member' was a member
     of the chat and whether the 'new_chat_member' is a member of the chat. Returns None, if
@@ -339,7 +341,6 @@ async def track_chats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha rimosso Emily dal canale: {chat.title} [{chat.id}]")
             # context.bot_data.setdefault("channel_ids", set()).discard(chat.id)
 
-
 async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     def extract_day(timestamp):
         return timestamp.astimezone(pytz.timezone('Europe/Rome')).strftime("%Y-%m-%d")
@@ -367,3 +368,35 @@ async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     context.chat_data['stats'][day][hour] += 1
     context.chat_data['stats'][day]['total'] += 1
+
+# Tensor
+async def log_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if update.effective_chat.id not in config.CHAT_LOGS_ENABLED:
+        return
+    # filters.TEXT & (~filters.COMMAND)
+
+    message = update.effective_message
+
+    if message.from_user.id == config.ID_EMILY:
+        return
+
+    chat_id = message.chat.id
+    message_id = message.message_id
+    user_id = message.from_user.id
+    name = message.from_user.first_name
+    timestamp = int(datetime.datetime.timestamp(message.date))
+    text = message.text
+    reply_to_message_id = None
+    if message.message_thread_id:
+        reply_to_message_id = message.message_thread_id
+
+    Chatlog.create(
+        chat_id=chat_id,
+        message_id=message_id,
+        user_id=user_id,
+        name=name,
+        timestamp=int(timestamp),
+        text=text,
+        reply_to_message_id=reply_to_message_id
+        )

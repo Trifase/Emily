@@ -6,7 +6,7 @@ import tempfile
 from html import escape as parsequote
 
 import httpx
-import peewee
+from database import TensorMessage, Quote
 import requests
 from bs4 import BeautifulSoup
 from rich import print
@@ -26,25 +26,6 @@ from utils import (
 last_search = ""
 last_results = []
 index_results = 0
-
-db = peewee.SqliteDatabase(config.DBPATH)
-
-class TensorMessage(peewee.Model):
-    tensor_text = peewee.TextField()
-    tensor_id = peewee.AutoField()
-
-    class Meta:
-        database = db
-        table_name = 'tensor'
-
-class Quote(peewee.Model):
-    quote_text = peewee.TextField()
-    quote_id = peewee.AutoField()
-
-    class Meta:
-        database = db
-        table_name = 'quotes'
-
 
 # Tensor
 async def save_tensor(update: Update, context: ContextTypes.DEFAULT_TYPE):

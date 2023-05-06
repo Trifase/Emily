@@ -1,9 +1,11 @@
 import datetime
 import inspect
 import io
+import json
 import logging
 import logging.handlers
 import time
+from database import Chatlog
 from typing import Callable, Optional, Tuple
 
 from dataclassy import dataclass
@@ -321,3 +323,110 @@ def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tup
     ] or (new_status == ChatMember.RESTRICTED and new_is_member is True)
 
     return was_member, is_member
+
+def ingest_json_to_log_db(filename) -> None:
+
+
+    with open(filename, 'r',  encoding='utf8') as f:
+        data = json.load(f)
+
+    chat_name = data['name']
+    chat_id = data['id']
+    chat_type = data['type']
+
+    out = {'name': chat_name, 'id': chat_id, 'type': chat_type, 'messages': []}
+
+    for message in data['messages']:
+        m = {}
+
+        if message.get('photo') or message.get('media_type'):
+            continue
+        if message.get('from_id') == 'user1735623047':
+            continue
+        if message.get('type') == 'service':
+            continue
+
+        text = ''.join([chunk['text'] for chunk in message['text_entities']])
+        if text.startswith('/'):
+            continue
+        # print(message)
+        m['id'] = message['id']
+        m['date'] = datetime.datetime.strptime(message['date'], '%Y-%m-%dT%H:%M:%S')
+        m['name'] = message['from']
+        m['user_id'] = int(message['from_id'].replace('user', ''))
+        m['text'] = text
+
+        if message.get('reply_to_message_id'):
+            m['reply_to_message_id'] = message['reply_to_message_id']
+        out['messages'].append(m)
+
+    for message in out['messages']:
+
+        chat_id = out['id']
+        message_id = message['id']
+        user_id = message['user_id']
+        timestamp = int(datetime.datetime.timestamp(message['date']))
+        name = message['name']
+        text = message['text']
+        reply_to_message_id = None
+        if message.get('reply_to_message_id'):
+            reply_to_message_id = message['reply_to_message_id']
+
+        Chatlog.create(
+            chat_id=chat_id,
+            message_id=message_id,
+            user_id=user_id,
+            name=name,
+            timestamp=timestamp,
+            text=text,
+            reply_to_message_id=reply_to_message_id)
+    return
+
+
+def print_clean_json(filename:str, min_datetime:datetime, max_datetime:datetime) -> str:
+    """
+        Genera una stringa con i messaggi contenuti nel file json passato come argomento.
+    Al momento, min_datetime and max_datetime devono essere due `Datetime.datetime` e non sono opzionali.
+
+    Args:
+        filename (str): Il file json da parsare
+        min_datetime (datetime): Data minima per prendere i messaggi
+        max_datetime (datetime): Data massima per prendere i messaggi
+
+    Returns:
+        str: Stringa coi messaggi formattati
+    """
+    with open(filename, 'r',  encoding='utf8') as f:
+        data = json.load(f)
+
+    return_string = ''
+
+    if not min_datetime and not max_datetime:
+        return
+
+    for message in data['messages']:
+
+        message_date = datetime.datetime.strptime(message['date'], "%Y-%m-%dT%H:%M:%S")
+
+        if message_date < min_datetime or message_date > max_datetime:
+            continue
+
+        if message.get('reply_to_message_id'):
+            reply_id = f" (rispondendo a {message['reply_to_message_id']})"
+        else:
+            reply_id = ''
+        
+        return_string += f"{message['id']}: <{message['from']}>{reply_id} {message['text']}\n"
+    return return_string
+
+def retrieve_logs_from_db(chat_id:int, min_time:int|float, max_time:int|float) -> str:
+    logs = Chatlog.select().where((Chatlog.chat_id == chat_id) & (Chatlog.timestamp >= min_time) & (Chatlog.timestamp <= max_time)).order_by(Chatlog.timestamp.asc())
+    mystring = ''
+    for line in logs:
+        if line.reply_to_message_id:
+            reply_id = f" (rispondendo a {line.reply_to_message_id})"
+        else:
+            reply_id = ''
+
+        mystring += f'{line.message_id}: <{line.name}>{reply_id} {line.text}\n'
+    return mystring

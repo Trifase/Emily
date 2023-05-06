@@ -111,7 +111,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                     mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
                 except Exception:
                     print(traceback.format_exc())
-
+            # print([tw_url, mast_url])
             if tw_url or mast_url:
                 await update.message.reply_html(f"Postato su {', '.join([x for x in [tw_url, mast_url] if x])}!", disable_web_page_preview=True)
                 await printlog(update, "vuole inviare un tweet con una foto")

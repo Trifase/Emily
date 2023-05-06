@@ -5,7 +5,7 @@ import time
 import httpx
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import peewee
+from database import Reminders, Compleanni
 from mastodon import Mastodon
 from rich import print
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -16,32 +16,17 @@ from pyrog import get_all_chatmembers
 from space import StelleResult, make_solar_system
 from utils import get_now
 
-db = peewee.SqliteDatabase(config.DBPATH)
-
-class Reminders(peewee.Model):
-    reply_id = peewee.TextField()
-    user_id = peewee.TextField()
-    chat_id = peewee.TextField()
-    date_now = peewee.TextField()
-    date_to_remind = peewee.TextField()
-    message = peewee.TextField()
-
-    class Meta:
-        database = db
-        table_name = 'reminders'
-        primary_key = False
-
-class Compleanni(peewee.Model):
-    user_id = peewee.TextField()
-    chat_id = peewee.TextField()
-    birthdate = peewee.TextField()
-
-    class Meta:
-        database = db
-        table_name = 'compleanni'
-        primary_key = False
+from database import Chatlog
 
 
+# Runs every day at 01:00 (Europe/Rome)
+async def delete_yesterday_chatlog(context: ContextTypes.DEFAULT_TYPE) -> None:
+    print(f"{get_now()} [AUTO] Cancello i messaggi di ieri dal db")
+    oggi_dt = datetime.datetime.combine(datetime.date.today(), datetime.datetime.min)
+    oggi_timestamp = int(datetime.datetime.timestamp(oggi_dt))
+    Chatlog.delete().where(Chatlog.timestamp < oggi_timestamp).execute()
+
+# Runs every day at 8:30 (Europe/Rome)
 async def post_solarsystem_mastodon(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     print(f"{get_now()} [AUTO] Posto il sistema solare giornaliero su mastodon")
@@ -76,7 +61,7 @@ async def post_solarsystem_mastodon(context: ContextTypes.DEFAULT_TYPE) -> None:
     fp.close()
     return
 
-
+# Runs every 30min
 async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
     DESTINATION_CHATS = [-1001619525581]
 
@@ -180,7 +165,6 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
                 else:
                     await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
 
-
 # Never runs
 async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
     import humanize
@@ -236,7 +220,6 @@ async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
         if messaggio_automatico:
             print(f"{get_now()} [AUTO] trovati lurkers da kickare nel gruppo {chat_id}")
             await context.bot.send_message(chat_id, messaggio_automatico, reply_markup=reply_markup)
-
 
 # Runs every minute
 async def check_reminders(context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -445,7 +428,6 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     plt.savefig("images/boiler48h.jpg")
 
-
 # Runs every day at 2:00 (Europe/Rome)
 # Doesn't run anymore, see do_global_backup
 async def do_backup(context: ContextTypes.DEFAULT_TYPE):
@@ -503,7 +485,7 @@ async def do_global_backup(context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         print(f"{get_now()} [AUTO] Backup globale eseguito: {archive_name} - File archiviati: {backupped} - File Skippati: {skipped} - File NON inviato su TG\n{e}")
 
-# Runs every day at 9:00 and 18:00 (Europe/Rome)
+# Runs every day at 0:00, 12:00 and 20:00 (Europe/Rome)
 async def check_compleanni(context: ContextTypes.DEFAULT_TYPE):
     print(f"{get_now()} [AUTO] controllo i compleanni di oggi")
 

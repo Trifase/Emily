@@ -1,7 +1,5 @@
 import datetime
 import re
-
-import peewee
 from rich import print
 from telegram.error import BadRequest
 from telegram import Update
@@ -10,17 +8,7 @@ from telegram.ext import ContextTypes
 import config
 from utils import get_now, no_can_do, printlog
 
-db = peewee.SqliteDatabase(config.DBPATH)
-
-class Compleanni(peewee.Model):
-    user_id = peewee.TextField()
-    chat_id = peewee.TextField()
-    birthdate = peewee.TextField()
-
-    class Meta:
-        database = db
-        table_name = 'compleanni'
-        primary_key = False
+from database import Compleanni
 
 # Compleanni
 async def compleanni_add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

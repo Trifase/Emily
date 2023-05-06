@@ -1,28 +1,12 @@
 import datetime
 
-import peewee
 from dateparser.search import search_dates
 from rich import print
 from telegram import Update
 from telegram.ext import ContextTypes
 
-import config
+from database import Reminders
 from utils import get_now, no_can_do, printlog
-
-db = peewee.SqliteDatabase(config.DBPATH)
-
-class Reminders(peewee.Model):
-    reply_id = peewee.TextField()
-    user_id = peewee.TextField()
-    chat_id = peewee.TextField()
-    date_now = peewee.TextField()
-    date_to_remind = peewee.TextField()
-    message = peewee.TextField()
-
-    class Meta:
-        database = db
-        table_name = 'reminders'
-        primary_key = False
 
 
 # Reminder
@@ -33,7 +17,6 @@ async def reminder_helper(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         'Uso: \n`/remindme 3d15h25m messaggio`\n`/remindme 5m butta la pasta`\nUsa `/reminderlist` per la lista dei tuoi reminder e \n`/remindelete <ID>` per eliminare un reminder',
         quote=True)
     return
-
 
 # Gets Job from APScheduler, send a message and delete entry from SQlite
 async def send_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -50,7 +33,6 @@ async def send_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
     user = await context.bot.get_chat_member(chat_id=row['chat_id'], user_id=row['user_id'])
     await context.bot.send_message(row['chat_id'], f"[{user.user.mention_html()}] {missiva}", reply_to_message_id=row['reply_id'], allow_sending_without_reply=True)
     Reminders.delete().where((Reminders.reply_id == row['reply_id']) & (Reminders.chat_id == row['chat_id'])).execute()
-
 
 async def remindme(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -107,7 +89,6 @@ async def remindme(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await printlog(update, "vuole che ricordi qualcosa il", f"{targetdate} messaggio: \[{message}]")
 
-
 async def reminders_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
@@ -161,8 +142,6 @@ async def remindelete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         else:
             await update.message.reply_html('Non trovo un cazzo onestamente', quote=True)
 
-
-
 # # A LITT'L BIT OF CLEANIN'
 # now = datetime.datetime.today()
 # c = 0
@@ -173,4 +152,3 @@ async def remindelete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 #         Reminders.delete().where((Reminders.reply_id == row.reply_id) & (Reminders.chat_id == row.chat_id)).execute()
 #         c += 1
 # print(f"Cancellati {c} reminder")
-

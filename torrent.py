@@ -34,17 +34,18 @@ async def lista_torrent(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # retrieve and show all torrents
     message = ""
     try:
-        if qbt_client.torrents_info() is None:
+        torrents_info = qbt_client.torrents_info()
+        if not torrents_info:
             await update.message.reply_text("Nessun torrent in download")
             return
-
-        for torrent in qbt_client.torrents_info():
-            progress_perc = round(torrent.progress * 100, 2)
-            message += f'<b>{torrent.name}</b> (<i>{torrent.state}</i>)\n↓ {str(round(torrent.dlspeed/1024/1024, 2))} MB/s · ↑ {str(round(torrent.upspeed/1024/1024, 2))} MB/s\nETA: {"∞" if torrent.eta == 8640000 else (str(humanize.precisedelta(torrent.eta, suppress=["days"], minimum_unit="seconds")))}\nProgress: {print_progressbar(progress_perc, suffix="", prefix="")} - {str(progress_perc)}%\n\n'
-        if not message:
-            await update.message.reply_text("Nessun torrent in download")
         else:
-            await update.message.reply_html(message)
+            for torrent in torrents_info:
+                progress_perc = round(torrent.progress * 100, 2)
+                message += f'<b>{torrent.name}</b> (<i>{torrent.state}</i>)\n↓ {str(round(torrent.dlspeed/1024/1024, 2))} MB/s · ↑ {str(round(torrent.upspeed/1024/1024, 2))} MB/s\nETA: {"∞" if torrent.eta == 8640000 else (str(humanize.precisedelta(torrent.eta, suppress=["days"], minimum_unit="seconds")))}\nProgress: {print_progressbar(progress_perc, suffix="", prefix="")} - {str(progress_perc)}%\n\n'
+            if not message:
+                await update.message.reply_text("Nessun torrent in download")
+            else:
+                await update.message.reply_html(message)
     except Exception as e:
         await update.message.reply_text(f"Errore!\n{e}")
     # # pause all torrents
