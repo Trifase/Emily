@@ -353,7 +353,7 @@ def ingest_json_to_log_db(filename) -> None:
         m['id'] = message['id']
         m['date'] = datetime.datetime.strptime(message['date'], '%Y-%m-%dT%H:%M:%S')
         m['name'] = message['from']
-        m['user_id'] = int(message['from_id'].replace('user', ''))
+        m['user_id'] = int(message['from_id'].replace('user', '').replace('channel',''))
         m['text'] = text
 
         if message.get('reply_to_message_id'):
@@ -381,7 +381,6 @@ def ingest_json_to_log_db(filename) -> None:
             text=text,
             reply_to_message_id=reply_to_message_id)
     return
-
 
 def print_clean_json(filename:str, min_datetime:datetime, max_datetime:datetime) -> str:
     """
