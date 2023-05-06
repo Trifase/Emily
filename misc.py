@@ -24,7 +24,7 @@ from codetiming import Timer
 from dataclassy import dataclass
 from dateutil.parser import parse, parserinfo
 from gtts import gTTS
-from nudenet import NudeClassifier, NudeDetector
+# from nudenet import NudeClassifier, NudeDetector
 from PIL import Image
 from pydub import AudioSegment
 from rich import print
@@ -392,6 +392,8 @@ async def is_safe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     actual_picture = await picture.get_file()
     await actual_picture.download_to_drive(custom_path=tempphoto.name)
 
+
+    # This wont work until tensorflow works with python 3.11
     classifier = NudeClassifier()
     results = classifier.classify(tempphoto.name)
 
@@ -402,6 +404,7 @@ async def is_safe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     msg = await update.message.reply_html(text)
 
     if '-why' in context.args:
+        # This wont work until tensorflow works with python 3.11
         detector = NudeDetector()
         results = detector.detect(tempphoto.name)
         text += "\n\n"
