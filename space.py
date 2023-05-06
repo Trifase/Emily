@@ -1,8 +1,11 @@
+import html
 import math
+import pprint
 import random
 import tempfile
 import uuid
 from datetime import datetime, timezone
+
 import cairo
 import numpy as np
 import pytz
@@ -16,6 +19,7 @@ from telegram.ext import ContextTypes
 
 import config
 from utils import no_can_do, printlog
+
 
 @dataclass
 class StelleResult:
@@ -1574,8 +1578,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(image_path, 'rb'), caption=f"<b>· {system_name.upper()} ·</b>\n<code>{seed}</code>", parse_mode='HTML')
     
     if '-raw' in context.args:
-        import html
-        import pprint
+
         rawtext = pprint.pformat(stelle, sort_dicts=False)
         rawtext = html.escape(rawtext)
         await context.bot.send_message(chat_id=update.effective_chat.id, text=f"<pre>{rawtext}</pre>", parse_mode='HTML')

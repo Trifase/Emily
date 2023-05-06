@@ -1,13 +1,13 @@
-import requests
+import string
 
+import requests
 from rich import print
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
-from telegram.ext import ContextTypes
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.error import BadRequest
+from telegram.ext import ContextTypes
 
 import config
-from utils import printlog, no_can_do
-
+from utils import no_can_do, printlog
 
 # Maps
 
@@ -37,7 +37,7 @@ async def streetview(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
     try:
         location_name = location['results'][0]['formatted_address']
-        import string
+
         for char in string.punctuation:
             location_name = location_name.replace(char, '')
         loc_lat = location['results'][0]['geometry']['location']['lat']

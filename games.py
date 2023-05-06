@@ -1,6 +1,8 @@
 
 import random
 
+import requests
+from codetiming import Timer
 from rich import print
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -60,10 +62,7 @@ async def sassocartaforbici(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         await update.message.reply_text(f"Scelgo {b.capitalize()}!\n\n{b.capitalize()} {verbo} {a.capitalize()}\n❌ Hai perso!")
         return
 
-
 def sudoku():
-    import requests
-    from codetiming import Timer
 
     def get_sudoku(diff):
         url = "https://sudoku-board.p.rapidapi.com/new-board"

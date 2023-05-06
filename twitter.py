@@ -2,6 +2,7 @@
 import tempfile
 import traceback
 
+import tweepy
 from mastodon import Mastodon
 from rich import print
 from telegram import Update
@@ -53,7 +54,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
         await crea_sondaggino(context, update, max_votes, tweet, domanda='Vogliamo veramente twittarlo?')
         return
 
-    import tweepy
+
     BEARER_TOKEN = config.TW_BEARER_TOKEN
     CONSUMER_KEY = config.TW_API
     CONSUMER_SECRET = config.TW_API_SECRET
@@ -202,7 +203,6 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
 async def lista_tweets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-    import tweepy
 
     CONSUMER_KEY = config.TW_API
     CONSUMER_SECRET = config.TW_API_SECRET
@@ -264,7 +264,7 @@ async def twitter_pms(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 async def tweet_pm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-    import tweepy
+
     CONSUMER_KEY = config.TW_API
     CONSUMER_SECRET = config.TW_API_SECRET
     ACCESS_KEY = config.TW_ACCESS_TOKEN

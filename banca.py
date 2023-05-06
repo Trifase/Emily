@@ -1,9 +1,13 @@
 import json
 import os.path
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import requests
 from requests.models import HTTPError
-from rich import print
+from requests.structures import CaseInsensitiveDict
+from rich import box, print
+from rich.table import Table
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -35,8 +39,6 @@ def get_new_token(id, key):
         response.raise_for_status()
 
 def refresh_token(refresh_token):
-    import requests
-    from requests.structures import CaseInsensitiveDict
 
     url = "https://ob.nordigen.com/api/v2/token/refresh/"
 
@@ -82,8 +84,6 @@ def get_or_refresh_token(SECRET_ID, SECRET_KEY):
     return data['access']  # in ogni caso ritorna il token refreshato o nuovo
 
 def build_requisition(token, BANK_ID, redirect_url="http://www.google.com"):  # returns link, requisition_id
-    import requests
-    from requests.structures import CaseInsensitiveDict
 
     url = "https://ob.nordigen.com/api/v2/requisitions/"
 
@@ -113,8 +113,6 @@ def build_requisition(token, BANK_ID, redirect_url="http://www.google.com"):  # 
         raise HTTPError
 
 def get_requisition_list(token):
-    import requests
-    from requests.structures import CaseInsensitiveDict
 
     url = "https://ob.nordigen.com/api/v2/requisitions/"
 
@@ -132,8 +130,6 @@ def get_requisition_list(token):
         raise HTTPError
 
 def delete_requisition(token, uuid):
-    import requests
-    from requests.structures import CaseInsensitiveDict
 
     url = f"https://ob.nordigen.com/api/v2/requisitions/{uuid}"
 
@@ -151,8 +147,6 @@ def delete_requisition(token, uuid):
         raise HTTPError
 
 def get_account_id_from_api(token, requisition_id):
-    import requests
-    from requests.structures import CaseInsensitiveDict
 
     url = f"https://ob.nordigen.com/api/v2/requisitions/{requisition_id}/"
     headers = CaseInsensitiveDict()
@@ -172,8 +166,6 @@ def get_account_id_from_api(token, requisition_id):
     pass
 
 def get_banks(token, country_code="it"):
-    import requests
-    from requests.structures import CaseInsensitiveDict
 
     url = f"https://ob.nordigen.com/api/v2/institutions/?country={country_code}"
 
@@ -195,12 +187,11 @@ def refresh_requisition(token):
         account_dict = dict()
         link, requisition_id = build_requisition(token, bank_id, "http://127.0.0.1:12666")  # creo un agreement
 
-        from http.server import BaseHTTPRequestHandler, HTTPServer
 
         class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             def do_GET(self):
                 self.wfile.write(b'Grazie, puoi chiudere!')
-                import threading
+
                 threading.Thread(target=httpd.shutdown, daemon=True).start()
 
         httpd = HTTPServer(('localhost', 12666), SimpleHTTPRequestHandler)
@@ -232,12 +223,12 @@ def get_account_id(token, BANK_ID, redirect):
         account_dict = dict()
         link, requisition_id = build_requisition(token, BANK_ID, "http://127.0.0.1:12666")  # creo un agreement
 
-        from http.server import BaseHTTPRequestHandler, HTTPServer
+
 
         class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             def do_GET(self):
                 self.wfile.write(b'Grazie, puoi chiudere!')
-                import threading
+
                 threading.Thread(target=httpd.shutdown, daemon=True).start()
 
         httpd = HTTPServer(('localhost', 12666), SimpleHTTPRequestHandler)
@@ -257,8 +248,6 @@ def get_account_id(token, BANK_ID, redirect):
         return acc_id
 
 def get_transactions(token, acc_id):
-    import requests
-    from requests.structures import CaseInsensitiveDict
 
     url = f"https://ob.nordigen.com/api/v2/accounts/{acc_id}/transactions/"
 
@@ -277,8 +266,6 @@ def get_transactions(token, acc_id):
         response.raise_for_status()
 
 def get_saldo(token, acc_id, just_the_number=1):
-    import requests
-    from requests.structures import CaseInsensitiveDict
 
     url = f"https://ob.nordigen.com/api/v2/accounts/{acc_id}/balances/"
 
@@ -300,10 +287,8 @@ def get_saldo(token, acc_id, just_the_number=1):
     else:
         response.raise_for_status()
 
-
 def transactions_nice_table(token, acc_id):
-    from rich import box
-    from rich.table import Table
+
     table = Table(title="Lista Transazioni", box=box.SQUARE_DOUBLE_HEAD)
 
     table.add_column("Data")
@@ -316,18 +301,6 @@ def transactions_nice_table(token, acc_id):
 
     return(table)
 
-
-
-
-# token = get_or_refresh_token(SECRET_ID, SECRET_KEY)
-# for banca in get_banks(token, "it"):
-#     print(banca['name'])
-
-# acc_id = get_account_id(token, BANK_ID, redirect)
-# refresh_requisition()
-# print(f"Saldo: {get_saldo(token, acc_id, 1)}€")
-
-# print(transactions_nice_table(token, acc_id))
 async def bot_get_saldo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:
         return

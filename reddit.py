@@ -2,10 +2,13 @@ import json
 import pprint
 import random
 import time
+import urllib
 
 import asyncpraw
+import ffmpy
 import requests
 from asyncprawcore.exceptions import Forbidden, NotFound, Redirect
+from bs4 import BeautifulSoup
 from rich import print
 from telegram import InputMediaPhoto, InputMediaVideo, Update
 from telegram.error import BadRequest
@@ -92,13 +95,8 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_html("Errore: subreddit privato")
         await reddit.close()
         return
-    # except Exception as e:
-    #     await update.message.reply_html(f"Errore: {e}")
-    #     return
 
     submission._fetch()  # Popolo la submission
-    # import pprint
-    # pprint.pprint(vars(submission))
 
     if hasattr(submission, "crosspost_parent"):  # controllo se è un crosspost
         submission = await reddit.submission(id=submission.crosspost_parent.split("_")[1])
@@ -176,9 +174,7 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
                     if download:
 
-                        import urllib
 
-                        import ffmpy
                         video_file = "reddit/video.mp4"
                         audio_file = "reddit/audio.mp4"
 
@@ -284,7 +280,7 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     elif "streamable.com" in url:
-        from bs4 import BeautifulSoup
+
         r = requests.get(url)
         soup = BeautifulSoup(r.text, 'html.parser')
         # Pull all text from the BodyText div

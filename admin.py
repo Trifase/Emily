@@ -1,13 +1,21 @@
 import datetime
+import html
 import os
+import platform
+import pprint
+import shutil
+import socket
 import subprocess
 import sys
 import tempfile
 import traceback
+import urllib.request
+from os import walk
 
 from PIL import ImageGrab
 from rich import print
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import __version__ as TG_VER
 from telegram.constants import ChatMemberStatus, ParseMode
 from telegram.ext import CallbackContext, ContextTypes
 
@@ -156,10 +164,6 @@ async def send_custom_media(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     return
 
 async def count_lines(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    import platform
-    from os import walk
-
-    from telegram import __version__ as TG_VER
     if update.message.from_user.id not in config.ADMINS:
         return
 
@@ -212,7 +216,6 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     commandlenght = update.message.entities[0].length + 1
     await update.message.reply_text(update.message.text[commandlenght:])
 
-
 async def tg_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if await no_can_do(update, context):
@@ -264,8 +267,7 @@ async def tg_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         try:
             if context.args[0] == "-raw":
-                import html
-                import pprint
+
                 # pprint.pprint(update.message.__str__())
                 rawtext = pprint.pformat(update.message.reply_to_message.to_dict())
                 # print(rawtext)
@@ -348,7 +350,6 @@ async def getchat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await context.bot.send_message(config.ID_SPIA, message, reply_markup=reply_markup)
-
 
 async def lista_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -449,7 +450,6 @@ async def listen_to(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(config.ID_SPIA, message, parse_mode=ParseMode.HTML)
         return
 
-
 async def esci(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message.from_user.id not in config.ADMINS:
         return
@@ -466,7 +466,7 @@ async def esci(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def ip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     def get_ip():
-        import socket
+
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             # doesn't even have to be reachable
@@ -479,7 +479,7 @@ async def ip(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return IP
     if update.message.from_user.id not in config.ADMINS:
         return
-    import urllib.request
+
     await printlog(update, "chiede gli indirizzi IP")
     local_ip = get_ip()
     external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
@@ -503,7 +503,6 @@ async def wakeup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     else: 
         await update.message.reply_text('Fatto')
     return
-
 
 async def banlist(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message.from_user.id not in config.ADMINS:
@@ -578,8 +577,6 @@ async def add_ban(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("È già bannato", disable_notification=True)
 
-
-
 async def del_ban(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:
         return
@@ -606,8 +603,6 @@ async def del_ban(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("Non mi sembra bannato.", disable_notification=True)
     return
-
-
 
 async def set_title(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message.from_user.id not in config.ADMINS:
@@ -644,9 +639,8 @@ async def set_group_picture(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             print(traceback.format_exc())
             await update.message.reply_text("Non posso farlo")
 
-
 async def do_manual_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    import shutil
+
     for filename in ['picklepersistence', 'sqlite.db', 'sets.json']:
         print(f"{get_now()} [AUTO] Eseguo il backup del file {filename}")
         oldfile = f"db/{filename}"
@@ -712,5 +706,3 @@ async def clean_db(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.application.bot_data.pop(chiave, None)
 
     await update.message.reply_text("bot_data pulito!")
-
-

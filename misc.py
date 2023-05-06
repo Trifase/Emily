@@ -1,12 +1,16 @@
 import datetime
+import io
 import json
 import os
 import random
 import tempfile
 import time
+import traceback
 
 import deepl
 import httpx
+import humanize
+import jsonlines
 import lichess.api
 import markovify
 import matplotlib.dates as mdates
@@ -14,14 +18,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import requests
 import upsidedown
+import zstandard
 from aiohttp_client_cache import CachedSession, FileBackend
+from codetiming import Timer
+from dataclassy import dataclass
 from dateutil.parser import parse, parserinfo
 from gtts import gTTS
+from nudenet import NudeClassifier, NudeDetector
 from PIL import Image
 from pydub import AudioSegment
 from rich import print
 from telegram import ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.ext import ContextTypes
+from youtubesearchpython import VideosSearch
 
 import config
 from pyrog import get_all_chatmembers, get_user_from_username, pyro_bomb_reaction, send_reaction
@@ -85,10 +94,8 @@ async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # print(f"Quale di queste due frasi è realmente stata scritta da tensor?\nA) {messages[0]}\nB) {messages[1]}")
 
-
-
 async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    import humanize
+
     _localize = humanize.i18n.activate("it_IT")
 
     if await no_can_do(update, context):
@@ -203,7 +210,7 @@ async def lurkers_callbackqueryhandlers(update: Update, context: ContextTypes.DE
                 await context.bot.unban_chat_member(update.effective_chat.id, user_id)
                 context.bot_data["timestamps"][update.effective_chat.id].pop(user_id)
             except Exception:
-                import traceback
+
                 print(traceback.format_exc())
                 pass
 
@@ -371,7 +378,7 @@ async def polls_callbackqueryhandlers(update: Update, context: ContextTypes.DEFA
 async def is_safe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-    from nudenet import NudeClassifier, NudeDetector
+
     
     if not update.message.reply_to_message or not update.message.reply_to_message.photo:
         return
@@ -578,16 +585,7 @@ async def bioritmo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_photo(open('images/bioritmo.png', 'rb'))
 
 async def condominioweb(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    import io
-    import json
-    import random
-    import time
-    from datetime import datetime
 
-    import jsonlines
-    import zstandard
-    from codetiming import Timer
-    from dataclassy import dataclass
 
 
     @dataclass
@@ -630,7 +628,7 @@ async def condominioweb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 msgs['headline'],
                 msgs['text'],
                 # fromisoformat does NOT accept the timezone because reasons, have to truncate here
-                datetime.fromisoformat(msgs['dateCreated'][0:19]),
+                datetime.datetime.fromisoformat(msgs['dateCreated'][0:19]),
                 msgs['author']['name'],
                 comment
             )
@@ -1050,7 +1048,7 @@ async def alexa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} chiede una canzone ad alexa: {search_term}')
     await printlog(update, "chiede una canzone ad alexa", search_term)
-    from youtubesearchpython import VideosSearch
+
     videosSearch = VideosSearch(search_term, limit=1, region='IT')
     my_video = videosSearch.result()['result'][0]
     message = f"<a href='{my_video['link']}'>{my_video['title']}</a>\n"

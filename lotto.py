@@ -1,4 +1,5 @@
 import datetime
+from collections import Counter, defaultdict
 
 from rich import print
 from telegram import Update
@@ -102,10 +103,8 @@ async def maesta_primo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             await update.message.reply_html(f"👑 Per oggi sei <b>Sua Maestà {word.capitalize()}!</b> 👑", quote=False)
             return
 
-
-
 async def stat_maesta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    from collections import Counter, defaultdict
+
 
     if await no_can_do(update, context):
         return
@@ -163,12 +162,10 @@ async def elenco_maesta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         await update.message.reply_text("Nessuna Sua Maestà per oggi.", quote=False)
         return
 
-
 async def conta_morti(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.chat_member.chat.id not in [config.ID_LOTTO]:
         return
-    # import pprint
-    # pprint.pprint(update.to_dict())
+
     try:
         chat_id = update.chat_member.chat.id
     except Exception:

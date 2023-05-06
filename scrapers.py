@@ -2,21 +2,29 @@ import datetime
 import json
 import pprint
 import random
+import re
 import shutil
 import tempfile
 import time
 import traceback
+import urllib
 import urllib.request
 from urllib import parse
 from uuid import uuid4
 
 import asyncpraw
+import ffmpy
 import httpx
 import instaloader
 import pymediainfo
 import pytz
 import requests
+import tweepy
+import wikipedia as wkp
+import yt_dlp
+from bs4 import BeautifulSoup
 from instaloader import BadResponseException, Profile, StoryItem
+from requests_html import AsyncHTMLSession
 from rich import print
 from telegram import (
     InlineQueryResultArticle,
@@ -41,9 +49,7 @@ def utc_to_local(utc_dt):
 
 async def get_facebook_video_info(url) -> dict:
     video_data = {}
-    import re
 
-    from requests_html import AsyncHTMLSession
     asession = AsyncHTMLSession()
     try:
         response = await asession.get(url)
@@ -91,7 +97,7 @@ async def file_in_limits(url, debug=False) -> bool:
         if (int(info.headers["Content-Length"]) <= 20000000):
 
             if debug:
-                import pprint
+
                 print(url)
                 print("E' nei limiti")
                 pprint.pprint(info.headers)
@@ -100,14 +106,12 @@ async def file_in_limits(url, debug=False) -> bool:
     if ('image' in info.headers["Content-Type"]):
         if (int(info.headers["Content-Length"]) <= 5000000):
             if debug:
-                import pprint
                 print(url)
                 pprint.pprint(info.headers)
                 print("E' nei limiti")
             return True
 
     if debug:
-        import pprint
         print(url)
         pprint.pprint(info.headers)
         print("Non è nei limiti")
@@ -118,7 +122,7 @@ async def get_tiktok_username_id(url):
     """
     Get the username and the video id from a tiktok url
     """
-    from urllib import parse
+
     purl = parse.urlparse(url)
 
     if purl.netloc == "vm.tiktok.com":
@@ -721,10 +725,9 @@ async def wikipedia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
 
-    import wikipedia
 
 
-    wikipedia.set_lang("it")
+    wkp.set_lang("it")
     try:
         searchquery = update.effective_message.text.split(maxsplit=1)[1]
     except IndexError:
@@ -758,13 +761,8 @@ async def youtube_alts(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def facebook_video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-    # print("Triggered!")
-    # print("zero", context.match.group(0))
-    # print("uno", context.match.group(1))
-    link = context.match.group(0)
 
-    import yt_dlp
-    # from rich import print
+    link = context.match.group(0)
 
     ydl_opts = {
         'quiet': True,
@@ -809,7 +807,6 @@ async def scrape_tweet_media(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} posta un tweet: {context.match.group(1)}')
     await printlog(update, "posta un tweet", context.match.group(1))
 
-    import tweepy
     CONSUMER_KEY = config.TW_API
     CONSUMER_SECRET = config.TW_API_SECRET
     ACCESS_KEY = config.TW_ACCESS_TOKEN
@@ -1003,9 +1000,7 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
                     if download:
 
-                        import urllib
 
-                        import ffmpy
                         video_file = "reddit/video.mp4"
                         audio_file = "reddit/audio.mp4"
 
@@ -1111,7 +1106,7 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         return
 
     elif "streamable.com" in url:
-        from bs4 import BeautifulSoup
+
         r = requests.get(url)
         soup = BeautifulSoup(r.text, 'html.parser')
         # Pull all text from the BodyText div

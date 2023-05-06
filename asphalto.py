@@ -5,7 +5,6 @@ from telegram.ext import ContextTypes
 import config
 from utils import no_can_do, printlog
 
-
 # Asphalto
 async def azzurro(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 

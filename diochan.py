@@ -56,7 +56,6 @@ async def random_tensor(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(tensor_message, quote=False)
 
-
 # Quotes
 async def search_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -182,7 +181,6 @@ async def add_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     newquote.save()
 
     await update.message.reply_text('Fatto', quote=False)
-
 
 # Diochan
 async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -337,7 +335,6 @@ async def mon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await printlog(update, "ha nominato mon", mon)
 
-
 async def get_thread_from_dc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_user.id not in config.ADMINS:
         return
@@ -411,7 +408,6 @@ async def get_thread_from_dc(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
         await update.message.reply_html(text=message)
 
-
 async def greet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_chat.id != config.ID_DIOCHAN2:
         return
@@ -480,123 +476,3 @@ async def set_greet_pic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             await update.message.reply_text("Devi rispondere ad un'immagine")
     else:
         await update.message.reply_text("Devi rispondere ad un'immagine")
-
-    
-# DEPRECATED
-# def infartino(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-#     update.message.reply_animation(open('images/infartino.mp4', 'rb'), quote=False)
-
-# def cacca(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-#     if no_can_do(update, context):
-#         return
-
-#     if update.effective_chat.type != 'private':
-#         print("non è una chat privata")
-#         if update.message.chat.id not in [config.ID_DIOCHAN, config.ID_TESTING]:
-#             print("è una chat privata ma è una chat di test o diochan")
-#             return
-
-#     print(f'{get_now()} {await get_display_name(update.effective_user)} in {get_chat(update.message.chat.id)} aggiunge una cacata!')
-#     import datetime
-
-#     with open('db/cacche.json') as cacche_db:
-#         cacche = json.load(cacche_db)
-
-
-#         today = datetime.datetime.today().strftime('%Y-%m-%d')
-#         now = datetime.datetime.now().strftime('%H:%M:%S')
-#         user = str(update.effective_user.id)
-
-#         if context.args:
-#             note = " ".join(context.args)
-#         else:
-#             note = "Niente da rilevare"
-
-#         if user not in cacche:
-#             cacche[user] = {}
-
-#         if today not in cacche[user]:
-#             cacche[user][today] = {}
-
-#         cacche[user][today][now] = note
-
-#         json.dump(cacche, open('db/cacche.json', 'w'), indent=4)
-
-
-#     if note != "Niente da rilevare":
-#         update.message.reply_html(f"Cacca salvata! Ho aggiunto a margine: <i>{note}</i>", quote=False)
-#     else:
-#         update.message.reply_text(f'Cacca salvata!', quote=False)
-
-#     return
-
-# def lista_cacche(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-
-#     if no_can_do(update, context):
-#         return
-
-
-#     if update.effective_chat.type != 'private':
-#         # print("non è una chat privata")
-#         if update.message.chat.id not in [config.ID_DIOCHAN, config.ID_TESTING]:
-#             # print("è una chat privata ma è una chat di test o diochan")
-#             return
-
-#     print(f'{get_now()} {await get_display_name(update.effective_user)} in {get_chat(update.message.chat.id)} chiede il registro cacate')
-
-#     completa = False
-#     data = ""
-#     if context.args:
-#         if context.args[0] == "-completa":
-#             completa = True
-#         else:
-#             format = '%Y-%m-%d'
-#             import datetime
-#             try:
-#                 datetime.datetime.strptime(context.args[0], format)
-#                 data = context.args[0]
-#             except ValueError:
-#                 update.message.reply_text(f"Inserisci una data valida in formato YYYY-MM-DD.\nAd esempio: {datetime.datetime.today().strftime('%Y-%m-%d')}")
-#                 return
-
-#     with open('db/cacche.json') as cacche_db:
-#         cacche = json.load(cacche_db)
-#         user = str(update.effective_user.id)
-
-#         if user not in cacche:
-#             update.message.reply_text("Il tuo registro cacche è vuoto, mangia più fibre.")
-#             return
-
-#         lista_cacche = cacche[user]
-#         registro_cacche = ""
-
-#         if data:
-#             if data not in lista_cacche:
-#                 update.message.reply_text("Non ci sono cacche quel giorno.")
-#                 return
-#             registro_cacche += f"<b>{data}</b>\n"
-#             for ora in lista_cacche[data]:
-#                 registro_cacche += f"<code>|{ora[:5]}| </code><i>{lista_cacche[data][ora]}</i>\n"
-#             update.message.reply_html(f"{registro_cacche}")
-#             return
-
-#         if completa:
-#             for giorno in reversed(cacche[user]):
-#                 registro_cacche += f"<b>{giorno}</b>\n"
-#                 for ora in lista_cacche[giorno]:
-#                     registro_cacche += f"<code>|{ora[:5]}| </code><i>{lista_cacche[giorno][ora]}</i>\n"
-#                 registro_cacche += "\n"
-#             update.message.reply_html(f"{registro_cacche}")
-#             return
-
-#         n = 0
-#         for giorno in reversed(cacche[user]):
-#             if n == 3:
-#                 update.message.reply_html(f"{registro_cacche}")
-#                 return
-#             registro_cacche += f"<b>{giorno}</b>\n"
-#             for ora in lista_cacche[giorno]:
-#                 registro_cacche += f"<code>|{ora[:5]}| </code><i>{lista_cacche[giorno][ora]}</i>\n"
-#             registro_cacche += "\n"
-#             n += 1
-#         update.message.reply_html(f"{registro_cacche}")

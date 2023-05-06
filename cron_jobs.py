@@ -1,22 +1,24 @@
 import datetime
 import html
+import os
+import shutil
 import time
+import zipfile
 
 import httpx
+import humanize
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-from database import Reminders, Compleanni
 from mastodon import Mastodon
 from rich import print
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 import config
+from database import Chatlog, Compleanni, Reminders
 from pyrog import get_all_chatmembers
 from space import StelleResult, make_solar_system
 from utils import get_now
-
-from database import Chatlog
 
 
 # Runs every day at 01:00 (Europe/Rome)
@@ -167,7 +169,7 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
 
 # Never runs
 async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
-    import humanize
+
     _localize = humanize.i18n.activate("it_IT")
 
     print(f"{get_now()} [AUTO] controllo i lurkers")
@@ -431,7 +433,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 # Runs every day at 2:00 (Europe/Rome)
 # Doesn't run anymore, see do_global_backup
 async def do_backup(context: ContextTypes.DEFAULT_TYPE):
-    import shutil
+
     for filename in ['picklepersistence', 'sqlite.db', 'sets.json']:
         print(f"{get_now()} [AUTO] Eseguo il backup del file {filename}")
         oldfile = f"db/{filename}"
@@ -441,9 +443,7 @@ async def do_backup(context: ContextTypes.DEFAULT_TYPE):
 
 # Runs every day at 2:00 (Europe/Rome)
 async def do_global_backup(context: ContextTypes.DEFAULT_TYPE):
-    import datetime
-    import os
-    import zipfile
+
 
     now = datetime.datetime.today().strftime('%Y%m%d_%H%M%S')
 

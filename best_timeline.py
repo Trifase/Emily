@@ -1,6 +1,7 @@
 import datetime
 import random
 
+import tweepy
 from telegram import ChatMember, ChatPermissions, InputMediaPhoto, InputMediaVideo, Update
 from telegram.ext import ContextTypes
 
@@ -23,7 +24,7 @@ async def scrape_tweet_bt(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         #     return
         return
 
-    import tweepy
+
     CONSUMER_KEY = config.TW_API
     CONSUMER_SECRET = config.TW_API_SECRET
     ACCESS_KEY = config.TW_ACCESS_TOKEN
@@ -127,7 +128,6 @@ async def silenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await context.bot.restrict_chat_member(update.message.chat.id, update.message.reply_to_message.from_user.id, until_date=expires_in, permissions=sta_zitto)
     await update.message.reply_html(f"Silenziatə fino al <code>{expires_in}</code>", reply_to_message_id=update.message.reply_to_message.id)
 
-
 async def permasilenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     def can_user_restrict(user: ChatMember):
         if user.status == ChatMember.OWNER:
@@ -156,7 +156,6 @@ async def permasilenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     sta_zitto = ChatPermissions.no_permissions()
     await context.bot.restrict_chat_member(update.message.chat.id, update.message.reply_to_message.from_user.id, permissions=sta_zitto)
     await update.message.reply_html("Silenziatə fino al <code>decadimento termico dell'universo</code>", reply_to_message_id=update.message.reply_to_message.id)
-
 
 async def deleta_if_channel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # if update.message.chat.id != config.ID_TIMELINE:
