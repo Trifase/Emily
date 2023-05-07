@@ -451,9 +451,21 @@ async def do_global_backup(context: ContextTypes.DEFAULT_TYPE):
     archive_name = f"{backup_dir}/{now}-backup.zip"
 
     IGNORED_DIRS = [
-        f"./{backup_dir}", "./db/backups", "./db/corpuses", "./__pycache__",
-        "./ig", "./.git/", "./reddit", "./images/tarots", "./images/trifasi",
-        "./.vscode", "./banca"
+        f"./{backup_dir}",
+        "./db/backups",
+        "./db/corpuses",
+        "./__pycache__",
+        "./ig",
+        "./.git/",
+        "./reddit",
+        "./images",
+        "./images/tarots",
+        "./images/trifasi",
+        "./templates",
+        "./.vscode",
+        "./banca",
+        "./.mypy_cache",
+        "./logs",
         ]
     IGNORED_FILES = [f"{now}-backup.zip", "condominioweb.jsonl.zst", "logs.txt"]
 
