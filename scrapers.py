@@ -45,7 +45,7 @@ local_tz = pytz.timezone('Europe/Rome')
 
 def utc_to_local(utc_dt):
     local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
-    return local_tz.normalize(local_dt) 
+    return local_tz.normalize(local_dt)
 
 async def get_facebook_video_info(url) -> dict:
     video_data = {}
@@ -235,7 +235,7 @@ async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         info = requests.head(video_info["video_url"])
 
         if int(info.headers["Content-Length"]) >= 20000000:
-            
+           
             results = [
                 InlineQueryResultArticle(
                     id=str(uuid4()),
@@ -283,7 +283,7 @@ async def tiktok(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     if video_info["slideshow"]:
-        await update.effective_chat.send_chat_action(action='upload_photo') 
+        await update.effective_chat.send_chat_action(action='upload_photo')
         await update.message.reply_media_group(media=[InputMediaPhoto(image) for image in video_info['slideshow']])
         return
 
@@ -316,7 +316,7 @@ async def tiktok_long(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     username, id, link = await get_tiktok_username_id(url)
 
     await printlog(update, "chiede un tiktok", link)
- 
+
     video_info = await get_tiktok_video_infos_aweme(username, id)
 
     if not video_info:
@@ -350,7 +350,7 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     url = context.match.group(1)
     url_path = parse.urlsplit(url).path[1:].split('/')
     user_agent = "Mozilla/5.0 (X11; Linux aarch64; rv:91.0) Gecko/20100101 Firefox/91.0"
-    
+   
     L = instaloader.Instaloader(dirname_pattern="ig/{target}", quiet=True, fatal_status_codes=[429], save_metadata=False, max_connection_attempts=1, user_agent=user_agent, iphone_support=False)
     USER = "emilia_superbot"
     L.load_session_from_file(USER, "db/session-emilia_superbot")
@@ -359,7 +359,7 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     match url_path[0]:
         case 'reel' | 'p' | 'tv':
-            
+           
             shortcode = url_path[1]
 
             await printlog(update, f"chiede un contenuto ({url_path[0]}) da instagram", f"https://www.instagram.com/{url_path[0]}/{shortcode}/")
@@ -394,7 +394,7 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                             medialist.append(InputMediaPhoto(media=p.display_url))
                         else:
                             continue
-                
+               
                 await context.bot.send_media_group(reply_to_message_id=update.message.message_id, chat_id=update.message.chat.id, media=medialist)
 
             elif post.typename == "GraphImage":
@@ -406,7 +406,7 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                     await update.message.reply_photo(photo=url, caption=caption, parse_mode='HTML')
                 else:
                     await update.message.reply_html(f"Il file è troppo grosso per caricarlo, quindi ecco <a href='{url}'>il link</a>.", disable_web_page_preview=True)
-                
+               
             elif post.typename == "GraphVideo":
                 url = post.video_url
                 username = post.owner_username
@@ -415,7 +415,7 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                     caption = f"https://www.instagram.com/{username}\n{post.caption[:200] if post.caption else ''}"
                     caption = caption.replace("<", "&lt;").replace(">", "&gt;")
                     await update.message.reply_video(video=url, caption=caption, parse_mode='HTML')
-                else: 
+                else:
                     await update.message.reply_html(f"Il file è troppo grosso per caricarlo, quindi ecco <a href='{url}'>il link</a>.", disable_web_page_preview=True)
 
         case 'stories':
@@ -715,7 +715,7 @@ async def ninofrassica(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             else:
                 print("Boh")
 
-            
+           
             await context.bot.send_media_group(reply_to_message_id=update.message.message_id, chat_id=update.message.chat.id, media=medialist)
 
     await update.message.reply_html("Non trovo niente.")
@@ -892,7 +892,7 @@ async def scrape_tweet_media(update: Update, context: ContextTypes.DEFAULT_TYPE)
             # print(medias)
             await context.bot.send_media_group(reply_to_message_id=update.message.message_id, chat_id=update.message.chat.id, media=medias)
         else:
-            
+           
             # print("C'erano dei media ma erano tutti oltre il limite:")
             # print(media_no)
             message = "C'erano dei media ma erano tutti oltre il limite per caricarli automaticamente:\n"
@@ -906,7 +906,7 @@ async def scrape_tweet_media(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-    
+   
     if update.effective_user.id == 160339370:
         await update.message.reply_html("Basta Zanna.")
         return
@@ -1026,7 +1026,7 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                         ff = ffmpy.FFmpeg(
                             # inputs={video_file: None, audio_file: None},
                             inputs={url: None, url_audio: None},
-                            outputs={video_file_finale: '-y -c:v copy -c:a aac -loglevel quiet'}) 
+                            outputs={video_file_finale: '-y -c:v copy -c:a aac -loglevel quiet'})
                         ff.run()
                         time_elapsed = time.perf_counter() - start_time
                         # caption = f"<a href='{permalink}'>{sub}</a> | {upvotes} upvotes\n{title}\n\nFinito in: {str(time_elapsed)[:4]}s\nScusate il ritardo, colpa di reddit.\n"
@@ -1143,7 +1143,7 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                 await update.message.reply_html(message, disable_web_page_preview=True)
                 await reddit.close()
                 return
-            
+           
         else:
             # pprint.pprint(vars(submission))
             print(f"{get_now()} Tipo di contenuto di reddit sconosciuto.")
@@ -1156,7 +1156,7 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             response = requests.post(URL + "/documents", mymessage.encode('utf-8'))
             r = json.loads(response.text)
             pastebin_url = f"{URL}/raw/{r['key']}"
-            
+           
             await context.bot.send_message(chat_id=config.ID_SPIA, text=f'<a href="{pastebin_url}">Ecco a te</a>\nHo trovato un contenuto che non so come parsare:\n{message}', parse_mode='HTML')
             await reddit.close()
             return
@@ -1191,7 +1191,7 @@ async def twitch_clips(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if not response.get('data'):
         await update.message.reply_html("Non trovo niente")
         return
-    
+   
     await printlog(update, "posta una clip di twitch", context.match.group(0))
 
     thumb_url = response['data'][0]['thumbnail_url']

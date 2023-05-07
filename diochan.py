@@ -80,7 +80,7 @@ async def search_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                     return (str(len(last_results)), str(len(last_results)), last_results[len(last_results) - 1])
                 index_results += 1
                 return (str(index_results), str(len(last_results)), last_results[index_results - 1])
-            else: 
+            else:
                 last_search = searchterm
                 query = searchterm
                 last_results = []
@@ -130,7 +130,7 @@ async def search_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await update.message.reply_html(myquote, quote=False)
 
     elif quote[0] == "-1":  # Nessun risultato
-        await update.message.reply_html("Nessun risultato trovato", quote=False)  
+        await update.message.reply_html("Nessun risultato trovato", quote=False)
 
     elif quote[0] == quote[1]:  # ultima quote
         myquote = parsequote(quote[2])
@@ -270,7 +270,7 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 if name not in ['body']:
                     payload[name] = value
 
-            # Textboox upload multipart-encoded files with Requests 
+            # Textboox upload multipart-encoded files with Requests
             image_file_descriptor = tempphoto
             files = {'file': image_file_descriptor}
             posturl = f'{baseurl}post.php'
@@ -285,14 +285,14 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 reply_link = f"Postato! {link}"
                 print(f'{get_now()} Fatto! {reply_link} - pass per cancellare: {delpass}')
                 await context.bot.send_message(update.message.chat.id, reply_link)
-                
+               
             except Exception as e:
                 print(e)
                 await context.bot.send_message(update.message.chat.id, richiesta.text)
             tempphoto.close()
         else:
             await context.bot.send_message(update.message.chat.id, "Devi rispondere ad una foto con didascalia")
-            
+           
     except AttributeError:
         return
 
@@ -383,7 +383,7 @@ async def get_thread_from_dc(update: Update, context: ContextTypes.DEFAULT_TYPE)
                     t['image_url'] = f'http://i3.ytimg.com/vi/{youtube_id}/hqdefault.jpg'
                     t['video_url'] = f"https://www.youtube.com/watch?v={youtube_id}"
                 post.append(t)
-    
+   
 
     if not post:
         await update.message.reply_html("Thread non trovato")
@@ -397,7 +397,7 @@ async def get_thread_from_dc(update: Update, context: ContextTypes.DEFAULT_TYPE)
         if len(text) > 2000:
             text = text[:2000] + "..."
         link = f"<a href='{thread['thread_url']}'>/{thread['board']}/ | No.{thread['thread']}</a> | {timestamp}"
-        
+       
         if thread['is_video']:
             link += f"\n<a href='{thread['video_url']}'>[YouTube]</a>"
 
@@ -449,7 +449,7 @@ async def set_greet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if len(context.args) < 1:
         await update.message.reply_text("Devi specificare il messaggio di benvenuto")
         return
-    
+   
     if '-help' in context.args:
         await update.message.reply_text("Puoi usare le seguenti variabili:\n$FIRST_NAME\n$LAST_NAME\n$USERNAME\n$CHAT_TITLE")
         return

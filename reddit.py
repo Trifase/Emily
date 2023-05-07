@@ -36,7 +36,7 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_html("Specifica un subreddit.")
         await reddit.close()
         return
-        
+       
     if subreddit_name.lower().startswith("r/"):
         subreddit_name = subreddit_name[2:]
     await printlog(update, "cerca su", f"r/{subreddit_name}")
@@ -200,7 +200,7 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                         ff = ffmpy.FFmpeg(
                             # inputs={video_file: None, audio_file: None},
                             inputs={url: None, url_audio: None},
-                            outputs={video_file_finale: '-y -c:v copy -c:a aac -loglevel quiet'}) 
+                            outputs={video_file_finale: '-y -c:v copy -c:a aac -loglevel quiet'})
                         ff.run()
                         time_elapsed = time.perf_counter() - start_time
                         caption = f"<a href='{permalink}'>{sub}</a> | {upvotes} upvotes\n{title}\n\nFinito in: {str(time_elapsed)[:4]}s\nScusate il ritardo, colpa di reddit.\n"
@@ -318,7 +318,7 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 await update.message.reply_html(message, disable_web_page_preview=True)
                 await reddit.close()
                 return
-            
+           
         else:
             # pprint.pprint(vars(submission))
             print(f"{get_now()} Tipo di contenuto di reddit sconosciuto.")
@@ -331,7 +331,7 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             response = requests.post(URL + "/documents", mymessage.encode('utf-8'))
             r = json.loads(response.text)
             pastebin_url = f"{URL}/raw/{r['key']}"
-            
+           
             await context.bot.send_message(chat_id=config.ID_SPIA, text=f'<a href="{pastebin_url}">Ecco a te</a>\nHo trovato un contenuto che non so come parsare:\n{message}', parse_mode='HTML')
             await reddit.close()
             return

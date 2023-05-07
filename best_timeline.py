@@ -14,7 +14,6 @@ async def scrape_tweet_bt(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         if (update.message.sender_chat.id == config.ID_BT_CHAN): # or (update.message.chat.id == config.ID_TESTING):
             # print(f'{get_now()} [deep_pink3]{update.message.sender_chat.title}[/deep_pink3] in {await get_chat_name(update.message.chat.id)} posta un tweet: {context.match.group(1)}')
             await printlog(update, "posta un tweet su BT", context.match.group(1))
-            pass
         else:
             return
     except AttributeError:
@@ -85,7 +84,7 @@ async def scrape_tweet_bt(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 medias.append(InputMediaVideo(media=media_url, caption=caption if i == 0 else '', parse_mode='HTML'))
                 i += 1
 
-        
+
         await context.bot.send_media_group(reply_to_message_id=update.message.message_id, chat_id=update.message.chat.id, media=medias)
     else:
         await update.message.reply_html(caption, disable_web_page_preview=True)
@@ -105,7 +104,7 @@ async def silenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if not update.message.reply_to_message:
         return
-    
+
     if not context.args:
         minutes = 30
     else:
@@ -143,7 +142,7 @@ async def permasilenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     if not update.message.reply_to_message:
         return
-    
+
     user = await update.message.chat.get_member(update.message.from_user.id)
 
     chi = update.message.reply_to_message.from_user

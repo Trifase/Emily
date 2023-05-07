@@ -1,7 +1,6 @@
 import datetime
 from collections import Counter, defaultdict
 
-from rich import print
 from telegram import Update
 from telegram.constants import ChatMemberStatus
 from telegram.ext import ContextTypes
@@ -21,7 +20,7 @@ async def maesta_primo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     if await no_can_do(update, context):
         return
-    
+   
     if update.message.chat_id != config.ID_LOTTO:
         return
 
@@ -141,7 +140,7 @@ async def stat_maesta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 async def elenco_maesta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-    
+   
     if update.message.chat_id != config.ID_LOTTO:
         return
 

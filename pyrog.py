@@ -3,7 +3,6 @@ import random
 from collections import defaultdict
 
 from pyrogram import Client
-from rich import print
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -75,7 +74,7 @@ async def get_reaction_count(user_id, chat_id):
 
         for reaction in r:
             data['reactions'][reaction[0]] = reaction[1]
-        
+       
         return data
 
 
@@ -116,7 +115,7 @@ async def reaction_karma(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not r:
         await mymsg.edit_text("Non trovo un cazzo, scusa.")
         return
-    
+   
     message = f"Ecco il bilancio su {r['messages_total']} messaggi ({r['messages_reacted']} messaggi con reazioni).\n"
     message += f"Utente: {user_id}\n"
     message += f"Chat ID: {chat_id}\n\n"

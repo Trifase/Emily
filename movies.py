@@ -317,7 +317,7 @@ async def imdb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     searchstring = f"{movie['localized title'].replace(' ', '+')}+{year}"
     for x in [':', '?', '&', '=', '%', '#', '@', '!', '$', '^', '*', '(', ')', '-', '_', '.', ',', "'"]:
         searchstring = searchstring.replace(x, '')
-        
+       
     t1_name = '[rarbg]'
     t1 = f'https://proxyrarbg.org/torrents.php?imdb=tt{imdb_id}&order=seeders&by=DESC'
 

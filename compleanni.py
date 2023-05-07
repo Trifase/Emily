@@ -33,7 +33,7 @@ async def compleanni_add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 y = "19" + g[3] if int(g[3]) > 29 else "20" + g[3]
             else:
                 y = g[3]
-            d = g[1] if len(g[1]) == 2 else "0" + g[1] 
+            d = g[1] if len(g[1]) == 2 else "0" + g[1]
             m = g[2] if len(g[2]) == 2 else "0" + g[2]
             # print(f'g: {d}, d: {d}, y:  {y}')
 
@@ -145,11 +145,11 @@ async def compleanno_del(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await update.message.reply_text('Come vuoi.', quote=True)
         # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} ha cancellato il suo compleanno')
         await printlog(update, "cancella il proprio compleanno")
-        
+
     else:
         await update.message.reply_markdown_v2('Non trovo un cazzo onestamente', quote=True)
 
-async def compleanni_manual_check(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:  
+async def compleanni_manual_check(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
 

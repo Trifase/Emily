@@ -35,13 +35,13 @@ async def zoom_link(update: Update, context: CallbackContext):
         response = requests.post('https://zoom.us/oauth/token', headers=headers, data=data).json()
         return response['access_token']
 
-    def get_all_recordings(token):
+    # def get_all_recordings(token):
 
-        headers = {
-            'Authorization': f'Bearer {token}',
-        }
-        response = requests.get('https://api.zoom.us/v2/users/me/recordings', headers=headers).json()
-        return response
+    #     headers = {
+    #         'Authorization': f'Bearer {token}',
+    #     }
+    #     response = requests.get('https://api.zoom.us/v2/users/me/recordings', headers=headers).json()
+    #     return response
 
     def double_encode(meeeting_uuid):
         single_encoded = urllib.parse.quote_plus(meeeting_uuid, encoding='utf-8', errors='replace')
@@ -79,7 +79,7 @@ async def zoom_link(update: Update, context: CallbackContext):
         new_settings = {
             'password': '',
             'viewer_download': False,
-            'on_demand': True, 
+            'on_demand': True,
             'topic': f'{oggi} Lezione di Yoga',
         }
 
@@ -106,7 +106,7 @@ async def zoom_link(update: Update, context: CallbackContext):
         return
 
     url = context.args[0]
-    
+   
     if 'meeting_id' not in url:
         await update.message.reply_html("Devi mandarmi un link alla registrazione zoom")
         return
@@ -133,4 +133,4 @@ async def zoom_link(update: Update, context: CallbackContext):
 
 
 
-    
+   

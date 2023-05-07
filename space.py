@@ -588,7 +588,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
                 "Major",
                 "Greater"
                 ]
-            return random.choice(prefixes)  
+            return random.choice(prefixes) 
 
         def gen_system_name():
             systems = [
@@ -796,7 +796,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
         if s_type <= 35:
             system_name = planet_name()
         elif s_type <= 65:
-            system_name = f"{gen_system_prefix()} {planet_name()}" 
+            system_name = f"{gen_system_prefix()} {planet_name()}"
         elif s_type <= 85:
             system_name = f"{planet_name()} {planet_name()}"
         else:
@@ -840,7 +840,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
         else:
             cr.arc(x, y, radius, 0, 2 * math.pi)
         # cr.arc(x, y, radius, 0, math.pi)
-        
+       
         cr.stroke()
 
     def draw_circle_fill(cr, x, y, radius, r, g, b, a=1.0, gradient=False):
@@ -885,7 +885,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
 
             # Set the composition operator to multiply
             cr.set_operator(cairo.Operator.MULTIPLY)
-            
+           
             # Create a pattern from the texture
             texture_pattern = cairo.SurfacePattern(texture)
 
@@ -947,7 +947,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
         for _ in range(0, n):
             angle = math.tau * random.random()
             p = (int(xc + r * math.cos(angle)), int(yc + r * math.sin(angle)))
-            points_list.append(p) 
+            points_list.append(p)
         return points_list
 
     def get_uniform_points_on_circle(xc, yc, r, n=360):
@@ -973,7 +973,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
         seg_start = 0
 
         for gap in gaps:
-            gap_size = random.randint(1, math.ceil((total_space / n_segs) * 0.2))  # gap between segments, 1px - 20% of average segment 
+            gap_size = random.randint(1, math.ceil((total_space / n_segs) * 0.2))  # gap between segments, 1px - 20% of average segment
             half_gap_1 = round(gap_size / 2)
             half_gap_2 = gap_size - half_gap_1
             gap_start = gap - half_gap_1
@@ -1061,9 +1061,9 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
         cr.curve_to(x, y, x, y, p4[0], p4[1])
         cr.curve_to(x, y, x, y, p1[0], p1[1])
         cr.fill()
-        # cr.new_sub_path() 
+        # cr.new_sub_path()
         # cr.arc(p1[0], p1[1], size, 0, math.pi / 2)
-        # cr.new_sub_path() 
+        # cr.new_sub_path()
         # cr.arc(p2[0], p2[1], size, math.pi / 2, math.pi)
         # cr.new_sub_path()
         # cr.arc(p3[0], p3[1], size, math.pi, math.pi * 3 / 2)
@@ -1143,7 +1143,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
     list_of_planet_textures = ['craters', 'fibers', 'nubi', 'perlin_poly', 'stripes', 'voronoi', 'splat', 'splot']
 
     stelle = {}
-    
+   
     WIDTH = width
     HEIGHT = height
 
@@ -1317,7 +1317,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
                 for x in range(belt_radius_min, belt_radius_max + 1, 2):
                     max_density = 120
                     density = int(asteroid_density(x, belt_radius_min, belt_radius_max, max_density))
-                    
+                   
                     asteroid_size_min = 2
                     asteroid_size_max = 3
                     belt_points = get_random_points_on_circle(width / 2, sun_center, x, n=density)
@@ -1393,7 +1393,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
                 planet['pos'] = (width / 2, next_center)
                 planet['radius'] = planet_radius
                 planet['details'] = {}
-                planet['details']['size'] = planet_radius * 2 
+                planet['details']['size'] = planet_radius * 2
                 planet['details']['color'] = (r, g, b)
                 planet['details']['n_moons'] = n_moons
                 planet['moons'] = []
@@ -1427,7 +1427,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
                 planet['pos'] = (width / 2, next_center)
                 planet['radius'] = planet_radius
                 planet['details'] = {}
-                planet['details']['size'] = planet_radius * 2 
+                planet['details']['size'] = planet_radius * 2
                 planet['details']['color'] = (r, g, b)
 
                 draw_planet(cr=cr, x=width / 2, y=next_center, radius=planet_radius, r=r, g=g, b=b, gradient=True)
@@ -1440,7 +1440,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
             last_size = next_size
             if planet_type == "moons" and MOONS and planet_radius >= 50:
                 last_size = orbit_radius
-    
+   
     draw_border(cr, border_size, sun_r, sun_g, sun_b, width, height)
     fp = tempfile.NamedTemporaryFile(suffix='.png')
 
@@ -1449,7 +1449,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
 
     img = Image.open(image_path)
     if BORDERSIZE >= 20:
-    
+   
         font_size = BORDERSIZE - 10
 
         rgb_bgcolor = tuple(int(x) for x in bg_color)
@@ -1460,7 +1460,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
         anchor = (int(WIDTH / 2), int((HEIGHT - (BORDERSIZE / 2))))
 
         draw.text(anchor, system_name.upper(), font=font, anchor="mm", fill=rgb_bgcolor, stroke_width=0)
-    
+   
     if NOISE:
         # Load image
         img = np.array(img)
@@ -1523,7 +1523,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if "-seed" in context.args:
             i = context.args.index("-seed")
             seed = context.args[i + 1]
-            kwargs['seed'] = seed 
+            kwargs['seed'] = seed
 
         if "-nostars" in context.args:
             kwargs['starfield'] = False
@@ -1576,7 +1576,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_document(chat_id=update.effective_chat.id, document=open(image_path, 'rb'), caption=description, parse_mode='HTML')
     else:
         await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(image_path, 'rb'), caption=f"<b>· {system_name.upper()} ·</b>\n<code>{seed}</code>", parse_mode='HTML')
-    
+   
     if '-raw' in context.args:
 
         rawtext = pprint.pformat(stelle, sort_dicts=False)
@@ -1598,7 +1598,7 @@ async def launches(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     def utc_to_local(utc_dt):
         local_tz = pytz.timezone('Europe/Rome')
         local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
-        return local_tz.normalize(local_dt) 
+        return local_tz.normalize(local_dt)
 
     if await no_can_do(update, context):
         return

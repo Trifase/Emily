@@ -3,7 +3,6 @@ import random
 from html import unescape
 
 import requests
-from rich import print
 from telegram import Update
 from telegram.constants import PollType
 from telegram.ext import ContextTypes
@@ -38,7 +37,7 @@ async def make_poll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     explanation = unescape(f"{poll_data['category']} - {diff}")
     random.shuffle(risposte)
     risp_giusta_index = risposte.index(risposta_corretta)
-    
+   
     sent_poll = await context.bot.send_poll(
         chat_id=update.message.chat_id,
         question=domanda,
@@ -82,7 +81,7 @@ async def ricevi_risposta_quiz(update: Update, context: ContextTypes.DEFAULT_TYP
 
     if poll_id not in context.bot_data['trivia']:
         return
-    
+   
     difficulty = context.bot_data['trivia'][poll_id][0]
 
     if risposta == context.bot_data['trivia'][poll_id][1]:
@@ -143,5 +142,5 @@ async def classifica(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
             risposta += f"{i+1} · <b>[ {points} ]</b> · {user.full_name} <i>({wrongs})</i>\n"
         except Exception:
             continue
-        
+       
     await update.message.reply_html(risposta)

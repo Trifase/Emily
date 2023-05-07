@@ -32,13 +32,13 @@ async def main():
         # remove empty keys
         if not chat_value:
             await pickle_persistence().drop_chat_data(this_chat_id)
-        
+       
 
         # remove empty subkeys
         for c_subkey, c_subvalue in list(this_chat_value.items()):
             if not c_subvalue:
                 this_chat_data.pop(c_subkey, None)
-                
+               
 
         # remove chat_data_remove
         for c_k in chat_data_remove:
@@ -208,7 +208,7 @@ asyncio.run(main())
 # mydict["chat_data"][-1001470497979]['2021-09-30'] = mydict["chat_data"][-1001470497979]['2021-09-29']
 # mydict["bot_data"]["tentativi_indovina"] = []
 # print(mydict["bot_data"]["tentativi_indovina"])
-# 
+#
 # mydict["bot_data"]["cavalli_esistenti"].sort(key=operator.itemgetter('name'))
 
 # print(cavalli_esistenti)

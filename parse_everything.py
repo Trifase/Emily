@@ -47,17 +47,17 @@ async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE
         is_presente = await is_member_in_group(config.ID_TRIF, chat_id, context)
         if chat_id < 0 and chat_id not in context.bot_data['listen_to'] and SPY:
 
-            
+           
             if not is_presente:
                 context.bot_data['listen_to'].append(chat_id)
             else:
                 pass
-                
+               
         elif chat_id not in context.bot_data['listen_to'] and SPY:
             context.bot_data['listen_to'].append(chat_id)
 
         if not await is_user(update):
-            
+           
             message = ""
             mychat = await context.bot.get_chat(chat_id)
             utenti = await context.bot.get_chat_member_count(chat_id)
@@ -129,7 +129,7 @@ async def messaggio_spiato(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         if my_chat.title:
             msg_from = f"💬 {my_chat.title}"
         text = f"[SPIO] Messaggio su {msg_from}:\nID: <code>{my_chat.id}</code>\n{update.effective_user.mention_html()}: {update.effective_message.text}"
-    
+   
         cbdata_listen_to = ForgeCommand(original_update=update, new_text=f"/listen_to {chat_id}", new_args=[chat_id], callable=listen_to)
         cbdata_getchat = ForgeCommand(original_update=update, new_text=f"/getchat {chat_id}", new_args=[chat_id], callable=getchat)
         cbdata_ban = ForgeCommand(original_update=update, new_text=f"/ban {chat_id}", new_args=[chat_id], callable=add_ban)
@@ -264,7 +264,7 @@ async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 async def new_admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
-    
+   
     await query.answer()
     mybutton: ForgeCommand = query.data
 
@@ -350,7 +350,7 @@ async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if not update.message or update.effective_chat.id in [0]:
         return
-    
+   
     if 'stats' not in context.chat_data:
         context.chat_data['stats'] = {}
 
@@ -359,13 +359,13 @@ async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if day not in context.chat_data['stats']:
         context.chat_data['stats'][day] = {}
-    
+   
     if 'total' not in context.chat_data['stats'][day]:
         context.chat_data['stats'][day]['total'] = 0
-    
+   
     if hour not in context.chat_data['stats'][day]:
         context.chat_data['stats'][day][hour] = 0
-    
+   
     context.chat_data['stats'][day][hour] += 1
     context.chat_data['stats'][day]['total'] += 1
 

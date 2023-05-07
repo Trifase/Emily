@@ -17,10 +17,10 @@ from utils import crea_sondaggino, no_can_do, printlog
 #         await original_update.message.reply_html('IT WERKS')
 #         return
 
-    
+   
 #     if not context.args:
 #         max_votes = 8
-#     else: 
+#     else:
 #         max_votes = int(context.args[0])
 
 #     await crea_sondaggino(context, update, max_votes, chiedi_opinione)
@@ -75,7 +75,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
 
     if update.message.reply_to_message and not message:
         message = update.message.reply_to_message.text
-    
+   
     tw_url = ""
     mast_url = ""
     try:
@@ -228,7 +228,6 @@ async def lista_tweets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def twitter_pms(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-    import tweepy
     CONSUMER_KEY = config.TW_API
     CONSUMER_SECRET = config.TW_API_SECRET
     ACCESS_KEY = config.TW_ACCESS_TOKEN

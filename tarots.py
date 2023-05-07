@@ -55,7 +55,7 @@ def get_piles(mazzo, n_piles):
     max_len = len(mazzo)
     average_pile = round(max_len/n_piles)
     average_error = round(max_len * 0.10)
-    for i in range(n_piles-1):
+    for _ in range(n_piles - 1):
         cuts.append(random.randint(average_pile - average_error, average_pile + average_error))
     cuts.append(max_len - sum(cuts))
     # print(cuts)
@@ -637,7 +637,7 @@ async def draw_cards(spread, reverse=False, deck='rws', context=None):
 
     dir = deck
     n = spread['total_cards']
-    
+   
 
     # if "tarot_deck" not in context.bot_data:
     if context:
@@ -648,7 +648,7 @@ async def draw_cards(spread, reverse=False, deck='rws', context=None):
             mazzo = default_mazzo
         else:
             mazzo = context.bot_data['tarot_deck']
-    
+   
     # mazzo = [i for i in range(0, 22)]
     # print("Sto usando questo mazzo:")
     # print(mazzo)
@@ -667,7 +667,7 @@ async def draw_cards(spread, reverse=False, deck='rws', context=None):
     # print("Salvo il mazzo")
     context.bot_data['tarot_deck'] = mazzo
     # print(context.bot_data['tarot_deck'])
-    
+   
     # pprint.pprint(chosen_cards)
     # print(chosen_cards)
     if spread['name'] == 'Deck Showcase':
@@ -676,7 +676,7 @@ async def draw_cards(spread, reverse=False, deck='rws', context=None):
     returned_cards = []
 
     i = 0
-    
+   
     for card in chosen_cards:
         c = {}
         c['number'] = str(card['n'])
@@ -744,7 +744,7 @@ async def draw_cards_special(reverse=False, deck='rws', force_obliqua=False):
     for i in range(4):
 
         if random_numbers[i] > n:
-        
+       
             for _ in range(random_numbers[i] - n - 1):
                 mazzo = skip(mazzo)
 
@@ -809,7 +809,7 @@ async def generate_cards_table(cards_info, imagepath, spread_name, zodiac=False)
 
 
     # print(cards_info)
-    cards_info['chosen_cards']
+    # cards_info['chosen_cards']
     cards_list = cards_info['cards']
 
     basedir = 'images/tarots'
@@ -911,7 +911,7 @@ async def tarot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if '-marsiglia' in context.args:
             deck = 'mars'
         if '-thoth' in context.args:
-            deck = 'thoth'  
+            deck = 'thoth' 
         if '-morgan' in context.args:
             deck = 'morgan'
         if '-rws' in context.args:
@@ -959,13 +959,13 @@ async def tarot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         h += "<code>-year       </code>: estrazione annuale a 16 carte.\n\n"
 
         h += "Una galleria degli schemi può essere vista <a href='https://imgur.com/a/lYgEWWX'>qui</a>.\n\n"
-        
+       
         h += "<b>· Opzioni ·</b>\n"
         h += "<code>-noread     </code>: non fare la lettura.\n"
         h += "<code>-info       </code>: la lista, in ordine, delle carte uscite.\n"
         h += "<code>-reverse    </code>: abilità la possibilità che le carte siano a testa in giù.\n\n"
 
-        
+       
         h += "Esempio:\n<code>/tarocchi -morgan -wirth</code>: estrazione con schema croce di Wirth e mazzo Morgan-Greer.\n"
 
         await printlog(update, "chiede l'help dei tarocchi")
@@ -1137,7 +1137,7 @@ async def oroscopo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return None
 
     async def get_horoscope_from_aztro(sign: str) -> str:
-        
+       
 
         async with httpx.AsyncClient() as session:
             # this uses http://astrology.kudosmedia.net/ - dead at 2023-03-29
@@ -1186,10 +1186,10 @@ async def oroscopo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lucky_number = horoscope.lucky_number
     lucky_time = horoscope.lucky_time
     mood = horoscope.mood
-    
-    translator = deepl.Translator(config.DEEPL_API_KEY) 
+   
+    translator = deepl.Translator(config.DEEPL_API_KEY)
     target_language = "IT"
-    result = translator.translate_text(desc, target_lang=target_language) 
+    result = translator.translate_text(desc, target_lang=target_language)
     translated_desc = f'{result.text}'
     oroscopo_emoji = {
         "aries": "♈",

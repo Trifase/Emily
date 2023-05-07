@@ -92,7 +92,7 @@ def sudoku():
                 pass
             elif c % 3 == 0:
                 print(f"-{'----' * max_len}")
-                
+               
             print(' ', end='')
             for r in range(max_len):
                 if (r == 0) or ((r+1) % 3 != 0) or (r == max_len-1):
@@ -140,7 +140,7 @@ def sudoku():
             for c in range(col_i, col_i + 3):
                 if puzzle[r][c] == guess:
                     return False
-        
+       
         return True
 
     def solve_sudoku(puzzle):
@@ -150,7 +150,7 @@ def sudoku():
             return True
 
         for guess in range(1, 10):
-            
+           
             if is_valid(puzzle, guess, row, col):
                 puzzle[row][col] = guess
 

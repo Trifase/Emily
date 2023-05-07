@@ -23,7 +23,7 @@ def extract_hour(timestamp):
 def last_30_days():
     start = datetime.datetime.today()
     days_30 = []
-    for day in range(1, 31): 
+    for day in range(1, 31):
         d = start - datetime.timedelta(days=day)
         days_30.append(d.strftime("%Y-%m-%d"))
     days_30.reverse()
@@ -48,25 +48,25 @@ def json_to_stats(json_filename):
     messages = data['messages']
     for message in messages:
         timestamp = datetime.datetime.fromtimestamp(int(message['date_unixtime']), tz=pytz.timezone('Europe/Rome'))
-        
+       
         day = extract_day(timestamp)
         hour = extract_hour(timestamp)
 
         if day not in stats:
             stats[day] = {}
-        
+       
         if 'total' not in stats[day]:
             stats[day]['total'] = 0
-        
+       
         if hour not in stats[day]:
             stats[day][hour] = 0
-        
+       
         stats[day][hour] += 1
         stats[day]['total'] += 1
     return stats
 
 def make_triplot(stats, name):
-    
+   
     messages_days = last_30_days()
     for x in messages_days:
         if x not in stats:
@@ -118,7 +118,7 @@ def make_triplot(stats, name):
     ax.barh(weekdays, weekdays_tot, height=0.3, color=weekdays_colors, zorder=2)
     ax.tick_params(axis='y', left=False)
     ax.tick_params(axis='x', bottom=False)
-    ax.invert_yaxis() 
+    ax.invert_yaxis()
 
     plt.savefig(f'images/charts/{name}.png')
     return f'images/charts/{name}.png'
@@ -153,13 +153,13 @@ async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if day not in context.chat_data['stats']:
         context.chat_data['stats'][day] = {}
-    
+   
     if 'total' not in context.chat_data['stats'][day]:
         context.chat_data['stats'][day]['total'] = 0
-    
+   
     if hour not in context.chat_data['stats'][day]:
         context.chat_data['stats'][day][hour] = 0
-    
+   
     context.chat_data['stats'][day][hour] += 1
     context.chat_data['stats'][day]['total'] += 1
 
@@ -168,12 +168,12 @@ async def send_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     locale.setlocale(locale.LC_ALL, 'it_IT.utf8')
     if await no_can_do(update, context):
         return
-    
+   
     stats = context.chat_data.get('stats')
     if not stats:
         await update.message.reply_text('Non ho ancora statistiche da mostrarti')
         return
-    
+   
     name = str(update.effective_chat.id)
 
     list_days = last_30_days()

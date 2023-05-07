@@ -130,7 +130,7 @@ def get_now():
     return datetime.datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
 
 def function_name():
-    
+   
     # print(inspect.stack())
     func_name = inspect.stack()[2][3]
     return(func_name)
@@ -208,7 +208,7 @@ async def printlog(update, action, additional_data=None, error=False):
         print(f"{get_now()} [red1]ERROR[/red1]\n{action}")
         logging.error(f"{action}")
         return
-    
+   
     if isinstance(update, CallbackQuery):
         user = update.from_user
         chat_id = update.message.chat.id
@@ -275,7 +275,7 @@ def print_to_string(*args, **kwargs):
 
 async def is_member_in_group(user_id, chat_id, context):
     if chat_id > 0:  # è una chat privata.
-        return False 
+        return False
     try:
         member = await context.bot.get_chat_member(chat_id, user_id)
         if member.status in ["left", "kicked"]:
@@ -426,7 +426,7 @@ def print_clean_json(filename:str, min_datetime:datetime, max_datetime:datetime)
             reply_id = f" (rispondendo a {message['reply_to_message_id']})"
         else:
             reply_id = ''
-        
+       
         return_string += f"{message['id']}: <{message['from']}>{reply_id} {message['text']}\n"
     return return_string
 

@@ -70,7 +70,7 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             songs = spotdl.search([url])
             results = spotdl.get_download_urls(songs)[0]
 
-        except Exception as e: 
+        except Exception as e:
             await update.message.reply_text(f"Non capisco:  {e}")
 
     if not results:
@@ -79,7 +79,7 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await printlog(update, "posta una canzone di spotify", results)
     msg = await update.message.reply_text("Arriva, dammi un minuto.")
-    
+   
     downloader = Downloader(loop=asyncio.get_event_loop(), settings=dlder_options)
 
     blocking_download = asyncio.to_thread(downloader.search_and_download, songs[0])
@@ -88,13 +88,13 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     caption = f"{song.display_name}\nfrom {song.album_name} ({song.year})"
 
-    # Thumbnail  
+    # Thumbnail 
     if song.cover_url:
         # Download the thumbnail
         tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
         urllib.request.urlretrieve(song.cover_url, tempphoto.name)
 
-        # Resize the thumbnail 
+        # Resize the thumbnail
         size = 320, 320
         im = Image.open(tempphoto.name)
         im.thumbnail(size, Image.Resampling.LANCZOS)
@@ -114,7 +114,7 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     os.remove(path)
     if song.cover_url:
         tempphoto.close()
- 
+
 
     await msg.delete()
 

@@ -10,7 +10,6 @@ import humanize
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from mastodon import Mastodon
-from rich import print
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
@@ -110,7 +109,7 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
                         t['image_url'] = f'http://i3.ytimg.com/vi/{youtube_id}/hqdefault.jpg'
                         t['video_url'] = f"https://www.youtube.com/watch?v={youtube_id}"
                     threads.append(t)
-    
+
 
     bot = context.bot
 
@@ -138,7 +137,7 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
             message += f"{link}\n{text}\n\n"
         for chat_id in DESTINATION_CHATS:
             await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
-    
+
     else:
         for thread in threads:
             timestamp = datetime.datetime.fromtimestamp(thread['time']).strftime('%d/%m/%Y %H:%M')
@@ -146,7 +145,7 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
             if len(text) > 2000:
                 text = text[:2000] + "..."
             link = f"<a href='{thread['thread_url']}'>/{thread['board']}/ | No.{thread['thread']}</a> | {timestamp}"
-            
+
             if thread['is_video']:
                 link += f"\n<a href='{thread['video_url']}'>[YouTube]</a>"
 
@@ -161,7 +160,7 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
                         await bot.send_photo(chat_id=chat_id, photo=image_url, caption=message, parse_mode='HTML')
 
                     # We catch everything, because we don't want to stop the bot if something goes wrong. We send a basic text message.
-                    except Exception as e: 
+                    except Exception as e:
                         print(e)
                         await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
                 else:
@@ -176,7 +175,7 @@ async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
     groups_to_check = [config.ID_DIOCHAN2]
 
     for chat_id in groups_to_check:
-    
+
         if "timestamps" not in context.bot_data:
             context.bot_data["timestamps"] = {}
         if chat_id not in context.bot_data["timestamps"]:
@@ -304,7 +303,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
         return response
 
-    async def get_room_history(access_token, home_id, room_id, date_end='last', type='temperature', scale='1hour'):
+    async def get_room_history(access_token, home_id, room_id, date_end='last', graph_type='temperature', scale='1hour'):
         headers = {
             'accept': 'application/json',
             'Authorization': f'Bearer {access_token}',
@@ -315,7 +314,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
             'room_id': room_id,
             'scale': scale,
             'date_begin': int(datetime.datetime.now().timestamp())-(3600*50),
-            'type': type
+            'type': graph_type
         }
 
         async with httpx.AsyncClient() as session:
@@ -363,7 +362,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
     temp_history = await get_room_history(access_token, home_id, room_id)
-    set_temp_history = await get_room_history(access_token, home_id, room_id, type='sp_temperature')
+    set_temp_history = await get_room_history(access_token, home_id, room_id, graph_type='sp_temperature')
     boiler_history = await get_boiler_history(access_token, bridge_mac, therm_mac)
 
 
@@ -374,7 +373,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
     set_temps = set_temp_history['body'][0]
     list_set_temps = [x[0] for x in set_temps['value']]
     # print(list_set_temps)
-    
+
     boiler = boiler_history['body'][0]
     list_minutes = [x[0]//60 for x in boiler['value']]
     # list_minutes = [x[0]//60 for x in reversed(boiler['value'])]

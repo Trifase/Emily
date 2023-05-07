@@ -133,7 +133,7 @@ async def maps_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     open('images/new_map.jpg', 'wb').write(r.content)
 
     try:
-        await query.edit_message_media(media=InputMediaPhoto(open('images/new_map.jpg', 'rb'), caption=location_name), reply_markup=reply_markup)    
+        await query.edit_message_media(media=InputMediaPhoto(open('images/new_map.jpg', 'rb'), caption=location_name), reply_markup=reply_markup)   
     except BadRequest:
         pass
 

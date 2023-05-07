@@ -59,7 +59,7 @@ async def addset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed
         if trigger[0] != "/":
             await update.message.reply_text('Il trigger deve essere un /comando.')
             return
-    
+   
     if chatdict.get(trigger.lower()) and not poll_passed:
         max_votes = 4
         await crea_sondaggino(context, update, max_votes, addset, domanda="Il set è già presente, vuoi sostituirlo?")
@@ -135,9 +135,9 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         if comando.startswith('media:'):
             medialist[comando.split(':')[1]].append(key)
-        
+       
         else:
-        
+       
             if comando.lower().startswith('nsfw'):
                 comando = "[NSFW whitespace]"
 

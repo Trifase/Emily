@@ -74,7 +74,7 @@ async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
     user_id = update.message.reply_to_message.from_user.id
-    
+   
     corpus = get_corpus(f'db/corpuses/{filename}', user_id)
     text_model = markovify.NewlineText(corpus)
     stopwords = [lin.strip() for lin in open('db/stopwords-it.txt', encoding='utf8').readlines()]
@@ -118,7 +118,7 @@ async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     elif '-report' in context.args:
         max_secs = 1_209_600//2
         # max_secs = 295_000
-    
+   
     else:
         try:
             max_secs = int(context.args[0])
@@ -189,7 +189,7 @@ async def lurkers_callbackqueryhandlers(update: Update, context: ContextTypes.DE
             return False
 
     query = update.callback_query
-    
+   
     user = await context.bot.get_chat_member(update.effective_chat.id, update.effective_user.id)
     if not can_user_restrict(user) and update.effective_user.id != config.ID_TRIF:
         await query.answer("Non puoi farlo.")
@@ -258,7 +258,7 @@ async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         LB_ID = 799277
     else:
         LB_ID = 8518
-    
+   
     SESSION = config.AOC_SESSION
 
     url = f"https://adventofcode.com/2022/leaderboard/private/view/{LB_ID}.json"
@@ -379,7 +379,7 @@ async def polls_callbackqueryhandlers(update: Update, context: ContextTypes.DEFA
 #     if await no_can_do(update, context):
 #         return
 
-    
+   
 #     if not update.message.reply_to_message or not update.message.reply_to_message.photo:
 #         return
 
@@ -657,7 +657,7 @@ async def condominioweb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not thread.get('comment'):
         await context.bot.send_message(config.ID_RITALY, "Nessuno ha mai risposto.", parse_mode='HTML')
         return
-    
+   
     for comment in thread.get('comment'):
         author = comment.get('author').get('name')
         text = comment.get('text')
@@ -675,7 +675,7 @@ async def traduci(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} richiede una traduzione')
     await printlog(update, "chiede una traduzione")
-    translator = deepl.Translator(config.DEEPL_API_KEY) 
+    translator = deepl.Translator(config.DEEPL_API_KEY)
     target_language = "EN-GB"
     languages = ["BG", "CS", "DA", "DE", "EL", "EN-GB", "EN-US", "ES", "ET", "FI", "FR", "HU", "IT", "JA", "LT", "LV", "NL", "PL", "PT-PT", "PT-BR", "RO", "RU", "SK", "SL", "SV", "TR", "ZH"]
 
@@ -688,7 +688,7 @@ async def traduci(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     return
                 else:
                     target_language = context.args[0][1:].upper()  # imposto la lingua
-                text = " ".join(context.args[1:]) 
+                text = " ".join(context.args[1:])
                 if not text:
                     text = update.message.reply_to_message.text
             else:
@@ -704,15 +704,15 @@ async def traduci(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     return
                 else:
                     target_language = context.args[0][1:].upper()  # imposto la lingua
-                text = " ".join(context.args[1:]) 
+                text = " ".join(context.args[1:])
                 if not text:
                     return
             else:
-                text = " ".join(context.args) 
+                text = " ".join(context.args)
         else:
             return
 
-    result = translator.translate_text(text, target_lang=target_language) 
+    result = translator.translate_text(text, target_lang=target_language)
     translated_text = f'[{target_language}] {result.text}'
     if not translated_text:
         await update.message.reply_text("boh")
@@ -765,7 +765,7 @@ async def fatfingers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
     if text is None:
         return
-    
+   
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} digita con le dita ciccione!')
     await printlog(update, "digita con le dita ciccionazze")
 
@@ -922,7 +922,7 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in [yellow1]{update.effective_chat.title[:10]}[/yellow1] ({str(update.message.chat.id)[4:]}) interroga lichess!')
     await printlog(update, "interroga lichess")
-    
+   
 
     token = config.LICHESS_API
     nick = " ".join(context.args)
@@ -935,8 +935,8 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         post_data = {
             'rated': 'false',
             'clock.limit': limit,
-            'clock.increment': increment, 
-            'variant': 'standard', 
+            'clock.increment': increment,
+            'variant': 'standard',
             'name': 'r/italy scacchi'
         }
         response = requests.post('https://lichess.org/api/challenge/open', data=post_data)
@@ -949,8 +949,8 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         post_data = {
             'rated': 'false',
             'clock.limit': "",
-            'clock.increment': "", 
-            'variant': 'standard', 
+            'clock.increment': "",
+            'variant': 'standard',
             'name': 'r/italy scacchi'
         }
         response = requests.post('https://lichess.org/api/challenge/open', data=post_data)
@@ -963,8 +963,8 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         post_data = {
             'rated': 'true',
             'clock.limit': limit,
-            'clock.increment': increment, 
-            'variant': 'standard', 
+            'clock.increment': increment,
+            'variant': 'standard',
             'name': 'r/italy scacchi'
         }
         response = requests.post('https://lichess.org/api/challenge/open', data=post_data)
@@ -978,13 +978,12 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     try:
         user = lichess.api.user(nick, auth=token)
-    except Exception as e:  
+    except Exception as e: 
         await update.message.reply_text(f'{e}: Nick {nick} non trovato.')
         return
     # print(user['perfs'])
     # print(user['count'])
     giocate = user['count']['all']
-    user['count']['loss']
     vinte = user['count']['win']
     last_seen = datetime.datetime.fromtimestamp(int(str(user['seenAt'])[:10])).strftime('%Y-%m-%d %H:%M:%S')
     if int(giocate) == 0:
@@ -1027,7 +1026,7 @@ async def voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} avvia una sintesi vocale')
     await printlog(update, "avvia TTS voice")
 
-    if text: 
+    if text:
         text = text
     elif update.message.reply_to_message and not text:
         text = update.message.reply_to_message.text

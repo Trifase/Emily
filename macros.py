@@ -56,11 +56,11 @@ async def ispirami(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "(",
             "-clone", "1",
             "-clone", "2",
-            "+swap", 
+            "+swap",
             "-background", "none",
             "-layers", "merge",
             "+repage",
-            ")", 
+            ")",
             "-delete", "1,2",
             "-gravity", "center",
             "-geometry", "+0-50",
@@ -84,11 +84,11 @@ async def ispirami(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "(",
             "-clone", "1",
             "-clone", "2",
-            "+swap", 
+            "+swap",
             "-background", "none",
             "-layers", "merge",
             "+repage",
-            ")", 
+            ")",
             "-delete", "1,2",
             "-gravity", "SouthEast",
             "-geometry", "+20+0",
@@ -131,7 +131,7 @@ async def ispirami(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if first_name and last_name:
                 nickname = f"{first_name} {last_name}"
             elif first_name and not last_name:
-                nickname = first_name 
+                nickname = first_name
             else:
                 nickname = f"@{username}"
 
@@ -149,7 +149,7 @@ async def ispirami(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if first_name and last_name:
             nickname = f"{first_name} {last_name}"
         elif first_name and not last_name:
-            nickname = first_name 
+            nickname = first_name
         else:
             nickname = f"@{username}"
         nickname += f", {update.message.reply_to_message.date.strftime('%-d %B %Y')}"
@@ -168,7 +168,6 @@ async def change_my_mind(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     def make_photo(text: str, destination_dir: Path) -> Path:
-        Path(__file__).parent
         template_photo = "templates/changemymind.jpg"
         font_file = "fonts/calibri.ttf"
         destination_photo = destination_dir / "changemymind.jpg"
