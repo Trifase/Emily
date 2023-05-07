@@ -388,8 +388,8 @@ async def log_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     timestamp = int(datetime.datetime.timestamp(message.date))
     text = message.text
     reply_to_message_id = None
-    if message.message_thread_id:
-        reply_to_message_id = message.message_thread_id
+    if message.reply_to_message:
+        reply_to_message_id = message.reply_to_message.id
 
     Chatlog.create(
         chat_id=chat_id,

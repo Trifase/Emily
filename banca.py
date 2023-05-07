@@ -6,7 +6,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import requests
 from requests.models import HTTPError
 from requests.structures import CaseInsensitiveDict
-from rich import box, print
+from rich import box
 from rich.table import Table
 from telegram import Update
 from telegram.ext import ContextTypes
