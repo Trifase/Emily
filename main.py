@@ -6,7 +6,6 @@ import warnings
 
 import instaloader
 import pytz
-from rich import print
 from telegram import Update
 from telegram import __version__ as TG_VER
 from telegram.constants import ParseMode

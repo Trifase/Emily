@@ -9,7 +9,6 @@ import httpx
 from database import TensorMessage, Quote
 import requests
 from bs4 import BeautifulSoup
-from rich import print
 from telegram import Update
 from telegram.ext import ContextTypes
 

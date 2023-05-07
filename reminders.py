@@ -1,7 +1,6 @@
 import datetime
 
 from dateparser.search import search_dates
-from rich import print
 from telegram import Update
 from telegram.ext import ContextTypes
 

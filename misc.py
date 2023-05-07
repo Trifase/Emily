@@ -27,7 +27,6 @@ from gtts import gTTS
 # from nudenet import NudeClassifier, NudeDetector
 from PIL import Image
 from pydub import AudioSegment
-from rich import print
 from telegram import ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.ext import ContextTypes
 from youtubesearchpython import VideosSearch

@@ -25,7 +25,6 @@ import yt_dlp
 from bs4 import BeautifulSoup
 from instaloader import BadResponseException, Profile, StoryItem
 from requests_html import AsyncHTMLSession
-from rich import print
 from telegram import (
     InlineQueryResultArticle,
     InlineQueryResultVideo,

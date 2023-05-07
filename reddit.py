@@ -9,7 +9,6 @@ import ffmpy
 import requests
 from asyncprawcore.exceptions import Forbidden, NotFound, Redirect
 from bs4 import BeautifulSoup
-from rich import print
 from telegram import InputMediaPhoto, InputMediaVideo, Update
 from telegram.error import BadRequest
 from telegram.ext import ContextTypes

@@ -1,6 +1,5 @@
 import datetime
 import re
-from rich import print
 from telegram.error import BadRequest
 from telegram import Update
 from telegram.ext import ContextTypes

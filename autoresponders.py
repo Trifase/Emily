@@ -3,7 +3,6 @@
 
 # from telegram import Update
 # from telegram.ext import CallbackContext, ContextTypes
-# from rich import print
 
 # from utils import printlog, get_display_name, get_now, get_chat_name, no_can_do
 

@@ -1,8 +1,6 @@
 import subprocess
 import time
 
-from rich import print
-
 from utils import get_now
 
 while True:

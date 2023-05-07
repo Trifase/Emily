@@ -9,7 +9,7 @@ from database import Chatlog, Reminders
 from typing import Callable, Optional, Tuple
 
 from dataclassy import dataclass
-from rich import print
+from rich import print as cprint
 from telegram import (
     Bot,
     CallbackQuery,
@@ -217,10 +217,10 @@ async def printlog(update, action, additional_data=None, error=False):
         chat_id = update.effective_chat.id
 
     if additional_data:
-        print(f'{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}: {additional_data}')
+        cprint(f'{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}: {additional_data}')
         message_log = f"{await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}: {additional_data}"
     else:
-        print(f'{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}')
+        cprint(f'{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}')
         message_log = f"{await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}"
 
     logging.info(message_log)

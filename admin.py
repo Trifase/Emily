@@ -12,7 +12,6 @@ import urllib.request
 from os import walk
 
 from PIL import ImageGrab
-from rich import print
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram import __version__ as TG_VER
 from telegram.constants import ChatMemberStatus, ParseMode

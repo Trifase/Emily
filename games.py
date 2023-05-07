@@ -3,7 +3,6 @@ import random
 
 import requests
 from codetiming import Timer
-from rich import print
 from telegram import Update
 from telegram.ext import ContextTypes
 

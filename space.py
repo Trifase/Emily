@@ -12,7 +12,6 @@ import pytz
 import requests
 from dataclassy import dataclass
 from PIL import Image, ImageDraw, ImageFont
-from rich import print
 from telegram import Update
 from telegram.constants import ChatAction
 from telegram.ext import ContextTypes

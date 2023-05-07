@@ -10,7 +10,6 @@ import httpx
 import openai
 import tiktoken
 from pydub import AudioSegment
-from rich import print
 from telegram import Update
 from telegram.constants import ChatMemberStatus
 from telegram.error import BadRequest

@@ -4,7 +4,6 @@ import traceback
 
 import tweepy
 from mastodon import Mastodon
-from rich import print
 from telegram import Update
 from telegram.ext import ContextTypes
 

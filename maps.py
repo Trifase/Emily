@@ -1,7 +1,6 @@
 import string
 
 import requests
-from rich import print
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.error import BadRequest
 from telegram.ext import ContextTypes

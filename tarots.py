@@ -6,7 +6,6 @@ import tempfile
 import deepl
 import httpx
 from PIL import Image
-from rich import print
 from telegram import Update
 from telegram.ext import ContextTypes
 

@@ -1,7 +1,6 @@
 import json
 from collections import defaultdict
 
-from rich import print
 from telegram import Update
 from telegram.ext import ContextTypes
 
