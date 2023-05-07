@@ -5,7 +5,7 @@ import json
 import logging
 import logging.handlers
 import time
-from database import Chatlog
+from database import Chatlog, Reminders
 from typing import Callable, Optional, Tuple
 
 from dataclassy import dataclass
@@ -21,6 +21,7 @@ from telegram import (
     User,
 )
 from telegram.ext import CallbackContext
+from aiohttp import web
 
 import config
 
@@ -89,6 +90,17 @@ async def crea_sondaggino(context, update, max_votes, callable, domanda=''):
         if update.effective_chat.id in [config.ID_ASPHALTO]:
             await to_pin.pin(disable_notification=True)
         return
+
+async def webserver_logs(request) -> web.Response:
+    current_m = datetime.date.today().strftime("%Y-%m")
+    with open(f'logs/{current_m}-logs.txt', "r") as file:
+        last_lines = file.readlines()[-100:]
+        my_response = ""
+
+        for line in last_lines:
+            my_response += line
+
+    return web.Response(text=my_response)
 
 def make_delete_button(update) -> InlineKeyboardMarkup:
     keyboard = [
@@ -429,3 +441,35 @@ def retrieve_logs_from_db(chat_id:int, min_time:int|float, max_time:int|float) -
 
         mystring += f'{line.message_id}: <{line.name}>{reply_id} {line.text}\n'
     return mystring
+
+def get_reminders_from_db() -> dict:
+    reminders_list = []
+    reminders_da_processare = 0
+    reminders_da_aggiungere = 0
+    reminders_cancellati = 0
+
+    for reminder in Reminders.select():
+        if reminder:
+            if datetime.datetime.strptime(reminder.date_to_remind, "%d/%m/%Y %H:%M") < datetime.datetime.now():
+                reminders_cancellati += 1
+                deletequery = Reminders.delete().where((Reminders.chat_id == reminder.chat_id) & (Reminders.reply_id == reminder.reply_id))
+                deletequery.execute()
+
+            else:
+                r = {}
+                r['message'] = reminder.message
+                r['reply_id'] = reminder.reply_id
+                r['user_id'] = reminder.user_id
+                r['chat_id'] = reminder.chat_id
+                r['date_now'] = datetime.datetime.strptime(reminder.date_now, "%d/%m/%Y %H:%M")
+                r['date_to_remind'] = datetime.datetime.strptime(reminder.date_to_remind, "%d/%m/%Y %H:%M")
+                reminders_da_aggiungere += 1
+                reminders_list.append(r)
+            reminders_da_processare += 1
+    mydict = {
+        "processed": reminders_da_processare,
+        "to_add": reminders_da_aggiungere,
+        "deleted": reminders_cancellati,
+        "reminders": reminders_list
+    }
+    return mydict
