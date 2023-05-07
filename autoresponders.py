@@ -62,7 +62,7 @@
 #         listamadri = ['Trifase', 'ddf', 'Jules', 'delma', 'fabri', 'mauro magi', 'giulia', 'jacopo', 'pastina', 'nico',
 #                       'faggin', 'marcog', 'mario', 'drpeace', 'bertoldi', 'alupeto', 'lita', 'misspesca', 'crisbal',
 #                       'mariarita', 'asaggese', 'cazo', 'izabera', 'denvit', 'alessia', 'danielina']
-        
+
 #     elif update.message.chat.id == config.ID_DIOCHAN:
 #         listamadri = ['Trifase', 'sushi', 'Stefano', 'Gesù', 'touchdown', 'exe', 'MadAdam', 'mainde', 'Porvora', 'fry',
 #                       'draw', 'manu', 'nrz']
@@ -121,7 +121,7 @@
 #         update.message.reply_text(f'{prepo} tua madre')
 
 # def quanto(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     if update.effective_chat.id in config.NOAUTORESPONDER:  
+#     if update.effective_chat.id in config.NOAUTORESPONDER:
 #         return
 #     num = random.randint(1, 1500)
 #     risp = random.choice(["", "Almeno ", "Credo che la cifra esatta sia ", "Più di ", "Meno di ", "Esattamente "])

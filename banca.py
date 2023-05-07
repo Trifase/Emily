@@ -93,7 +93,7 @@ def build_requisition(token, BANK_ID, redirect_url="http://www.google.com"):  # 
     headers["Authorization"] = f"Bearer {token}"
 
     data = {
-        "redirect": redirect_url, 
+        "redirect": redirect_url,
         "institution_id": BANK_ID
         }
 
@@ -332,7 +332,7 @@ async def bot_get_transazioni(update: Update, context: ContextTypes.DEFAULT_TYPE
     token = get_or_refresh_token(SECRET_ID, SECRET_KEY)
     # print("token ok")
     acc_id = get_account_id(token, BANK_ID, redirect)
-    try: 
+    try:
         n = int(context.args[0])
     except IndexError:
         n = 5

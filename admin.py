@@ -1,6 +1,5 @@
 import datetime
 import html
-import os
 import platform
 import pprint
 import shutil
@@ -40,7 +39,7 @@ async def check_temp(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     if update.effective_user.id not in config.ADMINS:
         return
     await printlog(update, "controlla la temperatura")
-    mycommand = ["vcgencmd", "measure_temp"] 
+    mycommand = ["vcgencmd", "measure_temp"]
     response = subprocess.run(mycommand, capture_output=True, encoding='utf-8')
     temp = response.stdout.split("=")[1].strip()[:-2]
     await update.message.reply_html(f"Temperatura interna: {temp}° C")
@@ -64,16 +63,16 @@ async def _eval(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_html(f"<code>{e}</code>")
 
 async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    async def shut_down_everything(app):
-        args = sys.argv[:]
-        args.insert(0, sys.executable)
+    # async def shut_down_everything(app):
+    #     args = sys.argv[:]
+    #     args.insert(0, sys.executable)
 
-        await app.stop()
-        await app.shutdown()
-        print(f'{get_now()} ### RIAVVIO IN CORSO ###')
+    #     await app.stop()
+    #     await app.shutdown()
+    #     print(f'{get_now()} ### RIAVVIO IN CORSO ###')
 
-        os.chdir(os.getcwd())
-        os.execv(sys.executable, args)
+    #     os.chdir(os.getcwd())
+    #     os.execv(sys.executable, args)
 
     if update.effective_user.id not in config.ADMINS:
         return
@@ -110,7 +109,6 @@ async def commandlist(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 funzione = h.callback.__name__
                 mycommands = list(h.commands)
                 if len(mycommands) == 1:
-                    
                     trigger = "/" + mycommands[0]
 
                 elif len(mycommands) == 2:
@@ -386,7 +384,7 @@ async def lista_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         try:
             my_chat = await context.bot.get_chat(chat_id)
-        except Exception: 
+        except Exception:
                 context.bot_data['lista_chat'].remove(chat_id)
                 continue
 
@@ -453,7 +451,7 @@ async def listen_to(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def esci(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message.from_user.id not in config.ADMINS:
         return
-    
+
     chatid = int(context.args[0])
     print(f'{get_now()} esce da {chatid}')
     if chatid in context.bot_data['lista_chat']:
@@ -491,7 +489,7 @@ async def wakeup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await printlog(update, "accende il PC di casa")
     process = subprocess.Popen(
         ['sudo', 'etherwake', '-i', 'eth0', '18:C0:4D:86:AC:82'],
-        stdout=subprocess.PIPE, 
+        stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
     stdout, stderr = process.communicate()
@@ -500,7 +498,7 @@ async def wakeup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(f'{stdout}')
     elif stderr:
         await update.message.reply_text(f'{stderr}')
-    else: 
+    else:
         await update.message.reply_text('Fatto')
     return
 
@@ -661,18 +659,17 @@ async def clean_db(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # remove empty keys
         if not chat_value:
             context.application.drop_chat_data(chat)
-        
 
         # remove empty subkeys
         for c_subkey, c_subvalue in list(chat_value.items()):
             if not c_subvalue:
                 context.application.chat_data[chat].pop(c_subkey, None)
-                
+
 
         # remove chat_data_remove
         for c_k in chat_data_remove:
             context.application.chat_data[chat].pop(c_k, None)
-    
+
     await update.message.reply_text("chat_data pulito!")
 
 
@@ -684,18 +681,16 @@ async def clean_db(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # remove empty keys
         if not user_value:
             context.application.drop_user_data(user)
-        
 
         # remove empty subkeys
         for u_subkey, u_subvalue in list(user_value.items()):
             if not u_subvalue:
                 context.application.user_data[user].pop(u_subkey, None)
-                
 
         # remove chat_data_remove
         for u_k in user_data_remove:
             context.application.user_data[user].pop(u_k, None)
-    
+
     await update.message.reply_text("user_data pulito!")
 
 
