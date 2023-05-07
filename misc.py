@@ -375,47 +375,47 @@ async def polls_callbackqueryhandlers(update: Update, context: ContextTypes.DEFA
 
     return
 
-async def is_safe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if await no_can_do(update, context):
-        return
+# async def is_safe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+#     if await no_can_do(update, context):
+#         return
 
     
-    if not update.message.reply_to_message or not update.message.reply_to_message.photo:
-        return
+#     if not update.message.reply_to_message or not update.message.reply_to_message.photo:
+#         return
 
-    await printlog(update, "controlla una foto per NSFW")
+#     await printlog(update, "controlla una foto per NSFW")
 
-    picture = update.message.reply_to_message.photo[-1]
-    # tempphoto = tempfile.mktemp(suffix='.jpg')
-    tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
+#     picture = update.message.reply_to_message.photo[-1]
+#     # tempphoto = tempfile.mktemp(suffix='.jpg')
+#     tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
 
-    actual_picture = await picture.get_file()
-    await actual_picture.download_to_drive(custom_path=tempphoto.name)
+#     actual_picture = await picture.get_file()
+#     await actual_picture.download_to_drive(custom_path=tempphoto.name)
 
 
-    # This wont work until tensorflow works with python 3.11
-    classifier = NudeClassifier()
-    results = classifier.classify(tempphoto.name)
+#     # This wont work until tensorflow works with python 3.11
+#     classifier = NudeClassifier()
+#     results = classifier.classify(tempphoto.name)
 
-    unsafeness = results[tempphoto.name]['unsafe']
-    safeness = results[tempphoto.name]['safe']
+#     unsafeness = results[tempphoto.name]['unsafe']
+#     safeness = results[tempphoto.name]['safe']
 
-    text = f"Safe: ({str(safeness * 100)[:4]}%)\nUnsafe: ({str(unsafeness * 100)[:4]}%)\n\n{'❌ NOT' if unsafeness > safeness else '✅'} SAFE"
-    msg = await update.message.reply_html(text)
+#     text = f"Safe: ({str(safeness * 100)[:4]}%)\nUnsafe: ({str(unsafeness * 100)[:4]}%)\n\n{'❌ NOT' if unsafeness > safeness else '✅'} SAFE"
+#     msg = await update.message.reply_html(text)
 
-    if '-why' in context.args:
-        # This wont work until tensorflow works with python 3.11
-        detector = NudeDetector()
-        results = detector.detect(tempphoto.name)
-        text += "\n\n"
+#     if '-why' in context.args:
+#         # This wont work until tensorflow works with python 3.11
+#         detector = NudeDetector()
+#         results = detector.detect(tempphoto.name)
+#         text += "\n\n"
 
-        if results:
-            for r in results:
-                text += f"<code>{r['label']}: {str(r['score'] * 100)[:4]}%</code>\n"
-        else:
-            text += "Nessuna feature trovata"
+#         if results:
+#             for r in results:
+#                 text += f"<code>{r['label']}: {str(r['score'] * 100)[:4]}%</code>\n"
+#         else:
+#             text += "Nessuna feature trovata"
 
-        await msg.edit_text(text, parse_mode='HTML')
+#         await msg.edit_text(text, parse_mode='HTML')
 
 async def greet_BT_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.id not in [config.ID_TIMELINE]:
