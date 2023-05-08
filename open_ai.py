@@ -134,11 +134,14 @@ async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE)-> None
     prompt = retrieve_logs_from_db(chat_id=chat_id, min_time=min_time, max_time=max_time)
     n_tokens = num_tokens_from_messages([prompt])
 
-    while n_tokens > 3000:
+    while n_tokens > 3500:
         hours -= 1
         min_time = datetime.datetime.timestamp(datetime.datetime.now() - datetime.timedelta(hours=hours))
         prompt = retrieve_logs_from_db(chat_id=chat_id, min_time=min_time, max_time=max_time)
         n_tokens = num_tokens_from_messages([prompt])
+    if hours == 0:
+        await update.message.reply_text("Avete parlato troppo, anche solo l'ultima ora è troppa per essere mandata ad OpenAI. Mi spiace.")
+        return
 
     await printlog(update, f"chiede un riassunto ({n_tokens} tokens)", f"ultime {hours} ore")
 
