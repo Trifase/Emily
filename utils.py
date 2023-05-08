@@ -289,7 +289,7 @@ async def is_member_in_group(user_id, chat_id, context):
 def count_k_v(d):
     keys = 0
     values = 0
-    if type(d) == dict:
+    if isinstance(d, dict):
         for item in d.keys():
             if isinstance(d[item], (list, tuple, dict)):
                 keys += 1
@@ -300,7 +300,7 @@ def count_k_v(d):
                 keys += 1
                 values += 1
 
-    elif type(d) == list or type(d) == tuple:
+    elif isinstance(d, (list, tuple)):
         for item in d:
             if isinstance(item, (list, tuple, dict)):
                 k, v = count_k_v(item)
@@ -336,7 +336,7 @@ def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tup
 
     return was_member, is_member
 
-def ingest_json_to_log_db(filename) -> None:
+def ingest_json_to_log_db(filename:str ) -> None:
 
 
     with open(filename, 'r',  encoding='utf8') as f:
