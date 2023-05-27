@@ -63,6 +63,7 @@ from misc import (
     lurkers,
     lurkers_callbackqueryhandlers,
     markovs,
+    movie,
     polls_callbackqueryhandlers,
     random_trifase,
     scacchi,
@@ -227,6 +228,7 @@ def generate_handlers_dict() -> dict:
 
     # misc.py
     h[49] = [CallbackQueryHandler(self_delete, pattern=r'^deleteme_')]
+    h[491] = [CommandHandler('movie', movie, filters=~filters.UpdateType.EDITED)]
     h[50] = [CommandHandler('wikihow', wikihow, filters=~filters.UpdateType.EDITED)]
     h[51] = [CommandHandler('markov', markovs, filters=~filters.UpdateType.EDITED)]
     h[52] = [CommandHandler(['trifase', 'randomtrif', 'randomtrifase'], random_trifase, filters=~filters.UpdateType.EDITED)]

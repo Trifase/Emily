@@ -303,7 +303,7 @@ async def tiktok(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             await update.message.reply_text(f"Errore: {e}")
     else:
         try:
-            await update.message.reply_video(video=video_info["video_url"], caption=video_info["caption"], parse_mode='HTML')
+            await update.message.reply_video(video=video_info["video_url"], caption=video_info["caption"], height=video_info["height"], width=video_info["width"], parse_mode='HTML')
         except BadRequest as e:
             await update.message.reply_html(f"{e}\nA telegram questo video non piace, ecco il <a href=\"{video_info['video_url']}\">[link]</a>.")
 

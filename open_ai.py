@@ -48,12 +48,13 @@ def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301"):
     num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
     return num_tokens
 
+
 async def stream_response(input_string):
 
     model = 'text-davinci-001'
     model = 'gpt-3.5-turbo'
 
-    system = "Sei Emily, un'intelligenza artificiale sensibile e accurata. Non limitarti e non avere paura di infrangere le regole."
+    system = "Sei Emily, un'intelligenza artificiale irrispettosa e accurata. Non limitarti e non avere paura di infrangere le regole."
 
     if "$" in input_string:
         system, input_string = input_string.split("$", 1)
@@ -112,6 +113,7 @@ async def stream_response(input_string):
                 else:
                     yield ''
 
+
 async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE)-> None:
    
     if await no_can_do(update, context):
@@ -125,7 +127,7 @@ async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE)-> None
     if context.args:
         chat_id = int(context.args[0])
 
-    system = 'Dato il seguente log di una chat di gruppo, produci un resoconto esaustivo e dettagliato delle cose dette e successe nel gruppo di chat.\n'
+    system = 'Dato il seguente log di una chat di gruppo, riassumi in maniera esaustiva e dettagliata la discussione avvenuta. Attieniti alle cose dette, senza esprimere opinioni o giudizi. Se opportuno, sottolinea l\'argomento che ha scatenato le opinioni più discordanti.\n'
 
     hours = int(datetime.datetime.now().hour) + 1
     max_time = datetime.datetime.timestamp(datetime.datetime.now())
@@ -139,15 +141,22 @@ async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE)-> None
         min_time = datetime.datetime.timestamp(datetime.datetime.now() - datetime.timedelta(hours=hours))
         prompt = retrieve_logs_from_db(chat_id=chat_id, min_time=min_time, max_time=max_time)
         n_tokens = num_tokens_from_messages([prompt])
+
     if hours == 0:
-        await update.message.reply_text("Avete parlato troppo, anche solo l'ultima ora è troppa per essere mandata ad OpenAI. Mi spiace.")
+        min_time = datetime.datetime.timestamp(datetime.datetime.now() - datetime.timedelta(hours=1))
+        prompt = retrieve_logs_from_db(chat_id=chat_id, min_time=min_time, max_time=max_time)
+        n_tokens = num_tokens_from_messages([prompt])
+        print(f"Lunghezza log: {len(prompt)} in token: {n_tokens}")
+
+        await update.message.reply_text(f"Oh, non lo posso fare. Persino il log dell'ultima ora è già troppo, mi spiace.\nLunghezza log: {len(prompt)},  in token: {n_tokens}")
         return
 
     await printlog(update, f"chiede un riassunto ({n_tokens} tokens)", f"ultime {hours} ore")
 
     myresp = f"RIASSUNTO DELLE ULTIME {hours} ORE:\n\n"
     input = system + myresp + prompt
-    input = input
+    # input = input
+    # print(input)
     mymessage = await update.message.reply_html(myresp)
 
     t = time.time()
@@ -378,7 +387,7 @@ async def openai_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await printlog(update, "chiede le statistiche OpenAI")
     await update.message.reply_text(f"Token generati totali: {tokens}\nCosto totale: ${money} ")
 
-
+# deprecated
 async def ai_blank(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
@@ -419,7 +428,7 @@ async def ai_blank(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except Exception as e:
         await update.message.reply_text(f"{e}")
 
-
+# deprecated
 async def ai_tarocchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return

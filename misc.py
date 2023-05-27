@@ -8,6 +8,7 @@ import time
 import traceback
 
 import deepl
+import ffmpeg
 import httpx
 import humanize
 import jsonlines
@@ -35,6 +36,38 @@ import config
 from pyrog import get_all_chatmembers, get_user_from_username, pyro_bomb_reaction, send_reaction
 from utils import expand, get_display_name, no_can_do, print_progressbar, printlog
 
+
+async def movie(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await no_can_do(update, context):
+        return
+
+    movie_dir = "/home/pi/Desktop/Movies/"
+    movies = os.listdir(movie_dir)
+
+    r_movie = random.choice(movies)
+    this_movie = f'{movie_dir}{r_movie}'
+
+    await printlog(update, "posta un frame di un film", r_movie)
+
+    probe = ffmpeg.probe(this_movie)
+
+    if probe['streams'][0].get('duration'):
+        duration_seconds = int(float(probe['streams'][0]['duration']))
+
+    else:
+        tot_frames = int(probe['streams'][0]['tags']['NUMBER_OF_FRAMES'])
+
+        avg_frame_rate = probe['streams'][0]['avg_frame_rate']
+        frame_rate = avg_frame_rate.split('/')
+        frame_rate = int(frame_rate[0])/int(frame_rate[1])
+
+        duration_seconds = tot_frames//frame_rate
+
+    r = random.randint(100, duration_seconds)
+
+    with tempfile.NamedTemporaryFile(suffix='.png') as tempphoto:
+        ffmpeg.input(this_movie, ss=r).output(f'{tempphoto.name}', vframes=1, loglevel="quiet").run(overwrite_output=True)
+        await update.message.reply_photo(photo=open(tempphoto.name, 'rb'), quote=False)
 
 async def self_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query

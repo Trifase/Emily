@@ -1536,7 +1536,6 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
             kwargs['blackholes'] = False
             kwargs['skips'] = True
 
-
         if "-noborder" in context.args:
             kwargs['bordersize'] = 0
 
@@ -1551,9 +1550,6 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
             HEIGHT = int(context.args[1])
             kwargs['width'] = WIDTH
             kwargs['height'] = HEIGHT
-
-
-
 
     result: StelleResult = await make_solar_system(update, **kwargs)
 

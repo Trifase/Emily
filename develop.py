@@ -69,3 +69,17 @@
 # n_tokens = num_tokens_from_messages([prompt])
 # print(prompt)
 # print(f"{h}h: len:{len(prompt)}, tokens: {n_tokens}")
+
+
+
+# import datetime
+# from utils import retrieve_logs_from_db
+# import config
+
+# max_time = datetime.datetime.timestamp(datetime.datetime.now())
+
+# hours = 8
+# chat_id = config.ID_ASPHALTO
+# min_time = datetime.datetime.timestamp(datetime.datetime.now() - datetime.timedelta(hours=hours))
+# prompt = retrieve_logs_from_db(chat_id=chat_id, min_time=min_time, max_time=max_time)
+# print(prompt)
