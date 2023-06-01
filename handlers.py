@@ -149,7 +149,7 @@ def generate_handlers_dict() -> dict:
     h[-5] = [CommandHandler(['del','cancella', 'delete'], cancella, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
     h[-4] = [CommandHandler('sloc', count_lines, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
     h[-3] = [CommandHandler('exec', executecode, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
-    h[-2] = [CommandHandler(['ripeti','say', 'echo'], echo, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
+    h[-2] = [CommandHandler(['ripeti', 'echo'], echo, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
     h[-1] = [CommandHandler('info', tg_info, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
     h[0] = [CommandHandler(['getchat', 'get_chat'], getchat, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
     h[1] = [CommandHandler(['chatlist', 'listachat', 'lista_chat'], lista_chat, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]

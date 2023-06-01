@@ -57,7 +57,7 @@ def main():
     app = builder.build()
 
     print(f'{get_now()} Aggiungo i job...')
-    # cron_jobs.py
+
     j = app.job_queue
 
     j.run_repeating(parse_diochan, interval=1800, data=None, job_kwargs={'misfire_grace_time': 25})
