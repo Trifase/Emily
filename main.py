@@ -79,10 +79,10 @@ def main():
     print(f'{get_now()} Genero gli handlers...')
     handlers = generate_handlers_dict()
 
-    print(f'{get_now()} Aggiungo gli handlers...')
     app.add_handlers(handlers)
+    print(f'{get_now()} {len(handlers)} handlers aggiunti.')
 
-    print(f'{get_now()} Inizializzazione completata.')
+    print(f'{get_now()} Inizializzazione completata.\n')
     app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
 

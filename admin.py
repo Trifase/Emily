@@ -5,7 +5,6 @@ import pprint
 import shutil
 import socket
 import subprocess
-import sys
 import tempfile
 import traceback
 import urllib.request
@@ -22,7 +21,6 @@ from cron_jobs import do_global_backup
 from scrapers import file_in_limits
 from utils import ForgeCommand, get_now, no_can_do, print_to_string, printlog
 
-# await printlog(update, "lancia una bombreact a", displayname)
 
 async def flush_arbitrary_callback_data(update: Update, context: CallbackContext):
     if update.effective_user.id not in config.ADMINS:
@@ -47,7 +45,6 @@ async def trigger_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id not in config.ADMINS:
          return
     await printlog(update, "triggera un backup manuale")
-    # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} evoca eval')
     await do_global_backup(context)
 
 async def _eval(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -62,23 +59,9 @@ async def _eval(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_html(f"<code>{e}</code>")
 
 async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # async def shut_down_everything(app):
-    #     args = sys.argv[:]
-    #     args.insert(0, sys.executable)
-
-    #     await app.stop()
-    #     await app.shutdown()
-    #     print(f'{get_now()} ### RIAVVIO IN CORSO ###')
-
-    #     os.chdir(os.getcwd())
-    #     os.execv(sys.executable, args)
 
     if update.effective_user.id not in config.ADMINS:
         return
-
-    # if context.bot_data["gara_in_corso"]:
-    #     await update.message.reply_text("Non posso farlo mentre una gara è in corso, mi dispiace.", quote=False)
-    #     return
 
     if 'last_restart' not in context.bot_data:
         context.bot_data['last_restart'] = ""
@@ -86,13 +69,8 @@ async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.bot_data['last_restart'] = update.message.chat.id
 
     await printlog(update, "chiede di riavviare")
-    # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} chiede di riavviare')
-
-    # print(f"setting last_restart: {context.bot_data['last_restart']}")
 
     await update.message.reply_text('Provo a riavviarmi...')
-    args = sys.argv[:]
-    args.insert(0, sys.executable)
 
     print(f'{get_now()} ### RIAVVIO IN CORSO ###')
     raise SystemExit()
