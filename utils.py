@@ -44,14 +44,20 @@ class ForgeCommand:
 
 
 # Logging setup
+log_level = logging.DEBUG
+
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(log_level)
+
+# httpx become very noisy from 0.24.1, so we set it to WARNING
+httpx_logger = logging.getLogger('httpx')
+httpx_logger.setLevel(logging.WARNING)
 
 fh = logging.handlers.RotatingFileHandler('logs/log.log', maxBytes=1000000, backupCount=5)
-fh.setLevel(logging.INFO)
+fh.setLevel(log_level)
 
 
-formatter = logging.Formatter('%(asctime)s %(message)s', datefmt='[%Y-%m-%d %H:%M:%S]')
+formatter = logging.Formatter('%(asctime)s [%(name)s] %(message)s', datefmt='[%Y-%m-%d %H:%M:%S]')
 fh.setFormatter(formatter)
 
 logger.addHandler(fh)

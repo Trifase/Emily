@@ -51,7 +51,6 @@ async def _eval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id not in config.ADMINS:
         return
     await printlog(update, "evoca eval")
-    # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} evoca eval')
     try:
         ret = eval(" ".join(context.args))
         await update.message.reply_html(f"<code>{print_to_string(ret)}</code>")
@@ -59,7 +58,6 @@ async def _eval(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_html(f"<code>{e}</code>")
 
 async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     if update.effective_user.id not in config.ADMINS:
         return
 
@@ -73,6 +71,7 @@ async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Provo a riavviarmi...')
 
     print(f'{get_now()} ### RIAVVIO IN CORSO ###')
+
     raise SystemExit()
 
 async def commandlist(update: Update, context: ContextTypes.DEFAULT_TYPE):
