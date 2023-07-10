@@ -192,3 +192,8 @@ logs2022-12-28.txt
 db/db/picklepersistence
 develop.py
 .ruff.toml
+db/pyrogramsession.session
+.gitignore
+.gitignore
+db/pyrogramsession.session-bk
+wideq_state.json

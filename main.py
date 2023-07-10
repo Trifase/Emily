@@ -18,6 +18,7 @@ from cron_jobs import (
     do_global_backup,
     lotto_member_count,
     parse_diochan,
+    parse_niuchan,
     post_solarsystem_mastodon,
 )
 from database import Chatlog, Compleanni, Quote, Reminders, TensorMessage
@@ -61,6 +62,7 @@ def main():
     j = app.job_queue
 
     j.run_repeating(parse_diochan, interval=1800, data=None, job_kwargs={'misfire_grace_time': 25})
+    j.run_repeating(parse_niuchan, interval=1800, data=None, job_kwargs={'misfire_grace_time': 25})
 
     j.run_daily(lotto_member_count, datetime.time(hour=9, minute=0, tzinfo=pytz.timezone('Europe/Rome')), data=None)
     j.run_daily(post_solarsystem_mastodon, datetime.time(hour=8, minute=30, tzinfo=pytz.timezone('Europe/Rome')), data=None)

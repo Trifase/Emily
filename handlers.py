@@ -41,7 +41,7 @@ from admin import (
 )
 from asphalto import azzurro
 from banca import bot_get_saldo, bot_get_transazioni
-from best_timeline import deleta_if_channel, permasilenzia, scrape_tweet_bt, silenzia
+from best_timeline import deleta_if_channel, permasilenzia, silenzia#, scrape_tweet_bt
 from compleanni import compleanni_add, compleanni_list, compleanni_manual_check, compleanno_del
 from diochan import add_quote, ascendi, diochan, get_thread_from_dc, random_tensor, save_tensor, search_quote
 from donazioni import donazioni, precheckout_callback, successful_payment_callback
@@ -101,7 +101,7 @@ from scrapers import (
     new_instagram,
     ninofrassica,
     parse_reddit_link,
-    scrape_tweet_media,
+    # scrape_tweet_media,
     tiktok,
     tiktok_inline,
     tiktok_long,
@@ -176,8 +176,8 @@ def generate_handlers_dict() -> dict:
     h[17] = [CommandHandler(['movimenti', 'transazioni', 'carige_movimenti'], bot_get_transazioni, filters=~filters.UpdateType.EDITED)]
 
     # best_timeline.py
-    best_timeline_twitter_regex = r"(?:(?:http|https):\/\/)?(?:www.|mobile.)?(?:twitter.com)\/(?:\w+)\/status\/(\w+)"
-    h[-201] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(best_timeline_twitter_regex, re.IGNORECASE)), scrape_tweet_bt)]
+    # best_timeline_twitter_regex = r"(?:(?:http|https):\/\/)?(?:www.|mobile.)?(?:twitter.com)\/(?:\w+)\/status\/(\w+)"
+    # h[-201] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(best_timeline_twitter_regex, re.IGNORECASE)), scrape_tweet_bt)]
     h[18] = [CommandHandler(['silenzia', 'silenzio', 'taci', 'shhh'], silenzia, filters=~filters.UpdateType.EDITED)]
     h[19] = [CommandHandler(['permasilenzia', 'permasilenzio', 'permataci', 'shhhhhhhh', 'permamute'], permasilenzia, filters=~filters.UpdateType.EDITED)]
     h[20] = [MessageHandler(filters.SenderChat.CHANNEL, deleta_if_channel)]
@@ -284,7 +284,7 @@ def generate_handlers_dict() -> dict:
     regex_instagram = r"(\b\S+(:?instagram\.com|instagr\.am)\S+\b)"
     regex_tiktok = r"(?:https?://vm.tiktok.com\/(\w+))"
     regex_tiktok_long = r"(?:(?:http|https):\/\/)?(?:www.)?(?:tiktok.com)\/(@[a-zA-Z0-9_.]+)\/video\/(\w+)"
-    regex_tweet_media = r"(?:(?:http|https):\/\/)?(?:www.|mobile.)?(?:twitter.com)\/(?:\w+)\/status\/(\w+)"
+    # regex_tweet_media = r"(?:(?:http|https):\/\/)?(?:www.|mobile.)?(?:twitter.com)\/(?:\w+)\/status\/(\w+)"
     regex_youtube_alts = r"(?:(?:http:\/\/)?|(?:https:\/\/)?)?(?:yewtu.be|utew.be)\/(?:watch\?v=)?([a-zA-Z0-9_-]{6,11})"
     regex_fb_video = r"(?:(?:http|https):\/\/)?(?:www\.|fb\.watch)\/([^\/]{10})"
     regex_facebok_video = r"(?:(?:http|https):\/\/)?(?:www.|fb.|m.)?(?:watch|facebook.com)(?:\/[\w.]+)(?:\/videos|\/watch)\/([\w.]+)"
@@ -298,7 +298,7 @@ def generate_handlers_dict() -> dict:
     h[91] = [InlineQueryHandler(tiktok_inline)]
     h[92] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_tiktok, re.IGNORECASE)), tiktok)]
     h[93] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_tiktok_long, re.IGNORECASE)), tiktok_long)]
-    h[94] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_tweet_media, re.IGNORECASE)), scrape_tweet_media)]
+    # h[94] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_tweet_media, re.IGNORECASE)), scrape_tweet_media)]
     h[95] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_youtube_alts, re.IGNORECASE)), youtube_alts)]
     h[96] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_fb_video, re.IGNORECASE)), facebook_video)]
     h[97] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_facebok_video, re.IGNORECASE)), facebook_video)]

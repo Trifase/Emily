@@ -108,7 +108,7 @@ async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE
 
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await context.bot.send_message(config.ID_SPIA, message, reply_markup=reply_markup)
+        await context.bot.send_message(config.ID_BOTCENTRAL, message, reply_markup=reply_markup)
 
 async def messaggio_spiato(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -149,7 +149,7 @@ async def messaggio_spiato(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await context.bot.send_message(chat_id=config.ID_SPIA, text=text, reply_markup=reply_markup)
+        await context.bot.send_message(chat_id=config.ID_BOTCENTRAL, text=text, reply_markup=reply_markup)
 
 async def update_timestamps_asphalto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -328,17 +328,17 @@ async def track_chats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             # context.bot_data.setdefault("user_ids", set()).discard(chat.id)
     elif chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
         if not was_member and is_member:
-            await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha aggiunto Emily al gruppo: {chat.title}")
+            await context.bot.send_message(config.ID_BOTCENTRAL, f"{cause_name} [{cause_id}] ha aggiunto Emily al gruppo: {chat.title}")
             # context.bot_data.setdefault("group_ids", set()).add(chat.id)
         elif was_member and not is_member:
-            await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha rimosso Emily dal gruppo: {chat.title}")
+            await context.bot.send_message(config.ID_BOTCENTRAL, f"{cause_name} [{cause_id}] ha rimosso Emily dal gruppo: {chat.title}")
             # context.bot_data.setdefault("group_ids", set()).discard(chat.id)
     else:
         if not was_member and is_member:
-            await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha aggiunto Emily al canale: {chat.title} [{chat.id}]")
+            await context.bot.send_message(config.ID_BOTCENTRAL, f"{cause_name} [{cause_id}] ha aggiunto Emily al canale: {chat.title} [{chat.id}]")
             # context.bot_data.setdefault("channel_ids", set()).add(chat.id)
         elif was_member and not is_member:
-            await context.bot.send_message(config.ID_SPIA, f"{cause_name} [{cause_id}] ha rimosso Emily dal canale: {chat.title} [{chat.id}]")
+            await context.bot.send_message(config.ID_BOTCENTRAL, f"{cause_name} [{cause_id}] ha rimosso Emily dal canale: {chat.title} [{chat.id}]")
             # context.bot_data.setdefault("channel_ids", set()).discard(chat.id)
 
 async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

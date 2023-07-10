@@ -283,7 +283,7 @@ async def getchat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             admins: list = await context.bot.get_chat_administrators(chat_id)
             utenti = await context.bot.get_chat_member_count(chat_id)
         except Exception as e:
-            await context.bot.send_message(config.ID_SPIA, f"Mi dispiace: {e}")
+            await context.bot.send_message(config.ID_BOTCENTRAL, f"Mi dispiace: {e}")
             return
 
         # print(mychat.to_dict())
@@ -323,7 +323,7 @@ async def getchat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    await context.bot.send_message(config.ID_SPIA, message, reply_markup=reply_markup)
+    await context.bot.send_message(config.ID_BOTCENTRAL, message, reply_markup=reply_markup)
 
 async def lista_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -421,7 +421,7 @@ async def listen_to(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 message += f"👤{is_banned}ID: <code>{chat_id}</code> - @{mychat.get('username')} {mychat.get('first_name')} {mychat.get('last_name')}\n"
                 # message += f"{chat_id} - @{my_chat.username} {my_chat.first_name} {my_chat.last_name}\n"
         message = "Sto spiando:\n" + message
-        await context.bot.send_message(config.ID_SPIA, message, parse_mode=ParseMode.HTML)
+        await context.bot.send_message(config.ID_BOTCENTRAL, message, parse_mode=ParseMode.HTML)
         return
 
 async def esci(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

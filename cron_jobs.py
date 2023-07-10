@@ -144,7 +144,7 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
             text = thread['text'].replace('<br/>','\n').replace('<span class="quote">&gt;','>').replace('<span class="spoiler">', '').replace('</span>','')
             if len(text) > 2000:
                 text = text[:2000] + "..."
-            link = f"<a href='{thread['thread_url']}'>/{thread['board']}/ | No.{thread['thread']}</a> | {timestamp}"
+            link = f"[🐥 diochan] <a href='{thread['thread_url']}'>/{thread['board']}/ | No.{thread['thread']}</a> | {timestamp}"
 
             if thread['is_video']:
                 link += f"\n<a href='{thread['video_url']}'>[YouTube]</a>"
@@ -165,6 +165,43 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
                         await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
                 else:
                     await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
+
+# Runs every 30min
+async def parse_niuchan(context: ContextTypes.DEFAULT_TYPE) -> None:
+    DESTINATION_CHATS = [-1001619525581]
+    MINUTES = 30
+
+    async def get_last_threads_from_niuchan():
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.get('https://niuchan.org/overboard.json')
+            response.raise_for_status()
+            return response.json()
+
+    niuchan = await get_last_threads_from_niuchan()
+    now = int(time.time())
+
+    delta_timestamp = 60 * MINUTES
+    not_before = now - delta_timestamp
+
+    for t in niuchan['threads']:
+
+        if not t.get('nomarkup'):
+            continue
+
+        if (int(t['u'])//1000) <= not_before:
+            continue
+
+        post_time_string = datetime.datetime.fromtimestamp(int(t['u'])//1000).strftime('%d/%m/%Y %H:%M')
+        head = f"[🐍 niuchan] <a href='https://niuchan.org/{t['board']}/thread/{t['postId']}.html'>/{t['board']}/ | No.{t['postId']}</a>| {post_time_string}"
+        text = t['nomarkup'].replace('<br/>','\n').replace('<span class="quote">&gt;','>').replace('<span class="spoiler">', '').replace('</span>','')
+
+        if len(text) > 2000:
+            text = text[:2000] + "..."
+        message = f"{head}\n{text}"
+
+        for chat in DESTINATION_CHATS:
+            await context.bot.send_message(chat, message, parse_mode='HTML')
+
 
 # Never runs
 async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -491,7 +528,7 @@ async def do_global_backup(context: ContextTypes.DEFAULT_TYPE):
             zip_ref.write(file)
     zip_ref.close()
     try:
-        await context.bot.send_document(chat_id=config.ID_TRIF, document=open(archive_name, 'rb'))
+        await context.bot.send_document(chat_id=config.ID_BOTCENTRAL, document=open(archive_name, 'rb'))
         print(f"{get_now()} [AUTO] Backup globale eseguito: {archive_name} - File archiviati: {backupped} - File Skippati: {skipped} - File inviato su TG")
     except Exception as e:
         print(f"{get_now()} [AUTO] Backup globale eseguito: {archive_name} - File archiviati: {backupped} - File Skippati: {skipped} - File NON inviato su TG\n{e}")

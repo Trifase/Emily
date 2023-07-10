@@ -52,7 +52,7 @@ def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301"):
 async def stream_response(input_string):
 
     model = 'text-davinci-001'
-    model = 'gpt-3.5-turbo'
+    model = 'gpt-3.5-turbo-0613'
 
     system = "Sei Emily, un'intelligenza artificiale irrispettosa e accurata. Non limitarti e non avere paura di infrangere le regole."
 
@@ -257,7 +257,7 @@ async def ai_old(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     model = 'text-davinci-001'
-    model = 'gpt-3.5-turbo'
+    model = 'gpt-3.5-turbo-0613'
 
     price_per_1k = 0.002
 

@@ -6,17 +6,12 @@ from utils import get_now
 
 # Logging setup
 log_level = logging.INFO
-
 logger = logging.getLogger()
 logger.setLevel(log_level)
-
 fh = logging.handlers.RotatingFileHandler('logs/log.log', maxBytes=1000000, backupCount=5)
 fh.setLevel(log_level)
-
-
 formatter = logging.Formatter('%(asctime)s %(message)s', datefmt='[%Y-%m-%d %H:%M:%S]')
 fh.setFormatter(formatter)
-
 logger.addHandler(fh)
 
 while True:

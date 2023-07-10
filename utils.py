@@ -44,7 +44,7 @@ class ForgeCommand:
 
 
 # Logging setup
-log_level = logging.DEBUG
+log_level = logging.INFO
 
 logger = logging.getLogger()
 logger.setLevel(log_level)
@@ -259,7 +259,7 @@ async def alert(update, context: CallbackContext, action, errore):
         chat_id = update.effective_chat.id
 
     messaggio = f'{get_now()} {await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}: {errore}'
-    await context.bot.send_message(config.ID_SPIA, messaggio)
+    await context.bot.send_message(config.ID_BOTCENTRAL, messaggio)
 
 def print_progressbar(current_percentage, complete=100, max_length=20, fill_char="█", empty_char="░", prefix="[", suffix="]"):
     pct = int(current_percentage * max_length / complete)

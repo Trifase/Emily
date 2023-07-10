@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 import pprint
 import random
 import re
@@ -25,6 +26,7 @@ import yt_dlp
 from bs4 import BeautifulSoup
 from instaloader import BadResponseException, Profile, StoryItem
 from requests_html import AsyncHTMLSession
+from rich import print as cprint
 from telegram import (
     InlineQueryResultArticle,
     InlineQueryResultVideo,
@@ -40,7 +42,7 @@ import config
 from utils import alert, get_display_name, get_now, no_can_do, printlog
 
 local_tz = pytz.timezone('Europe/Rome')
-
+logger = logging.getLogger()
 
 def utc_to_local(utc_dt):
     local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
@@ -198,7 +200,7 @@ async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     username, id, link = await get_tiktok_username_id(query)
 
-    print(f'{get_now()} {await get_display_name(update.effective_user)} inline chiede un tiktok: {link}')
+    cprint(f'{get_now()} {await get_display_name(update.effective_user)} inline chiede un tiktok: {link}')
 
     try:
         video_info = await get_tiktok_video_infos_aweme(username, id)
@@ -934,6 +936,7 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     gallery = []
 
     await printlog(update, "posta un link a reddit", permalink)
+    # print(url)
 
     if submission.is_self:
         if len(submission.selftext) > 900:
@@ -978,9 +981,14 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                     url_audio = url.replace("1080", "audio")
                     url_audio = url_audio.replace("720", "audio")
                     url_audio = url_audio.replace("360", "audio")
+                    url_audio = url_audio.replace("240", "audio")
                     width = submission.media['reddit_video']['width']
                     height = submission.media['reddit_video']['height']
 
+                    # import pprint
+                    # pprint.pprint(submission.media)
+                    # print(f"url: {url}")
+                    # print(f"url_audio: {url_audio}")
                     # pprint.pprint(vars(submission))
                     try:
                         link_thumb = submission.preview['images'][0]['source']['url']
@@ -1156,7 +1164,7 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             r = json.loads(response.text)
             pastebin_url = f"{URL}/raw/{r['key']}"
            
-            await context.bot.send_message(chat_id=config.ID_SPIA, text=f'<a href="{pastebin_url}">Ecco a te</a>\nHo trovato un contenuto che non so come parsare:\n{message}', parse_mode='HTML')
+            await context.bot.send_message(chat_id=config.ID_BOTCENTRAL, text=f'<a href="{pastebin_url}">Ecco a te</a>\nHo trovato un contenuto che non so come parsare:\n{message}', parse_mode='HTML')
             await reddit.close()
             return
 
