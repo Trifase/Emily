@@ -422,7 +422,6 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         case 'stories':
             username = url_path[1]
             target_story_id = url_path[2]
-
             await printlog(update, "chiede una storia da instagram", f"https://www.instagram.com/stories/{username}/{target_story_id}/")
 
             try:
@@ -432,6 +431,9 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                 return
 
             if item.is_video:
+                if not item.video_url:
+                    await update.message.reply_html("Instagram è stronzo e non mi fa scaricare la storia, scusa.", disable_web_page_preview=True)
+                    return
                 if await file_in_limits(item.video_url):
                     mi = pymediainfo.MediaInfo.parse(item.video_url, parse_speed=0)
                     if not mi.audio_tracks:
@@ -621,7 +623,7 @@ async def instagram_stories(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                     medialist.append(InputMediaPhoto(media=url, caption=f"@{username}"))
                     i += 1
 
-    if not medialist:
+    if not i:
         await update.message.reply_text(f"@{username} non ha nessuna storia visibile.")
         return
 

@@ -484,7 +484,7 @@ async def do_global_backup(context: ContextTypes.DEFAULT_TYPE):
     now = datetime.datetime.today().strftime('%Y%m%d_%H%M%S')
 
     backup_dir = "backups"
-    archive_name = f"{backup_dir}/{now}-backup.zip"
+    archive_name = f"{backup_dir}/emily-{now}-backup.zip"
 
     IGNORED_DIRS = [
         f"./{backup_dir}",
@@ -503,7 +503,7 @@ async def do_global_backup(context: ContextTypes.DEFAULT_TYPE):
         "./.mypy_cache",
         "./logs",
         ]
-    IGNORED_FILES = [f"{now}-backup.zip", "condominioweb.jsonl.zst", "logs.txt"]
+    IGNORED_FILES = [f"emily-{now}-backup.zip", "condominioweb.jsonl.zst", "logs.txt"]
 
     skipped = 0
     backupped = 0

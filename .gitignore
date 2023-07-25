@@ -197,3 +197,4 @@ db/pyrogramsession.session
 .gitignore
 db/pyrogramsession.session-bk
 wideq_state.json
+develop.py
