@@ -392,7 +392,7 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                             medialist.append(InputMediaPhoto(media=p.display_url))
                         else:
                             continue
-               
+
                 await context.bot.send_media_group(reply_to_message_id=update.message.message_id, chat_id=update.message.chat.id, media=medialist)
 
             elif post.typename == "GraphImage":

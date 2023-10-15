@@ -382,7 +382,6 @@ async def get_thread_from_dc(update: Update, context: ContextTypes.DEFAULT_TYPE)
                     t['image_url'] = f'http://i3.ytimg.com/vi/{youtube_id}/hqdefault.jpg'
                     t['video_url'] = f"https://www.youtube.com/watch?v={youtube_id}"
                 post.append(t)
-   
 
     if not post:
         await update.message.reply_html("Thread non trovato")

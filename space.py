@@ -1142,7 +1142,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
     list_of_planet_textures = ['craters', 'fibers', 'nubi', 'perlin_poly', 'stripes', 'voronoi', 'splat', 'splot']
 
     stelle = {}
-   
+
     WIDTH = width
     HEIGHT = height
 

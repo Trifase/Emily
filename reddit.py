@@ -331,7 +331,7 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             response = requests.post(URL + "/documents", mymessage.encode('utf-8'))
             r = json.loads(response.text)
             pastebin_url = f"{URL}/raw/{r['key']}"
-           
+
             await context.bot.send_message(chat_id=config.ID_BOTCENTRAL, text=f'<a href="{pastebin_url}">Ecco a te</a>\nHo trovato un contenuto che non so come parsare:\n{message}', parse_mode='HTML')
             await reddit.close()
             return

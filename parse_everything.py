@@ -56,7 +56,7 @@ async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE
             context.bot_data['listen_to'].append(chat_id)
 
         if not await is_user(update):
-           
+
             message = ""
             mychat = await context.bot.get_chat(chat_id)
             utenti = await context.bot.get_chat_member_count(chat_id)

@@ -433,7 +433,7 @@ def print_clean_json(filename:str, min_datetime:datetime, max_datetime:datetime)
             reply_id = f" (rispondendo a {message['reply_to_message_id']})"
         else:
             reply_id = ''
-       
+
         return_string += f"{message['id']}: <{message['from']}>{reply_id} {message['text']}\n"
     return return_string
 

@@ -222,7 +222,7 @@ async def lurkers_callbackqueryhandlers(update: Update, context: ContextTypes.DE
             return False
 
     query = update.callback_query
-   
+
     user = await context.bot.get_chat_member(update.effective_chat.id, update.effective_user.id)
     if not can_user_restrict(user) and update.effective_user.id != config.ID_TRIF:
         await query.answer("Non puoi farlo.")
@@ -620,13 +620,11 @@ async def bioritmo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def condominioweb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-
-
-    @dataclass
-    class Comment:
-        text: str
-        dateCreated: datetime
-        author_name: str
+    # @dataclass
+    # class Comment:
+    #     text: str
+    #     dateCreated: datetime
+    #     author_name: str
 
     # @dataclass
     # class DiscussionForumPosting:
@@ -1069,7 +1067,7 @@ async def voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     file = open("tts/tts_ogg.ogg", 'rb')
     await update.effective_chat.send_chat_action(action='upload_voice')
     await bot.send_voice(update.message.chat_id, file, reply_to_message_id=update.message.reply_to_message.id)
-    pass
+
 
 async def alexa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     search_term = context.match.group(1)

@@ -272,7 +272,6 @@ async def meteo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     try:
         meteo = data['current']
     except KeyError:
-        data['error']
         await update.message.reply_text("Errore.")
         return
 
@@ -307,7 +306,6 @@ async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     citta = " ".join(context.args)
 
     citta += ",,it"
-   
     geocoding_url = "http://api.openweathermap.org/geo/1.0/direct"
     query = {
         "q": citta,

@@ -666,7 +666,7 @@ async def draw_cards(spread, reverse=False, deck='rws', context=None):
     # print("Salvo il mazzo")
     context.bot_data['tarot_deck'] = mazzo
     # print(context.bot_data['tarot_deck'])
-   
+
     # pprint.pprint(chosen_cards)
     # print(chosen_cards)
     if spread['name'] == 'Deck Showcase':
@@ -675,7 +675,7 @@ async def draw_cards(spread, reverse=False, deck='rws', context=None):
     returned_cards = []
 
     i = 0
-   
+
     for card in chosen_cards:
         c = {}
         c['number'] = str(card['n'])
