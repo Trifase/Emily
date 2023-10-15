@@ -107,7 +107,7 @@ from scrapers import (
     tiktok_long,
     twitch_clips,
     wikipedia,
-    youtube_alts,
+    # youtube_alts,
 )
 from sets import addset, deleteset, jukebox, listaset
 from smarthome import consumo, luci_status, purificatore, riscaldamento_stats, toggle_light

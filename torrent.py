@@ -8,6 +8,7 @@ import config
 from utils import no_can_do, print_progressbar, printlog
 
 _localize = humanize.i18n.activate("it_IT")
+type(_localize)
 
 async def lista_torrent(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await no_can_do(update, context):

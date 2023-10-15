@@ -89,7 +89,7 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     caption = f"{song.display_name}\nfrom {song.album_name} ({song.year})"
 
-    # Thumbnail 
+    # Thumbnail
     if song.cover_url:
         # Download the thumbnail
         tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')

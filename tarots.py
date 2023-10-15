@@ -1044,7 +1044,7 @@ async def tarotschema(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if '-help' in context.args:
         await update.message.reply_html('Questo comando serve a creare un\'immagine basandosi sull\'estrazione dei tarocchi hce hai già fatto per conto tuo.\nUso:\n<code>/schema [nome dello schema] -c [numeri delle carte] -d [nome del mazzo]</code>\nAd esempio:\n<code>/schema wirth -c 11 0 15 3 7 5 -d marsiglia</code>\nUsa l\'asterisco <code>*</code> per indicare una carta obliqua.')
         return
-    args, unknown = a.parse_known_args(context.args)
+    args, _ = a.parse_known_args(context.args)
     # print(args)
 
     SPREADS = ['yesno', 'wirth', 'zodiac', 'default_three', 'simple_cross', 'celtic_cross', 'year', 'mondo', 'scelta']

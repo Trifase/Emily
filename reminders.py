@@ -36,7 +36,7 @@ async def send_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
 async def remindme(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-    global reply_id
+    # global reply_id
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
     reply_id = update.message.message_id

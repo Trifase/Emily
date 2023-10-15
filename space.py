@@ -1104,28 +1104,28 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
                 density = max_density
             return density
 
-    def write_planet_name(cr, x, y, radius, name, type="planet"):
-        if type == "planet":
-            x1 = x + radius + 20
-            y1 = y - 10
-        elif type == "moon":
-            x1 = x + radius + 35
-            y1 = y - 10
-        elif type == "rings":
-            x1 = x + radius + 20
-            y1 = y - 10
-        elif type == "belt":
-            x1 = x
-            y1 = y - radius - 10
-        cr.close_path()
-        cr.set_font_size(30)
-        cr.select_font_face("GeosansLight-NMS", cairo.FONT_SLANT_OBLIQUE, cairo.FONT_WEIGHT_BOLD)
-        cr.set_source_rgba(1, 1, 1, 0.8)
-        cr.move_to(x1, y1)
-        cr.show_text(name.upper())
-        cr.move_to(x, y)
-        cr.set_source_rgba(0, 0, 0, 0.0)
-        return
+    # def write_planet_name(cr, x, y, radius, name, type="planet"):
+    #     if type == "planet":
+    #         x1 = x + radius + 20
+    #         y1 = y - 10
+    #     elif type == "moon":
+    #         x1 = x + radius + 35
+    #         y1 = y - 10
+    #     elif type == "rings":
+    #         x1 = x + radius + 20
+    #         y1 = y - 10
+    #     elif type == "belt":
+    #         x1 = x
+    #         y1 = y - radius - 10
+    #     cr.close_path()
+    #     cr.set_font_size(30)
+    #     cr.select_font_face("GeosansLight-NMS", cairo.FONT_SLANT_OBLIQUE, cairo.FONT_WEIGHT_BOLD)
+    #     cr.set_source_rgba(1, 1, 1, 0.8)
+    #     cr.move_to(x1, y1)
+    #     cr.show_text(name.upper())
+    #     cr.move_to(x, y)
+    #     cr.set_source_rgba(0, 0, 0, 0.0)
+    #     return
 
     list_of_colors = [
         (145, 185, 141), (229, 192, 121), (210, 191, 88), (140, 190, 178), (255, 183, 10),

@@ -16,7 +16,6 @@ from utils import crea_sondaggino, no_can_do, printlog
 #         await original_update.message.reply_html('IT WERKS')
 #         return
 
-   
 #     if not context.args:
 #         max_votes = 8
 #     else:

@@ -129,6 +129,7 @@ async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     _localize = humanize.i18n.activate("it_IT")
+    type(_localize)
 
     if await no_can_do(update, context):
         return
@@ -288,7 +289,7 @@ async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     if update.message.chat.id == config.ID_TIMELINE:
         await update.message.reply_html("<code>https://www.youtube.com/watch?v=6Z3QJ4L1Bg0</code>")
         return
-        LB_ID = 799277
+        # LB_ID = 799277 (btest timeline)
     else:
         LB_ID = 8518
    
@@ -859,11 +860,11 @@ async def spongebob(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     newmessage = []
-    for index in range(len(message)):
+    for index, character in message:
         if (index % 2 != 0):
-            newmessage.append(message[index].lower())
+            newmessage.append(character.lower())
         else:
-            newmessage.append(message[index].upper())
+            newmessage.append(character.upper())
 
     string = ''.join(x for x in newmessage)
     await context.bot.send_photo(update.message.chat.id, photo=open('images/spongebob.jpg', 'rb'), caption=string, reply_to_message_id=message_id)

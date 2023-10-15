@@ -104,7 +104,6 @@ async def stream_response(input_string):
                         result = json.loads(chunk)
                     except Exception as e:
                         print(e)
-                        pass
                     if result:
                         text = result['choices'][0]['delta'].get('content', '')
                         yield text
@@ -201,25 +200,25 @@ async def ai_stream(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     elif update.effective_chat.id not in [config.ID_CHAT, config.ID_ASPHALTO, config.ID_DIOCHAN, config.ID_LOTTO, config.ID_RITALY, config.ID_NINJA] and update.message.from_user.id != config.ID_TRIF:
         return
     cmd = update.message.text.split(" ")[0]
-    input = update.message.text.replace(f'{cmd} ', "")
+    input_text = update.message.text.replace(f'{cmd} ', "")
 
-    if "$" in input:
-        system, prompt = input.split("$", 1)
+    if "$" in input_text:
+        system, prompt = input_text.split("$", 1)
         prompt = prompt.strip()
         prompt = prompt[:1].upper() + prompt[1:]
         myresp = f"<b>{prompt}</b>\n\n"
     else:
-        prompt = input.strip()
-        prompt = input[:1].upper() + input[1:]
-        myresp = f"<b>{input}</b>\n\n"
+        prompt = input_text.strip()
+        prompt = input_text[:1].upper() + input_text[1:]
+        myresp = f"<b>{input_text}</b>\n\n"
 
     mymessage = await update.message.reply_html(myresp)
     t = time.time()
 
     tokens = 0
-    n_tokens_calculated = num_tokens_from_messages([input])
+    n_tokens_calculated = num_tokens_from_messages([input_text])
 
-    async for text in stream_response(input):
+    async for text in stream_response(input_text):
         tokens += 1
         myresp += text
 

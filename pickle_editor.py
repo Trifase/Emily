@@ -32,7 +32,6 @@ async def main():
         # remove empty keys
         if not chat_value:
             await pickle_persistence().drop_chat_data(this_chat_id)
-       
 
         # remove empty subkeys
         for c_subkey, c_subvalue in list(this_chat_value.items()):

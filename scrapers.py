@@ -271,11 +271,11 @@ async def tiktok(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     link = f"https://vm.tiktok.com/{context.match.group(1)}"
 
-    username, id, link = await get_tiktok_username_id(link)
+    username, tiktok_id, link = await get_tiktok_username_id(link)
 
     await printlog(update, "chiede un tiktok", link)
 
-    video_info = await get_tiktok_video_infos_aweme(username, id)
+    video_info = await get_tiktok_video_infos_aweme(username, tiktok_id)
 
     if not video_info:
         await update.message.reply_text("Non riesco, forse tiktok è rotto, o forse sono programmata male.")

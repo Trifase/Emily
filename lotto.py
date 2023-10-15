@@ -20,7 +20,7 @@ async def maesta_primo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     if await no_can_do(update, context):
         return
-   
+
     if update.message.chat_id != config.ID_LOTTO:
         return
 

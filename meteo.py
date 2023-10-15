@@ -83,7 +83,7 @@ async def prometeo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             context.user_data['default_meteo_city'] = default_city
             await update.message.reply_text(f"Salvata: {default_city}")
             return
-       
+
     API_KEY = config.OWM_API_KEY
     if not citta:
         if len(context.args) == 1:
@@ -360,10 +360,10 @@ async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             data['error']
             await update.message.reply_text("Errore.")
             return
-        min = round(meteo['temp']['min'])
-        max = round(meteo['temp']['max'])
+        temp_min = round(meteo['temp']['min'])
+        temp_max = round(meteo['temp']['max'])
         icon = meteo['weather'][0]['icon']
         aspetto = f"{emojis[icon]} {meteo['weather'][0]['description']}"
         dt = datetime.datetime.utcfromtimestamp(meteo['dt'] + data['timezone_offset']).strftime('%d/%m')
-        meteo_oggi += f"{dt} - {max}/{min}°C - {aspetto}\n"
+        meteo_oggi += f"{dt} - {temp_max}/{temp_min}°C - {aspetto}\n"
     await update.message.reply_text(meteo_oggi)

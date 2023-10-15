@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, AIORateLimiter, CommandHandler, ContextTypes, filters
 
-import config
+# import config
 import logging
 
 # from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
