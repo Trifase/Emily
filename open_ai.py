@@ -203,7 +203,7 @@ async def ai_stream(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     input_text = update.message.text.replace(f'{cmd} ', "")
 
     if "$" in input_text:
-        system, prompt = input_text.split("$", 1)
+        _, prompt = input_text.split("$", 1)
         prompt = prompt.strip()
         prompt = prompt[:1].upper() + prompt[1:]
         myresp = f"<b>{prompt}</b>\n\n"
