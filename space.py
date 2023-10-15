@@ -1439,7 +1439,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
             last_size = next_size
             if planet_type == "moons" and MOONS and planet_radius >= 50:
                 last_size = orbit_radius
-   
+
     draw_border(cr, border_size, sun_r, sun_g, sun_b, width, height)
     fp = tempfile.NamedTemporaryFile(suffix='.png')
 
@@ -1448,7 +1448,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
 
     img = Image.open(image_path)
     if BORDERSIZE >= 20:
-   
+
         font_size = BORDERSIZE - 10
 
         rgb_bgcolor = tuple(int(x) for x in bg_color)
@@ -1459,7 +1459,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
         anchor = (int(WIDTH / 2), int((HEIGHT - (BORDERSIZE / 2))))
 
         draw.text(anchor, system_name.upper(), font=font, anchor="mm", fill=rgb_bgcolor, stroke_width=0)
-   
+
     if NOISE:
         # Load image
         img = np.array(img)
@@ -1571,7 +1571,7 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_document(chat_id=update.effective_chat.id, document=open(image_path, 'rb'), caption=description, parse_mode='HTML')
     else:
         await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(image_path, 'rb'), caption=f"<b>· {system_name.upper()} ·</b>\n<code>{seed}</code>", parse_mode='HTML')
-   
+
     if '-raw' in context.args:
 
         rawtext = pprint.pformat(stelle, sort_dicts=False)

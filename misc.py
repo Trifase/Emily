@@ -410,7 +410,7 @@ async def polls_callbackqueryhandlers(update: Update, context: ContextTypes.DEFA
 #     if await no_can_do(update, context):
 #         return
 
-   
+
 #     if not update.message.reply_to_message or not update.message.reply_to_message.photo:
 #         return
 
@@ -686,7 +686,7 @@ async def condominioweb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not thread.get('comment'):
         await context.bot.send_message(config.ID_RITALY, "Nessuno ha mai risposto.", parse_mode='HTML')
         return
-   
+
     for comment in thread.get('comment'):
         author = comment.get('author').get('name')
         text = comment.get('text')
@@ -794,7 +794,7 @@ async def fatfingers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
     if text is None:
         return
-   
+
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} digita con le dita ciccione!')
     await printlog(update, "digita con le dita ciccionazze")
 
@@ -951,7 +951,6 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in [yellow1]{update.effective_chat.title[:10]}[/yellow1] ({str(update.message.chat.id)[4:]}) interroga lichess!')
     await printlog(update, "interroga lichess")
-   
 
     token = config.LICHESS_API
     nick = " ".join(context.args)

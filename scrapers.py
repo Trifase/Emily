@@ -715,7 +715,7 @@ async def ninofrassica(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             else:
                 print("Boh")
 
-           
+
             await context.bot.send_media_group(reply_to_message_id=update.message.message_id, chat_id=update.message.chat.id, media=medialist)
 
     await update.message.reply_html("Non trovo niente.")
@@ -892,7 +892,7 @@ async def scrape_tweet_media(update: Update, context: ContextTypes.DEFAULT_TYPE)
             # print(medias)
             await context.bot.send_media_group(reply_to_message_id=update.message.message_id, chat_id=update.message.chat.id, media=medias)
         else:
-           
+
             # print("C'erano dei media ma erano tutti oltre il limite:")
             # print(media_no)
             message = "C'erano dei media ma erano tutti oltre il limite per caricarli automaticamente:\n"
@@ -906,7 +906,7 @@ async def scrape_tweet_media(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-   
+
     if update.effective_user.id == 160339370:
         await update.message.reply_html("Basta Zanna.")
         return
@@ -1150,7 +1150,7 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                 await update.message.reply_html(message, disable_web_page_preview=True)
                 await reddit.close()
                 return
-           
+
         else:
             # pprint.pprint(vars(submission))
             print(f"{get_now()} Tipo di contenuto di reddit sconosciuto.")
@@ -1163,7 +1163,7 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             response = requests.post(URL + "/documents", mymessage.encode('utf-8'))
             r = json.loads(response.text)
             pastebin_url = f"{URL}/raw/{r['key']}"
-           
+
             await context.bot.send_message(chat_id=config.ID_BOTCENTRAL, text=f'<a href="{pastebin_url}">Ecco a te</a>\nHo trovato un contenuto che non so come parsare:\n{message}', parse_mode='HTML')
             await reddit.close()
             return
@@ -1198,7 +1198,7 @@ async def twitch_clips(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if not response.get('data'):
         await update.message.reply_html("Non trovo niente")
         return
-   
+
     await printlog(update, "posta una clip di twitch", context.match.group(0))
 
     thumbnail_url = response['data'][0]['thumbnail_url']

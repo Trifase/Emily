@@ -271,7 +271,7 @@ async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 async def new_admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
-   
+
     await query.answer()
     mybutton: ForgeCommand = query.data
 
@@ -357,7 +357,7 @@ async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if not update.message or update.effective_chat.id in [0]:
         return
-   
+
     if 'stats' not in context.chat_data:
         context.chat_data['stats'] = {}
 
@@ -366,13 +366,13 @@ async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if day not in context.chat_data['stats']:
         context.chat_data['stats'][day] = {}
-   
+
     if 'total' not in context.chat_data['stats'][day]:
         context.chat_data['stats'][day]['total'] = 0
-   
+
     if hour not in context.chat_data['stats'][day]:
         context.chat_data['stats'][day][hour] = 0
-   
+
     context.chat_data['stats'][day][hour] += 1
     context.chat_data['stats'][day]['total'] += 1
 

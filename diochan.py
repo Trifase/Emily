@@ -446,7 +446,7 @@ async def set_greet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if len(context.args) < 1:
         await update.message.reply_text("Devi specificare il messaggio di benvenuto")
         return
-   
+
     if '-help' in context.args:
         await update.message.reply_text("Puoi usare le seguenti variabili:\n$FIRST_NAME\n$LAST_NAME\n$USERNAME\n$CHAT_TITLE")
         return

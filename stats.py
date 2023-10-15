@@ -173,7 +173,7 @@ async def send_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     if not stats:
         await update.message.reply_text('Non ho ancora statistiche da mostrarti')
         return
-   
+
     name = str(update.effective_chat.id)
 
     list_days = last_30_days()

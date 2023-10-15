@@ -962,13 +962,13 @@ async def tarot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         h += "<code>-year       </code>: estrazione annuale a 16 carte.\n\n"
 
         h += "Una galleria degli schemi può essere vista <a href='https://imgur.com/a/lYgEWWX'>qui</a>.\n\n"
-       
+
         h += "<b>· Opzioni ·</b>\n"
         h += "<code>-noread     </code>: non fare la lettura.\n"
         h += "<code>-info       </code>: la lista, in ordine, delle carte uscite.\n"
         h += "<code>-reverse    </code>: abilità la possibilità che le carte siano a testa in giù.\n\n"
 
-       
+
         h += "Esempio:\n<code>/tarocchi -morgan -wirth</code>: estrazione con schema croce di Wirth e mazzo Morgan-Greer.\n"
 
         await printlog(update, "chiede l'help dei tarocchi")
@@ -1140,7 +1140,6 @@ async def oroscopo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return None
 
     async def get_horoscope_from_aztro(sign: str) -> str:
-       
 
         async with httpx.AsyncClient() as session:
             # this uses http://astrology.kudosmedia.net/ - dead at 2023-03-29
@@ -1189,7 +1188,7 @@ async def oroscopo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lucky_number = horoscope.lucky_number
     lucky_time = horoscope.lucky_time
     mood = horoscope.mood
-   
+
     translator = deepl.Translator(config.DEEPL_API_KEY)
     target_language = "IT"
     result = translator.translate_text(desc, target_lang=target_language)
