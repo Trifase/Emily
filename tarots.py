@@ -857,6 +857,10 @@ async def tarot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     force_obliqua = False
     help_message = False
     deck = random.choice(['rws', 'morgan'])
+
+    if update.effective_user.id == 90135506: # sushi
+        deck = 'mars'
+
     spread_name = 'default_three'
 
 

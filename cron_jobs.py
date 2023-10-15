@@ -144,7 +144,7 @@ async def parse_diochan(context: ContextTypes.DEFAULT_TYPE) -> None:
             text = thread['text'].replace('<br/>','\n').replace('<span class="quote">&gt;','>').replace('<span class="spoiler">', '').replace('</span>','')
             if len(text) > 2000:
                 text = text[:2000] + "..."
-            link = f"[🐥 diochan] <a href='{thread['thread_url']}'>/{thread['board']}/ | No.{thread['thread']}</a> | {timestamp}"
+            link = f"<a href='{thread['thread_url']}'>/{thread['board']}/ | No.{thread['thread']}</a> | {timestamp}"
 
             if thread['is_video']:
                 link += f"\n<a href='{thread['video_url']}'>[YouTube]</a>"

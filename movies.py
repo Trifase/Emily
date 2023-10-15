@@ -1,173 +1,331 @@
 
 import requests
+from aiographql.client import GraphQLClient, GraphQLRequest, GraphQLResponse
 from imdb import Cinemagoer
-from justwatch import JustWatch
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.ext import ContextTypes
 
 from utils import no_can_do, printlog
 
+# async def get_doveguardo_result(titolo: str, index_n):
+
+#     just_watch = JustWatch(country='IT')
+
+#     results = just_watch.search_for_item(query=titolo)
+
+#     if not results['items']:
+#         raise ValueError('Movie not found')
+#     providers = {}
+#     provider_details = just_watch.get_providers()
+#     for p in provider_details:
+#         providers[p['short_name']] = p['clear_name'].replace('Channel', 'Ch.')
+
+#     offerte = {}
+#     message = ""
+#     imdb_id = 0
+#     imdb_url = ""
+#     imdb_text = ""
+
+#     title = results['items'][int(index_n)]
+
+#     name = title['full_path'].split('/')[-1]
+#     if title.get('poster'):
+#         poster_id = title['poster'][:-9]
+#         poster_url = f"https://images.justwatch.com/{poster_id}s592/{name}.jpg"
+#     else:
+#         poster_url = "https://i.imgur.com/FEbLwXk.png"
+
+#     name_title = f"<b>{title['title']}</b>, <i>{title['object_type']}</i>, {title['original_release_year']}"
+
+
+#     id = title['id']
+#     infos = just_watch.get_title(title_id=id, content_type=title['object_type'])
+#     external_ids = infos['external_ids']
+#     for ids in external_ids:
+#         if ids['provider'] == 'imdb':
+#             imdb_id = ids['external_id']
+#             imdb_url = f'https://www.imdb.com/title/{imdb_id}/'
+#             rarbg_url = f'https://proxyrarbg.org/torrents.php?imdb={imdb_id}'
+#             break
+
+#     for k in title['scoring']:
+#         if k['provider_type'] == 'imdb:score':
+#             if imdb_url:
+#                 imdb_text = f"{k['value']}/10 su <a href='{imdb_url}'>IMDb</a>\n<a href='{rarbg_url}'>⬇️ Cerca torrent</a>\n"
+#             else:
+#                 imdb_text = f"{k['value']}/10 su IMDb\n<a href='{rarbg_url}'>⬇️ Cerca torrent</a>\n"
+
+#     if not imdb_text:
+#         imdb_text = "<i>No IMDb result</i>"
+#     streaming_places = ""
+
+#     if title.get('offers'):
+#         for offer in title['offers']:
+#             if offer['monetization_type'] == 'flatrate':
+#                 offer_type = "Streaming"
+#             elif offer['monetization_type'] == 'buy':
+#                 offer_type = "Buy"
+#             elif offer['monetization_type'] == 'rent':
+#                 offer_type = "Rent"
+#             elif offer['monetization_type'] == 'ads':
+#                 offer_type = "Streaming (ads)"
+#             else:
+#                 offer_type = offer['monetization_type']
+
+#             if offer['package_short_name'] == 'dnp':
+#                 urls = offer['urls']['standard_web'].split("u=")
+#                 url = urls[1].split("&")
+#                 url = url[0]
+#             else:
+#                 url = offer['urls']['standard_web']
+
+#             if url not in offerte:
+#                 offerte[url] = {"providers": "", "type": set(), "stagioni": 0}
+#             offerte[url]['providers'] = offer['package_short_name']
+#             offerte[url]['type'].add(offer_type)
+
+#         for url, details in offerte.items():
+#             lista_tipi = ""
+#             for t in details['type']:
+#                 lista_tipi += t + ", "
+#             provider = providers.get(details['providers'], details['providers'])
+#             streaming_places += f"[{provider}]: <a href='{requests.utils.unquote(url)}'>{lista_tipi[:-2]}</a>\n"
+
+#     else:
+#         streaming_places = "Non ho trovato posti in cui guardarlo, scusa"
+
+#     message = f"{name_title}\n{imdb_text}\n{streaming_places}"
+
+
+
+#     return message, poster_url, len(results['items'])
+
+async def get_titles(query_text: str, format=True) -> dict:
+
+    client = GraphQLClient(endpoint='https://apis.justwatch.com/graphql')
+
+    query = """
+    query GetSuggestedTitles($country: Country!, $language: Language!, $first: Int!, $filter: TitleFilter) {
+    popularTitles(country: $country, first: $first, filter: $filter) {
+        edges {
+        node {
+            ...SuggestedTitle
+            __typename
+        }
+        __typename
+        }
+        __typename
+    }
+    }
+
+    fragment SuggestedTitle on MovieOrShow {
+    id
+    objectType
+    objectId
+    content(country: $country, language: $language) {
+        fullPath
+        title
+        originalReleaseYear
+        posterUrl
+        fullPath
+        __typename
+    }
+    __typename
+    }
+    """
+
+    variables = {
+    "country": "IT",
+    "language": "it",
+    "first": 5,
+    "filter": {
+        "searchQuery": f"{query_text}"
+    }
+    }
+
+    request = GraphQLRequest(query=query, variables=variables, validate=False)
+
+    response: GraphQLResponse = await client.query(request=request)
+    if format:
+        return format_titles(response.data)
+    else:
+        return response.data
+
+async def get_title_detail(fullpath: str, format=True) -> dict:
+
+    client = GraphQLClient(endpoint='https://apis.justwatch.com/graphql')
+
+    query = """
+        query GetUrlTitleDetails($fullPath: String!, $country: Country!, $language: Language!, $platform: Platform! = WEB, $filterAll: OfferFilter!) {
+          urlV2(fullPath: $fullPath) {
+            id
+            heading1
+            node {
+              id
+              ... on MovieOrShowOrSeason {
+                objectType
+                objectId
+                flatrateOffers: offers(country: $country, platform: $platform, filter: $filterAll) {
+                  id
+                  standardWebURL
+                  package {
+                    id
+                    packageId
+                    clearName
+                    monetizationTypes
+                    technicalName
+                  }
+                }
+                content(country: $country, language: $language) {
+                  externalIds {
+                    imdbId
+                  }
+                  fullPath
+                  fullPosterUrl: posterUrl(profile: S718, format: JPG)
+                  scoring {
+                    imdbScore
+                    imdbVotes
+                  }
+                  ... on SeasonContent {
+                    seasonNumber
+                  }
+                }
+              }
+              ... on Show {
+                totalSeasonCount
+              }
+              ... on Season {
+                totalEpisodeCount
+              }
+            }
+          }
+        }
+
+        """
+
+    variables = {
+    "platform": "WEB",
+    "fullPath": f"{fullpath}",
+    "language": "it",
+    "country": "IT",
+    "filterAll": {
+        "monetizationTypes": [
+            "FLATRATE",
+            "FLATRATE_AND_BUY",
+            "ADS",
+            "FREE",
+            "CINEMA",
+            "RENT",
+            "BUY"
+        ],
+        "bestOnly": True
+        }
+    }
+
+    request = GraphQLRequest(query=query, variables=variables, validate=False)
+    response: GraphQLResponse = await client.query(request=request)
+    if format:
+        return format_title_details(response.data)
+    else:
+        return response.data
+
+def format_titles(response: dict) -> list[dict]:
+    results = response['popularTitles']['edges']
+    data = []
+    for result in results:
+        res = {}
+        node = result['node']
+        content = node['content']
+        res['title'] = content['title']
+        res['fullPath'] = content['fullPath']
+        res['posterUrl'] = content['posterUrl']
+        res['originalReleaseYear'] = content['originalReleaseYear']
+        res['id'] = node['id']
+        res['objectId'] = node['objectId']
+        res['objectType'] = node['objectType']
+        data.append(res)
+    return data
+
+def format_title_details(response: dict) -> list[dict]:
+    results = response['urlV2']
+    content = results['node']['content']
+    data = {}
+    data['title'] = results['heading1']
+    data['id'] = results['id']
+    data['full_poster_url'] = content['fullPosterUrl']
+    data['imdb_id'] = content['externalIds']['imdbId']
+    data['score'] = content['scoring']['imdbScore']
+    data['offers'] = []
+    for offer in results['node']['flatrateOffers']:
+        off = {}
+        off['clearname'] = offer['package']['clearName']
+        off['techname'] = offer['package']['technicalName']
+        off['monetization'] = offer['package']['monetizationTypes']
+        off['url'] = offer['standardWebURL']
+        data['offers'].append(off)
+    return data
+
+async def aggregate_justwatch_results(query: str) -> dict:
+    data = []
+    response = await get_titles(query)
+    for result in response:
+        title = result['fullPath']
+        response = await get_title_detail(title)
+        r = {}
+        r['full_path'] = result['fullPath']
+        r['id'] = result['id']
+        r['title'] = result['title']
+        r['year'] = result['originalReleaseYear']
+        r['type'] = result['objectType']
+
+        details = await get_title_detail(title)
+        r['score'] = details['score']
+        r['full_poster_url'] = details['full_poster_url']
+        r['imdb_id'] = details['imdb_id']
+        r['imdb_score'] = details['score']
+        r['offers'] = details['offers']
+        data.append(r)
+    return data
 
 async def get_doveguardo_result(titolo: str, index_n):
 
-    just_watch = JustWatch(country='IT')
-
-    results = just_watch.search_for_item(query=titolo)
-
-    if not results['items']:
+    results = await aggregate_justwatch_results(query=titolo)
+    if not results:
         raise ValueError('Movie not found')
 
-    providers = {
-                'nfx': 'Netflix',
-                'prv': 'Amazon Prime Video',
-                'dnp': 'Disney+',
-                'wki': 'Rakuten TV',
-                'itu': 'Apple iTunes',
-                'atp': 'Apple TV+',
-                'hay': 'Hayu',
-                'ply': 'Google Play Movies',
-                'skg': 'Sky Go',
-                'ntv': 'Now TV',
-                'msp': 'Mediaset Play',
-                'chi': 'Chili',
-                'mbi': 'MUBI',
-                'tvi': 'Timvision',
-                'inf': 'Infinity',
-                'dzn': 'DAZN',
-                'ssp': 'Sky Sport',
-                'rai': 'Rai Play',
-                'uci': 'UCIcinemas',
-                'gdc': 'GuideDoc',
-                'nxp': 'Nexo+',
-                'ytr': 'YouTube Premium',
-                'msf': 'Microsoft Store',
-                'dpe': 'Discovery+',
-                'adp': 'Discovery+ Amazon Ch.',
-                'vvv': 'VVVVID',
-                'cts': 'Curiosity Stream',
-                'dsv': 'DOCSVILLE',
-                'sfx': 'Spamflix',
-                'ast': 'Starz Play Amazon Ch.',
-                'plx': 'Plex',
-                'wow': 'WOW Presents+',
-                'mgl': 'Magellan TV',
-                'bhd': 'BroadwayHD',
-                'fmz': 'Filmzie',
-                'dkk': 'Dekkoo',
-                'trs': 'True Story',
-                'daf': 'DocAlliance Films',
-                'hoc': 'Hoichoi',
-                'amz': 'Amazon Video',
-                'ptv': 'Pluto TV',
-                'eve': 'Eventive',
-                'atv': 'ShortsTV Amazon Ch.',
-                'ctx': 'Cultpix',
-                'sly': 'Serially',
-                'flb': 'FilmBox+',
-                'f1t': 'F1TV',
-                'isa': 'Infinity Selection Amazon Ch.',
-                'cga': 'CG Collection Amazon Ch.',
-                'iwa': 'iWonder Full Amazon Ch.',
-                'faa': 'Full Action Amazon Ch.',
-                'cca': 'Cine Comico Amazon Ch.',
-                'amu': 'MUBI Amazon Ch.',
-                'amg': 'MGM Amazon Ch.',
-                'ahy': 'Hayu Amazon Ch.',
-                'hpa': 'HistoryPlay Amazon Ch.',
-                'rns': 'Rai News',
-                'eus': 'Eurosport',
-                'ngp': 'NFL Game Pass',
-                'pmp': 'Paramount+',
-                'app': 'Paramount+ Amazon Ch.',
-                'nlp': 'NBA League Pass',
-                'tak': 'Takflix',
-                'sup': 'SuperTennis',
-                'twc': 'Twitch',
-                'lgu': 'Lionsgate+',
-                'snx': 'Sun Nxt',
-                'cla': 'Classix',
-                'nfa': 'Netflix basic with Ads',
-                'ras': 'Rai Sport',
-                'epl': 'ESPN Player',
-                'cru': 'Crunchyroll'
-            }
+    title = results[int(index_n)]
 
-    offerte = {}
-    message = ""
-    imdb_id = 0
-    imdb_url = ""
-    imdb_text = ""
+    name = title['title']
+    if title.get('full_poster_url'):
+        poster_url = f"https://images.justwatch.com/{title.get('full_poster_url')}"
+    else:
+        poster_url = "https://i.imgur.com/FEbLwXk.png"
 
-    title = results['items'][int(index_n)]
-
-    name = title['full_path'].split('/')[-1]
-    poster_id = title['poster'][:-9]
-    poster_url = f"https://images.justwatch.com/{poster_id}s592/{name}.jpg"
-
-    name_title = f"<b>{title['title']}</b>, <i>{title['object_type']}</i>, {title['original_release_year']}"
-
-
-    id = title['id']
-    infos = just_watch.get_title(title_id=id, content_type=title['object_type'])
-    external_ids = infos['external_ids']
-    for ids in external_ids:
-        if ids['provider'] == 'imdb':
-            imdb_id = ids['external_id']
-            imdb_url = f'https://www.imdb.com/title/{imdb_id}/'
-            rarbg_url = f'https://proxyrarbg.org/torrents.php?imdb={imdb_id}'
-            break
-
-    for k in title['scoring']:
-        if k['provider_type'] == 'imdb:score':
-            if imdb_url:
-                imdb_text = f"{k['value']}/10 su <a href='{imdb_url}'>IMDb</a>\n<a href='{rarbg_url}'>⬇️ Cerca torrent</a>\n"
-            else:
-                imdb_text = f"{k['value']}/10 su IMDb\n<a href='{rarbg_url}'>⬇️ Cerca torrent</a>\n"
+    name_title = f"<b>{name}</b>, <i>{title['type'].lower()}</i>, {title['year']}"
+    
+    imdb_text = ''
+    if title.get('imdb_score') and title.get('imdb_id'):
+        imdb_url = f'https://www.imdb.com/title/{title["imdb_id"]}/'
+        imdb_text = f"{title['imdb_score']}/10 su <a href='{imdb_url}'>IMDb</a>\n"
 
     if not imdb_text:
         imdb_text = "<i>No IMDb result</i>"
-    streaming_places = ""
+
+    streaming_places = ''
 
     if title.get('offers'):
         for offer in title['offers']:
-            if offer['monetization_type'] == 'flatrate':
-                offer_type = "Streaming"
-            elif offer['monetization_type'] == 'buy':
-                offer_type = "Buy"
-            elif offer['monetization_type'] == 'rent':
-                offer_type = "Rent"
-            elif offer['monetization_type'] == 'ads':
-                offer_type = "Streaming (ads)"
-            else:
-                offer_type = offer['monetization_type']
-
-            if offer['package_short_name'] == 'dnp':
-                urls = offer['urls']['standard_web'].split("u=")
-                url = urls[1].split("&")
-                url = url[0]
-            else:
-                url = offer['urls']['standard_web']
-
-            if url not in offerte:
-                offerte[url] = {"providers": "", "type": set(), "stagioni": 0}
-            offerte[url]['providers'] = offer['package_short_name']
-            offerte[url]['type'].add(offer_type)
-
-        for url, details in offerte.items():
-            lista_tipi = ""
-            for t in details['type']:
-                lista_tipi += t + ", "
-            provider = providers.get(details['providers'], details['providers'])
-            streaming_places += f"[{provider}]: <a href='{requests.utils.unquote(url)}'>{lista_tipi[:-2]}</a>\n"
+            monetization = ', '.join([x.capitalize() for x in offer['monetization']]).replace('Flatrate', 'Streaming')
+            url = offer['url']
+            provider = offer['clearname'].replace('Channel', 'Ch.')
+            streaming_places += f"[{provider}]: <a href='{requests.utils.unquote(url)}'>{monetization}</a>\n"
 
     else:
         streaming_places = "Non ho trovato posti in cui guardarlo, scusa"
 
     message = f"{name_title}\n{imdb_text}\n{streaming_places}"
 
-
-
-    return message, poster_url, len(results['items'])
+    return message, poster_url, len(results)
 
 async def doveguardo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):

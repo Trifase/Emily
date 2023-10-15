@@ -85,6 +85,7 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     blocking_download = asyncio.to_thread(downloader.search_and_download, songs[0])
     song, path = await blocking_download
     # print(song)
+    # print(path)
 
     caption = f"{song.display_name}\nfrom {song.album_name} ({song.year})"
 
@@ -106,8 +107,9 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         thumbnail = None
 
     try:
-        await update.message.reply_audio(audio=open(path, "rb"), caption=caption, thumb=thumbnail)
-    except Exception:
+        await update.message.reply_audio(audio=open(path, "rb"), caption=caption, thumbnail=thumbnail)
+    except Exception as e:
+        print(e)
         await update.message.reply_text("Niente non riesco a mandare il file, amen.")
 
     # Lil' bit of cleaning

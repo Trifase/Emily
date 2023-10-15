@@ -1,4 +1,5 @@
 import datetime
+import textwrap
 import inspect
 import io
 import json
@@ -479,3 +480,11 @@ def get_reminders_from_db() -> dict:
         "reminders": reminders_list
     }
     return mydict
+
+async def reply_html_long_message(update, context, message):
+    if len(message) > 4000:
+        lines = textwrap.wrap(message, 4000, break_long_words=False)
+        for line in lines:
+            await update.message.reply_html(line)
+    else:
+        await update.message.reply_html(message)

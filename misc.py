@@ -175,9 +175,10 @@ async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 if u.user.id == lurker[0]:
                     mylurker = u
                     break
+                else:
             # try:
-                # mylurker = await context.bot.get_chat_member(chat_id, lurker[0])
-            if mylurker.status in ['left', 'kicked']:
+                    mylurker = await context.bot.get_chat_member(chat_id, lurker[0])
+            if mylurker and mylurker.status in ['left', 'kicked']:
                 context.bot_data["timestamps"][chat_id].pop(lurker[0])
                 continue
 

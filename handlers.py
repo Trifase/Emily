@@ -285,9 +285,9 @@ def generate_handlers_dict() -> dict:
     regex_tiktok = r"(?:https?://vm.tiktok.com\/(\w+))"
     regex_tiktok_long = r"(?:(?:http|https):\/\/)?(?:www.)?(?:tiktok.com)\/(@[a-zA-Z0-9_.]+)\/video\/(\w+)"
     # regex_tweet_media = r"(?:(?:http|https):\/\/)?(?:www.|mobile.)?(?:twitter.com)\/(?:\w+)\/status\/(\w+)"
-    regex_youtube_alts = r"(?:(?:http:\/\/)?|(?:https:\/\/)?)?(?:yewtu.be|utew.be)\/(?:watch\?v=)?([a-zA-Z0-9_-]{6,11})"
-    regex_fb_video = r"(?:(?:http|https):\/\/)?(?:www\.|fb\.watch)\/([^\/]{10})"
-    regex_facebok_video = r"(?:(?:http|https):\/\/)?(?:www.|fb.|m.)?(?:watch|facebook.com)(?:\/[\w.]+)(?:\/videos|\/watch)\/([\w.]+)"
+    # regex_youtube_alts = r"(?:(?:http:\/\/)?|(?:https:\/\/)?)?(?:yewtu.be|utew.be)\/(?:watch\?v=)?([a-zA-Z0-9_-]{6,11})"
+    # regex_fb_video = r"(?:(?:http|https):\/\/)?(?:www\.|fb\.watch)\/([^\/]{10})"
+    # regex_facebok_video = r"(?:(?:http|https):\/\/)?(?:www.|fb.|m.)?(?:watch|facebook.com)(?:\/[\w.]+)(?:\/videos|\/watch)\/([\w.]+)"
     regex_reddit = r"http(?:s)?:\/\/(?:[\w-]+?\.)?reddit\.com(\/r\/|\/user\/)?([\w:\.]{2,21})(\/comments\/)?(\w{5,9}(?:\/[\w%\\-]+)?)?(\/\w{7})?\/?(\?)?(\S+)?"
     regex_twitch_clip = r"(?:https:\/\/)?clips\.twitch\.tv\/(\S+)"
 
@@ -299,9 +299,9 @@ def generate_handlers_dict() -> dict:
     h[92] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_tiktok, re.IGNORECASE)), tiktok)]
     h[93] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_tiktok_long, re.IGNORECASE)), tiktok_long)]
     # h[94] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_tweet_media, re.IGNORECASE)), scrape_tweet_media)]
-    h[95] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_youtube_alts, re.IGNORECASE)), youtube_alts)]
-    h[96] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_fb_video, re.IGNORECASE)), facebook_video)]
-    h[97] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_facebok_video, re.IGNORECASE)), facebook_video)]
+    # h[95] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_youtube_alts, re.IGNORECASE)), youtube_alts)]
+    # h[96] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_fb_video, re.IGNORECASE)), facebook_video)]
+    # h[97] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_facebok_video, re.IGNORECASE)), facebook_video)]
     h[98] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_reddit, re.IGNORECASE)), parse_reddit_link)]
     h[99] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_twitch_clip, re.IGNORECASE)), twitch_clips)]
 

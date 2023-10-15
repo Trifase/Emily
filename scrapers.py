@@ -204,7 +204,6 @@ async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     try:
         video_info = await get_tiktok_video_infos_aweme(username, id)
-
         if not video_info:
             results = [
                 InlineQueryResultArticle(
@@ -212,40 +211,38 @@ async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                     title="Video not found! ",
                     input_message_content=InputTextMessageContent(link),
                     description="Can't find the video, sorry",
-                    thumb_url="https://i.imgur.com/P9IhjS6.jpg",
-                    thumb_height=80,
-                    thumb_width=80
+                    thumbnail_url="https://i.imgur.com/P9IhjS6.jpg",
+                    thumbnail_height=80,
+                    thumbnail_width=80
                     )]
             await update.inline_query.answer(results)
             return
 
-        if not video_info["height"]  and not video_info["width"]:
+        if not video_info["height"] and not video_info["width"]:
             results = [
                 InlineQueryResultArticle(
                     id=str(uuid4()),
                     title="Video is slideshow! Sorry!",
                     input_message_content=InputTextMessageContent(link),
                     description="Telegram doesn't support slideshows with music",
-                    thumb_url="https://i.imgur.com/P9IhjS6.jpg",
-                    thumb_height=80,
-                    thumb_width=80
+                    thumbnail_url="https://i.imgur.com/P9IhjS6.jpg",
+                    thumbnail_height=80,
+                    thumbnail_width=80
                     )]
             await update.inline_query.answer(results)
             return
-
         info = requests.head(video_info["video_url"])
-
         if int(info.headers["Content-Length"]) >= 20000000:
-           
+            message_content = InputTextMessageContent(f"Video is too big! Here's the link: <a href=\"{video_info['video_url']}\">[link]</a>")
             results = [
                 InlineQueryResultArticle(
                     id=str(uuid4()),
                     title="Video too big! ",
-                    input_message_content=InputTextMessageContent(link),
+                    input_message_content=message_content,
                     description="The video exceeds 20MB",
-                    thumb_url="https://i.imgur.com/P9IhjS6.jpg",
-                    thumb_height=80,
-                    thumb_width=80
+                    thumbnail_url="https://i.imgur.com/P9IhjS6.jpg",
+                    thumbnail_height=80,
+                    thumbnail_width=80
                     )]
             await update.inline_query.answer(results)
             return
@@ -257,15 +254,16 @@ async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                         id=str(uuid4()),
                         video_url=video_info['video_url'],
                         mime_type="video/mp4",
-                        thumb_url=video_info['thumbnail_url'],
-                        # thumb_url="https://imgur.com/BIWJZPG.jpg",
+                        thumbnail_url=video_info['thumbnail_url'],
+                        # thumbnail_url="https://imgur.com/BIWJZPG.jpg",
                         title=video_info['title'],
                         caption=caption,
                         parse_mode="HTML"
                     )]
             await update.inline_query.answer(results)
             return
-    except Exception:
+    except Exception as e:
+        print(e)
         return
 
 async def tiktok(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -977,17 +975,18 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             else:
                 if submission.url.startswith("https://v.redd"):
                     # v.redd.it ha audio e video separati. Alternativamente bisogna scaricare l'audio a parte e unirli via ffmpeg.
-
+                    # import pprint
+                    # pprint.pprint(submission)
                     url = submission.media['reddit_video']['fallback_url']
                     url = url.replace("?source=fallback", "")
                     url_audio = url.replace("1080", "audio")
                     url_audio = url_audio.replace("720", "audio")
                     url_audio = url_audio.replace("360", "audio")
                     url_audio = url_audio.replace("240", "audio")
+                    url_audio = url_audio.replace("audio", "AUDIO_128")
                     width = submission.media['reddit_video']['width']
                     height = submission.media['reddit_video']['height']
 
-                    # import pprint
                     # pprint.pprint(submission.media)
                     # print(f"url: {url}")
                     # print(f"url_audio: {url_audio}")
@@ -1203,8 +1202,8 @@ async def twitch_clips(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
    
     await printlog(update, "posta una clip di twitch", context.match.group(0))
 
-    thumb_url = response['data'][0]['thumbnail_url']
-    mp4_base_url = thumb_url.split("-preview",1)[0]
+    thumbnail_url = response['data'][0]['thumbnail_url']
+    mp4_base_url = thumbnail_url.split("-preview",1)[0]
     mp4_url_1080 = f"{mp4_base_url}.mp4"
     mp4_url_720 = f"{mp4_base_url}-720.mp4"
     mp4_url_480 = f"{mp4_base_url}-480.mp4"

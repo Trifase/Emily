@@ -16,7 +16,7 @@ from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
 import config
-from utils import no_can_do, printlog, retrieve_logs_from_db
+from utils import no_can_do, printlog, retrieve_logs_from_db, reply_html_long_message
 
 
 def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301"):
@@ -360,7 +360,7 @@ async def whisper_transcribe(update: Update, context: ContextTypes.DEFAULT_TYPE)
     transcript = await openai.Audio.atranscribe("whisper-1", f)
     text = transcript.text
     text += f"\n<i>______</i>\n<i>Questo messaggio è costato circa ${price}</i>"
-    await update.message.reply_html(text)
+    await reply_html_long_message(update, context, text)
 
     og_filename.close()
     filename_mp3.close()

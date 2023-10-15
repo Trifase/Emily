@@ -198,3 +198,8 @@ db/pyrogramsession.session
 db/pyrogramsession.session-bk
 wideq_state.json
 develop.py
+db/asph-million-log.json
+movies.py
+.gitignore
+db/pyrogramsession.session-old
+db/pyro-session-trifase.session.session.old

@@ -2,6 +2,7 @@ import humanize
 import qbittorrentapi
 from telegram import Update
 from telegram.ext import ContextTypes
+from hurry.filesize import size
 
 import config
 from utils import no_can_do, print_progressbar, printlog
@@ -34,14 +35,17 @@ async def lista_torrent(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # retrieve and show all torrents
     message = ""
     try:
-        torrents_info = qbt_client.torrents_info()
+        torrents_info = qbt_client.torrents_info(sort='progress')
         if not torrents_info:
             await update.message.reply_text("Nessun torrent in download")
             return
         else:
             for torrent in torrents_info:
-                progress_perc = round(torrent.progress * 100, 2)
-                message += f'<b>{torrent.name}</b> (<i>{torrent.state}</i>)\n↓ {str(round(torrent.dlspeed/1024/1024, 2))} MB/s · ↑ {str(round(torrent.upspeed/1024/1024, 2))} MB/s\nETA: {"∞" if torrent.eta == 8640000 else (str(humanize.precisedelta(torrent.eta, suppress=["days"], minimum_unit="seconds")))}\nProgress: {print_progressbar(progress_perc, suffix="", prefix="")} - {str(progress_perc)}%\n\n'
+                if torrent.progress == 1:
+                    message += f'[100%] <b>{torrent.name}</b> (<i>{torrent.state}</i>)\n\n'
+                else:
+                    progress_perc = round(torrent.progress * 100, 2)
+                    message += f'<b>{torrent.name}</b> (<i>{torrent.state}</i>) {size(torrent.total_size)}\n↓ {str(round(torrent.dlspeed/1024/1024, 2))} MB/s · ↑ {str(round(torrent.upspeed/1024/1024, 2))} MB/s\nETA: {"∞" if torrent.eta == 8640000 else (str(humanize.precisedelta(torrent.eta, suppress=["days"], minimum_unit="seconds")))}\n{str(progress_perc)}% {print_progressbar(progress_perc, suffix="", prefix="")}\n\n'
             if not message:
                 await update.message.reply_text("Nessun torrent in download")
             else:

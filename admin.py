@@ -381,7 +381,10 @@ async def lista_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 username = f" (@{my_chat.username})"
             message = f"ID: <code>{chat_id}</code> - {my_chat.title}{username}\n" + message #[:15]
 
-    await update.message.reply_html(message)
+    try:
+        await update.message.reply_html(message)
+    except Exception as e:
+        print(message)
 
 async def listen_to(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:

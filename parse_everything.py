@@ -188,6 +188,12 @@ async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     chat_id = str(update.message.chat.id)
     messaggio = update.effective_message.text
 
+    replacers = {
+        '%myname%': update.effective_user.first_name,
+        '%chat%': update.effective_chat.title,
+        '%yourname%': update.message.reply_to_message.from_user.first_name if update.message.reply_to_message else ''
+    }
+
     if chat_id not in sets:
         sets[chat_id] = {}
     chatdict = sets[chat_id]
@@ -252,10 +258,12 @@ async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 await update.message.reply_html(f'<b>Errore:</b> {e}')
                 return
         else:
+            for k, v in replacers.items():
+                set_text = set_text.replace(k, v)
             if is_reply:
-                await update.message.reply_text(f'{chatdict[messaggio.lower()]}', quote=False, disable_web_page_preview=True, reply_to_message_id=reply_id)
+                await update.message.reply_text(f'{set_text}', quote=False, disable_web_page_preview=True, reply_to_message_id=reply_id)
             else:
-                await update.message.reply_text(f'{chatdict[messaggio.lower()]}', quote=False, disable_web_page_preview=True)
+                await update.message.reply_text(f'{set_text}', quote=False, disable_web_page_preview=True)
 
 
         myself = await context.bot.get_chat_member(update.message.chat.id, config.ID_EMILY)

@@ -9,8 +9,8 @@ import logging
 # Enable logging
 
 logging.basicConfig(
-
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+    level=logging.DEBUG
+    # format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG
 
 )
 
@@ -25,7 +25,8 @@ async def fragolone_test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 def main():
     builder = ApplicationBuilder()
-    builder.token(config.BOT_TOKEN_FRAGOLONE)
+    # builder.token(config.BOT_TOKEN_FRAGOLONE)
+    builder.token("6114487111:AAHchBZDtV2t3hRMH-2S-fY_BhLU9CHdXcM")
     builder.rate_limiter(AIORateLimiter())
     app = builder.build()
 
