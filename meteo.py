@@ -58,7 +58,7 @@ async def ora(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
         meteo = data['current']
     except KeyError:
-        data['error']
+        # data['error']
         await update.message.reply_text("Errore.")
         return
 
@@ -228,7 +228,7 @@ async def meteo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
             context.user_data['default_meteo_city'] = default_city
             await update.message.reply_text(f"Salvata: {default_city}")
             return
-       
+
     API_KEY = config.OWM_API_KEY
     if not citta:
         if len(context.args) == 1:

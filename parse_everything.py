@@ -47,7 +47,6 @@ async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE
         is_presente = await is_member_in_group(config.ID_TRIF, chat_id, context)
         if chat_id < 0 and chat_id not in context.bot_data['listen_to'] and SPY:
 
-           
             if not is_presente:
                 context.bot_data['listen_to'].append(chat_id)
             else:

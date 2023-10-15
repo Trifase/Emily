@@ -73,7 +73,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
 
     if update.message.reply_to_message and not message:
         message = update.message.reply_to_message.text
-   
+
     tw_url = ""
     mast_url = ""
     try:

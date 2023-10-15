@@ -631,10 +631,10 @@ async def get_spread(spread_name='default_three'):
     return spread
 
 async def draw_cards(spread, reverse=False, deck='rws', context=None):
-    def spacca(mazzo):
-        return mazzo[1:] + mazzo[:1]
+    # def spacca(mazzo):
+    #     return mazzo[1:] + mazzo[:1]
 
-    dir = deck
+    deck_dir = deck
     n = spread['total_cards']
    
 
@@ -647,7 +647,7 @@ async def draw_cards(spread, reverse=False, deck='rws', context=None):
             mazzo = default_mazzo
         else:
             mazzo = context.bot_data['tarot_deck']
-   
+
     # mazzo = [i for i in range(0, 22)]
     # print("Sto usando questo mazzo:")
     # print(mazzo)
@@ -680,7 +680,7 @@ async def draw_cards(spread, reverse=False, deck='rws', context=None):
         c = {}
         c['number'] = str(card['n'])
         c['pos'] = i
-        c['card_name'] = f"{dir}/{str(card['n'])}.png"
+        c['card_name'] = f"{deck_dir}/{str(card['n'])}.png"
         c['is_reversed'] = card['reverse'] if reverse else False
         returned_cards.append(c)
         i += 1
@@ -914,7 +914,7 @@ async def tarot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if '-marsiglia' in context.args:
             deck = 'mars'
         if '-thoth' in context.args:
-            deck = 'thoth' 
+            deck = 'thoth'
         if '-morgan' in context.args:
             deck = 'morgan'
         if '-rws' in context.args:
@@ -1152,7 +1152,7 @@ async def oroscopo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     parser.add_argument('-setdefault', '-set', type=str)
 
     # args = parser.parse_args(context.args)
-    args, unknown = parser.parse_known_args(context.args)
+    args, _ = parser.parse_known_args(context.args)
 
     if args.setdefault:
         if args.setdefault.lower() in segni:

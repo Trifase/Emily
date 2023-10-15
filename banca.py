@@ -163,7 +163,6 @@ def get_account_id_from_api(token, requisition_id):
     else:
         response.raise_for_status()
 
-    pass
 
 def get_banks(token, country_code="it"):
 
@@ -216,7 +215,6 @@ def get_account_id(token, BANK_ID, redirect):
             data = json.load(json_file)
 
         acc_id = data['acc_id']
-        data['bank_id']
         requisition_id = data['requisition_id']
         return acc_id
     else:  # non c'è un file accounts

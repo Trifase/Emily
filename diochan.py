@@ -284,7 +284,7 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 reply_link = f"Postato! {link}"
                 print(f'{get_now()} Fatto! {reply_link} - pass per cancellare: {delpass}')
                 await context.bot.send_message(update.message.chat.id, reply_link)
-               
+
             except Exception as e:
                 print(e)
                 await context.bot.send_message(update.message.chat.id, richiesta.text)
@@ -403,7 +403,6 @@ async def get_thread_from_dc(update: Update, context: ContextTypes.DEFAULT_TYPE)
         text = html.unescape(text)
         text = text.replace('<br/>','\n').replace('<span class="quote">', '').replace('<span class="spoiler">', '').replace('</span>', '')
         message = f"{link}\n{text}"
-        thread['image_url']
 
         await update.message.reply_html(text=message)
 

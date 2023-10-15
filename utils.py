@@ -63,7 +63,7 @@ fh.setFormatter(formatter)
 
 logger.addHandler(fh)
 
-async def crea_sondaggino(context, update, max_votes, callable, domanda=''):
+async def crea_sondaggino(context, update, max_votes, _callable, domanda=''):
         current_votes = round(max_votes/2)
 
         if 'votazioni_attive' not in context.chat_data:
@@ -83,8 +83,8 @@ async def crea_sondaggino(context, update, max_votes, callable, domanda=''):
 
         keyboard = [
             [
-                InlineKeyboardButton("✅", callback_data=InlineButton(chat_id=update.effective_chat.id, original_msg_id=update.effective_message.id, from_user_id=update.effective_user.id, original_update=update, callable=callable, vote='sì')),
-                InlineKeyboardButton("❌", callback_data=InlineButton(chat_id=update.effective_chat.id, original_msg_id=update.effective_message.id, from_user_id=update.effective_user.id, original_update=update, callable=callable, vote='no'))
+                InlineKeyboardButton("✅", callback_data=InlineButton(chat_id=update.effective_chat.id, original_msg_id=update.effective_message.id, from_user_id=update.effective_user.id, original_update=update, callable=_callable, vote='sì')),
+                InlineKeyboardButton("❌", callback_data=InlineButton(chat_id=update.effective_chat.id, original_msg_id=update.effective_message.id, from_user_id=update.effective_user.id, original_update=update, callable=_callable, vote='no'))
                 ]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -137,7 +137,7 @@ def get_now():
     return datetime.datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
 
 def function_name():
-   
+
     # print(inspect.stack())
     func_name = inspect.stack()[2][3]
     return(func_name)

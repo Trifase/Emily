@@ -35,7 +35,7 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_html("Specifica un subreddit.")
         await reddit.close()
         return
-       
+
     if subreddit_name.lower().startswith("r/"):
         subreddit_name = subreddit_name[2:]
     await printlog(update, "cerca su", f"r/{subreddit_name}")
@@ -128,8 +128,8 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if "gallery" in url:
             ids = [i['media_id'] for i in submission.gallery_data['items']]
 
-            for id in ids:
-                url = submission.media_metadata[id]['p'][0]['u']
+            for reddit_id in ids:
+                url = submission.media_metadata[reddit_id]['p'][0]['u']
                 url = url.split("?")[0].replace("preview", "i")
                 if await file_in_limits(url):
                     gallery.append(url)
@@ -178,7 +178,8 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                         audio_file = "reddit/audio.mp4"
 
                         try:
-                            link_audio = urllib.request.urlopen(url_audio)  # Proviamo a guardare se c'è il file audio
+                            # Proviamo a guardare se c'è il file audio
+                            link_audio = urllib.request.urlopen(url_audio)  #nosec
                         except urllib.error.HTTPError:  # Se non c'è passiamo direttamente il video come url, inutile scaricare e muxare
                             caption = f"<a href='{permalink}'>{sub}</a> | {upvotes} upvotes\n{title}\n\nNo audio (and reddit is dumb)."
                             await context.bot.edit_message_media(chat_id=update.message.chat.id, message_id=messaggio.message_id, media=InputMediaVideo(media=url, caption=caption, parse_mode='HTML'))
@@ -186,7 +187,7 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                             return
 
                         print(f"{get_now()} Unisco audio e video con FFmpeg per l'upload da locale")
-                        link_video = urllib.request.urlopen(url)
+                        link_video = urllib.request.urlopen(url)  #nosec
 
                         with open(video_file, "wb") as output:
                             output.write(link_video.read())

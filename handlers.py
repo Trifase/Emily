@@ -188,7 +188,7 @@ def generate_handlers_dict() -> dict:
     h[23] = [CommandHandler(['compleanni', 'listacompleanni'], compleanni_list, filters=~filters.UpdateType.EDITED)]
     h[24] = [CommandHandler(['cancellacompleanno', 'delcompleanno'], compleanno_del, filters=~filters.UpdateType.EDITED)]
     h[25] = [CommandHandler('compleanni_check', compleanni_manual_check, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
-   
+
     # diochan.py
     h[26] = [CommandHandler('quote', search_quote, filters=~filters.UpdateType.EDITED & filters.Chat(config.ID_DIOCHAN))]
     h[27] = [CommandHandler('addquote', add_quote, filters=~filters.UpdateType.EDITED & filters.Chat(config.ID_DIOCHAN))]

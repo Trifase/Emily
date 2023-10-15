@@ -106,7 +106,7 @@ async def zoom_link(update: Update, context: CallbackContext):
         return
 
     url = context.args[0]
-   
+
     if 'meeting_id' not in url:
         await update.message.reply_html("Devi mandarmi un link alla registrazione zoom")
         return

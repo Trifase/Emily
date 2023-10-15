@@ -106,7 +106,7 @@ async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
     user_id = update.message.reply_to_message.from_user.id
-   
+
     corpus = get_corpus(f'db/corpuses/{filename}', user_id)
     text_model = markovify.NewlineText(corpus)
     stopwords = [lin.strip() for lin in open('db/stopwords-it.txt', encoding='utf8').readlines()]
@@ -244,9 +244,7 @@ async def lurkers_callbackqueryhandlers(update: Update, context: ContextTypes.DE
                 await context.bot.unban_chat_member(update.effective_chat.id, user_id)
                 context.bot_data["timestamps"][update.effective_chat.id].pop(user_id)
             except Exception:
-
                 print(traceback.format_exc())
-                pass
 
 async def wikihow(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -641,8 +639,8 @@ async def condominioweb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         author_name: str
         comment: list[Comment]
 
-    def generate_condominioweb_threads(zip=True):
-        if zip:
+    def generate_condominioweb_threads(use_zip=True):
+        if use_zip:
             with open('db/condominioweb.jsonl.zst', 'rb') as fh:
                 dctx = zstandard.ZstdDecompressor()
                 stream_reader = dctx.stream_reader(fh)
@@ -655,20 +653,20 @@ async def condominioweb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 for obj in reader:
                     yield obj
 
-    def generate_condominioweb_objs(thread):
-        for msgs in thread:
-            comment = []
-            for c in msgs.get('comment', []):
-                comment.append(Comment(c['text'], datetime.fromisoformat(c['dateCreated'][0:19]), c['author']['name']))
-            yield DiscussionForumPosting(
-                msgs['discussionUrl'],
-                msgs['headline'],
-                msgs['text'],
-                # fromisoformat does NOT accept the timezone because reasons, have to truncate here
-                datetime.datetime.fromisoformat(msgs['dateCreated'][0:19]),
-                msgs['author']['name'],
-                comment
-            )
+    # def generate_condominioweb_objs(thread):
+    #     for msgs in thread:
+    #         comment = []
+    #         for c in msgs.get('comment', []):
+    #             comment.append(Comment(c['text'], datetime.fromisoformat(c['dateCreated'][0:19]), c['author']['name']))
+    #         yield DiscussionForumPosting(
+    #             msgs['discussionUrl'],
+    #             msgs['headline'],
+    #             msgs['text'],
+    #             # fromisoformat does NOT accept the timezone because reasons, have to truncate here
+    #             datetime.datetime.fromisoformat(msgs['dateCreated'][0:19]),
+    #             msgs['author']['name'],
+    #             comment
+    #         )
 
     if update.effective_chat.id != config.ID_RITALY:
         return
@@ -1012,7 +1010,7 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     try:
         user = lichess.api.user(nick, auth=token)
-    except Exception as e: 
+    except Exception as e:
         await update.message.reply_text(f'{e}: Nick {nick} non trovato.')
         return
     # print(user['perfs'])

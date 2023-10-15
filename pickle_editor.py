@@ -37,7 +37,6 @@ async def main():
         for c_subkey, c_subvalue in list(this_chat_value.items()):
             if not c_subvalue:
                 this_chat_data.pop(c_subkey, None)
-               
 
         # remove chat_data_remove
         for c_k in chat_data_remove:

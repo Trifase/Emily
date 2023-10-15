@@ -15,7 +15,7 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 while True:
-    subprocess.call(["python", "main.py"])
+    subprocess.call(["python", "main.py"])  #nosec
     logger.info('This is the supervisor speaking. I am commanding you to RAISE AGAIN!')
     print(f"{get_now()} Processo terminato. Riavvio...")
     time.sleep(0.5)

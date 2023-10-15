@@ -91,7 +91,7 @@ def sudoku():
                 pass
             elif c % 3 == 0:
                 print(f"-{'----' * max_len}")
-               
+
             print(' ', end='')
             for r in range(max_len):
                 if (r == 0) or ((r+1) % 3 != 0) or (r == max_len-1):

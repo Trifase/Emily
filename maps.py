@@ -81,9 +81,10 @@ async def streetview(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     await update.message.reply_photo(open('images/map.jpg', 'rb'), quote=False, caption=location_name, reply_markup=reply_markup)
 
 async def maps_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # """Parses the CallbackQuery and updates the message text."""
     if update.effective_user.id in context.bot_data['global_bans']:
         return
-    """Parses the CallbackQuery and updates the message text."""
+
     # CallbackQueries need to be answered, even if no notification to the user is needed
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
     query = update.callback_query

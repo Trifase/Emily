@@ -48,7 +48,7 @@ def json_to_stats(json_filename):
     messages = data['messages']
     for message in messages:
         timestamp = datetime.datetime.fromtimestamp(int(message['date_unixtime']), tz=pytz.timezone('Europe/Rome'))
-       
+
         day = extract_day(timestamp)
         hour = extract_hour(timestamp)
 

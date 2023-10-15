@@ -133,14 +133,14 @@ async def get_tiktok_username_id(url):
         response = requests.get(link, headers=headers)
         info_list = requests.utils.unquote(response.url).split("?")[0].split("/")
         username = info_list[3]
-        id = info_list[5]
+        tt_id = info_list[5]
     elif purl.netloc == 'www.tiktok.com':
         username = purl.path.split("/")[1]
-        id = purl.path.split("/")[3]
+        tt_id = purl.path.split("/")[3]
         link = url
     else:
         raise RuntimeError
-    return (username, id, link)
+    return (username, tt_id, link)
 
 async def get_tiktok_video_infos_aweme(username: str, video_ID: str, debug: bool=False) -> dict:
     """
@@ -198,12 +198,12 @@ async def tiktok_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         return
 
 
-    username, id, link = await get_tiktok_username_id(query)
+    username, tt_id, link = await get_tiktok_username_id(query)
 
     cprint(f'{get_now()} {await get_display_name(update.effective_user)} inline chiede un tiktok: {link}')
 
     try:
-        video_info = await get_tiktok_video_infos_aweme(username, id)
+        video_info = await get_tiktok_video_infos_aweme(username, tt_id)
         if not video_info:
             results = [
                 InlineQueryResultArticle(
@@ -312,11 +312,11 @@ async def tiktok_long(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         return
     url = f"https://www.tiktok.com/{context.match.group(1)}/video/{context.match.group(2)}"
 
-    username, id, link = await get_tiktok_username_id(url)
+    username, tt_id, link = await get_tiktok_username_id(url)
 
     await printlog(update, "chiede un tiktok", link)
 
-    video_info = await get_tiktok_video_infos_aweme(username, id)
+    video_info = await get_tiktok_video_infos_aweme(username, tt_id)
 
     if not video_info:
         await update.message.reply_text("Non riesco, forse tiktok è rotto, o forse sono programmata male.")
@@ -349,7 +349,7 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     url = context.match.group(1)
     url_path = parse.urlsplit(url).path[1:].split('/')
     user_agent = "Mozilla/5.0 (X11; Linux aarch64; rv:91.0) Gecko/20100101 Firefox/91.0"
-   
+
     L = instaloader.Instaloader(dirname_pattern="ig/{target}", quiet=True, fatal_status_codes=[429], save_metadata=False, max_connection_attempts=1, user_agent=user_agent, iphone_support=False)
     USER = "emilia_superbot"
     L.load_session_from_file(USER, "db/session-emilia_superbot")
@@ -957,8 +957,8 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         if "gallery" in url:
             ids = [i['media_id'] for i in submission.gallery_data['items']]
 
-            for id in ids:
-                url = submission.media_metadata[id]['p'][0]['u']
+            for reddit_id in ids:
+                url = submission.media_metadata[reddit_id]['p'][0]['u']
                 url = url.split("?")[0].replace("preview", "i")
                 if await file_in_limits(url):
                     gallery.append(url)

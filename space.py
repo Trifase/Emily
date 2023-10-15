@@ -587,7 +587,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
                 "Major",
                 "Greater"
                 ]
-            return random.choice(prefixes) 
+            return random.choice(prefixes)
 
         def gen_system_name():
             systems = [
@@ -839,7 +839,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
         else:
             cr.arc(x, y, radius, 0, 2 * math.pi)
         # cr.arc(x, y, radius, 0, math.pi)
-       
+
         cr.stroke()
 
     def draw_circle_fill(cr, x, y, radius, r, g, b, a=1.0, gradient=False):
@@ -938,8 +938,8 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
         cr.rectangle(0, 0, width, height)
         cr.fill()
 
-    def random_bg_color(min, max):
-        return round(random.uniform(min, max), 2)
+    def random_bg_color(col_min, col_max):
+        return round(random.uniform(col_min, col_max), 2)
 
     def get_random_points_on_circle(xc, yc, r, n=100):
         points_list = []

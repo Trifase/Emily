@@ -511,7 +511,7 @@ async def do_global_backup(context: ContextTypes.DEFAULT_TYPE):
 
     with zipfile.ZipFile(archive_name, 'w') as zip_ref:
         to_archive = []
-        for folder_name, subfolders, filenames in os.walk('.'):
+        for folder_name, _, filenames in os.walk('.'):
             for filename in filenames:
                 file_path = os.path.join(folder_name, filename)
                 if file_path.startswith(tuple(IGNORED_DIRS)):

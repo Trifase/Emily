@@ -90,7 +90,8 @@ async def pyro_bomb_reaction(chat_id, user_id, limit=100, sample=20):
         for message in random.sample(msglist, sample):
             try:
                 await pyro.send_reaction(chat_id, message.id, random.choice(["👎", "💩", "🤡", "🤮"]))
-            except Exception:
+            except Exception as e:
+                print(e)
                 continue
             await asyncio.sleep(0.5)
 
@@ -115,7 +116,7 @@ async def reaction_karma(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not r:
         await mymsg.edit_text("Non trovo un cazzo, scusa.")
         return
-   
+
     message = f"Ecco il bilancio su {r['messages_total']} messaggi ({r['messages_reacted']} messaggi con reazioni).\n"
     message += f"Utente: {user_id}\n"
     message += f"Chat ID: {chat_id}\n\n"

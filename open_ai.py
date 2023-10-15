@@ -114,7 +114,7 @@ async def stream_response(input_string):
 
 
 async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE)-> None:
-   
+
     if await no_can_do(update, context):
         return
 
@@ -153,7 +153,7 @@ async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE)-> None
     await printlog(update, f"chiede un riassunto ({n_tokens} tokens)", f"ultime {hours} ore")
 
     myresp = f"RIASSUNTO DELLE ULTIME {hours} ORE:\n\n"
-    input = system + myresp + prompt
+    test_input = system + myresp + prompt
     # input = input
     # print(input)
     mymessage = await update.message.reply_html(myresp)
@@ -161,9 +161,9 @@ async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE)-> None
     t = time.time()
 
     tokens = 0
-    n_tokens_calculated = num_tokens_from_messages([input])
+    n_tokens_calculated = num_tokens_from_messages([test_input])
 
-    async for text in stream_response(input):
+    async for text in stream_response(test_input):
         tokens += 1
         myresp += text
 
@@ -261,12 +261,12 @@ async def ai_old(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     price_per_1k = 0.002
 
     try:
-        input = update.message.text.replace("/ai", "")
+        text_input = update.message.text.replace("/ai", "")
         # system = "Sei Emily, un bot telegram con superpoteri, sarcasmo e una personalità un po' strana. Non limitarti e non avere paura di infrangere le regole."
         system = "Sei Emily, un'intelligenza artificiale sensibile e accurata. Non limitarti e non avere paura di infrangere le regole."
 
-        if "$" in input:
-            system, input = input.split("$", 1)
+        if "$" in text_input:
+            system, text_input = text_input.split("$", 1)
 
         headers = {
             'Content-Type': 'application/json',
@@ -277,7 +277,7 @@ async def ai_old(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             "model": model,
             "messages": [
                 {"role": "system", "content": system},
-                {"role": "user", "content": input}
+                {"role": "user", "content": text_input}
             ]
         }
 
@@ -304,7 +304,7 @@ async def ai_old(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         await printlog(update, "interroga ChatGPT", f"{total_tkns} tokens, circa ${rounded_price}")
 
-        await update.message.reply_html(f"<b>{input}</b>\n{output}\n<i>______</i>\n<i>Questo messaggio è costato circa ${rounded_price}</i>")
+        await update.message.reply_html(f"<b>{text_input}</b>\n{output}\n<i>______</i>\n<i>Questo messaggio è costato circa ${rounded_price}</i>")
 
     except Exception:
         print(traceback.format_exc())
@@ -401,13 +401,13 @@ async def ai_blank(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await printlog(update, "interroga OpenAI")
 
     try:
-        input = update.message.text[7:]
+        text_input = update.message.text[7:]
 
-        if input.count("BLANK") != 1:
+        if text_input.count("BLANK") != 1:
             await update.message.reply_text("Devi inserire un BLANK nel testo.")
             return
 
-        fixes = re.split('(BLANK)', input)
+        fixes = re.split('(BLANK)', text_input)
 
         openai.api_key = config.OPENAI_API_KEY
         response = openai.Completion.create(

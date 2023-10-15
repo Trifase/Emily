@@ -81,7 +81,7 @@ async def ricevi_risposta_quiz(update: Update, context: ContextTypes.DEFAULT_TYP
 
     if poll_id not in context.bot_data['trivia']:
         return
-   
+
     difficulty = context.bot_data['trivia'][poll_id][0]
 
     if risposta == context.bot_data['trivia'][poll_id][1]:

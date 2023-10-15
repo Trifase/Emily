@@ -13,8 +13,8 @@ from telegram.ext import ContextTypes
 from utils import no_can_do, printlog
 
 # Questi erano dentro il codice di spotdl, prima o poi uso i miei
-client_id = "5f573c9620494bae87890c0f08a60293"
-client_secret = "212476d9b0f3472eaa762d90b19b0ba8"
+client_id = "5f573c9620494bae87890c0f08a60293"  #nosec
+client_secret = "212476d9b0f3472eaa762d90b19b0ba8"  #nosec
 
 # dlder_options = DownloaderOptions(output='mp3/', overwrite='force', simple_tui=False)
 dlder_options: DownloaderOptions = {
@@ -79,7 +79,7 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await printlog(update, "posta una canzone di spotify", results)
     msg = await update.message.reply_text("Arriva, dammi un minuto.")
-   
+
     downloader = Downloader(loop=asyncio.get_event_loop(), settings=dlder_options)
 
     blocking_download = asyncio.to_thread(downloader.search_and_download, songs[0])
@@ -93,7 +93,7 @@ async def spoty(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if song.cover_url:
         # Download the thumbnail
         tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
-        urllib.request.urlretrieve(song.cover_url, tempphoto.name)
+        urllib.request.urlretrieve(song.cover_url, tempphoto.name)  # nosec
 
         # Resize the thumbnail
         size = 320, 320

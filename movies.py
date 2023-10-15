@@ -100,7 +100,7 @@ from utils import no_can_do, printlog
 
 #     return message, poster_url, len(results['items'])
 
-async def get_titles(query_text: str, format=True) -> dict:
+async def get_titles(query_text: str, pretty_format=True) -> dict:
 
     client = GraphQLClient(endpoint='https://apis.justwatch.com/graphql')
 
@@ -146,12 +146,12 @@ async def get_titles(query_text: str, format=True) -> dict:
     request = GraphQLRequest(query=query, variables=variables, validate=False)
 
     response: GraphQLResponse = await client.query(request=request)
-    if format:
+    if pretty_format:
         return format_titles(response.data)
     else:
         return response.data
 
-async def get_title_detail(fullpath: str, format=True) -> dict:
+async def get_title_detail(fullpath: str, pretty_format=True) -> dict:
 
     client = GraphQLClient(endpoint='https://apis.justwatch.com/graphql')
 
@@ -224,7 +224,7 @@ async def get_title_detail(fullpath: str, format=True) -> dict:
 
     request = GraphQLRequest(query=query, variables=variables, validate=False)
     response: GraphQLResponse = await client.query(request=request)
-    if format:
+    if pretty_format:
         return format_title_details(response.data)
     else:
         return response.data
@@ -367,7 +367,6 @@ async def doveguardo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 async def doveguardo_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_user.id in context.bot_data['global_bans']:
         return
-    """Parses the CallbackQuery and updates the message text."""
     # CallbackQueries need to be answered, even if no notification to the user is needed
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
     query = update.callback_query
@@ -475,7 +474,7 @@ async def imdb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     searchstring = f"{movie['localized title'].replace(' ', '+')}+{year}"
     for x in [':', '?', '&', '=', '%', '#', '@', '!', '$', '^', '*', '(', ')', '-', '_', '.', ',', "'"]:
         searchstring = searchstring.replace(x, '')
-       
+
     t1_name = '[rarbg]'
     t1 = f'https://proxyrarbg.org/torrents.php?imdb=tt{imdb_id}&order=seeders&by=DESC'
 
