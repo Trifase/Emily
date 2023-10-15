@@ -128,7 +128,7 @@ async def messaggio_spiato(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         if my_chat.title:
             msg_from = f"💬 {my_chat.title}"
         text = f"[SPIO] Messaggio su {msg_from}:\nID: <code>{my_chat.id}</code>\n{update.effective_user.mention_html()}: {update.effective_message.text}"
-   
+
         cbdata_listen_to = ForgeCommand(original_update=update, new_text=f"/listen_to {chat_id}", new_args=[chat_id], callable=listen_to)
         cbdata_getchat = ForgeCommand(original_update=update, new_text=f"/getchat {chat_id}", new_args=[chat_id], callable=getchat)
         cbdata_ban = ForgeCommand(original_update=update, new_text=f"/ban {chat_id}", new_args=[chat_id], callable=add_ban)

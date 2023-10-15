@@ -743,7 +743,7 @@ async def draw_cards_special(reverse=False, deck='rws', force_obliqua=False):
     for i in range(4):
 
         if random_numbers[i] > n:
-       
+
             for _ in range(random_numbers[i] - n - 1):
                 mazzo = skip(mazzo)
 

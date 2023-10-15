@@ -395,7 +395,7 @@ async def get_thread_from_dc(update: Update, context: ContextTypes.DEFAULT_TYPE)
         if len(text) > 2000:
             text = text[:2000] + "..."
         link = f"<a href='{thread['thread_url']}'>/{thread['board']}/ | No.{thread['thread']}</a> | {timestamp}"
-       
+
         if thread['is_video']:
             link += f"\n<a href='{thread['video_url']}'>[YouTube]</a>"
 

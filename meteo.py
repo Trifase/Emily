@@ -354,7 +354,6 @@ async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         try:
             meteo = data['daily'][day]
         except KeyError:
-            data['error']
             await update.message.reply_text("Errore.")
             return
         temp_min = round(meteo['temp']['min'])

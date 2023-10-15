@@ -168,7 +168,7 @@ async def send_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     locale.setlocale(locale.LC_ALL, 'it_IT.utf8')
     if await no_can_do(update, context):
         return
-   
+
     stats = context.chat_data.get('stats')
     if not stats:
         await update.message.reply_text('Non ho ancora statistiche da mostrarti')

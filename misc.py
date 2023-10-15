@@ -22,7 +22,7 @@ import upsidedown
 import zstandard
 from aiohttp_client_cache import CachedSession, FileBackend
 from codetiming import Timer
-from dataclassy import dataclass
+# from dataclassy import dataclass
 from dateutil.parser import parse, parserinfo
 from gtts import gTTS
 # from nudenet import NudeClassifier, NudeDetector
@@ -289,7 +289,7 @@ async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         # LB_ID = 799277 (btest timeline)
     else:
         LB_ID = 8518
-   
+
     SESSION = config.AOC_SESSION
 
     url = f"https://adventofcode.com/2022/leaderboard/private/view/{LB_ID}.json"

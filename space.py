@@ -1316,7 +1316,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
                 for x in range(belt_radius_min, belt_radius_max + 1, 2):
                     max_density = 120
                     density = int(asteroid_density(x, belt_radius_min, belt_radius_max, max_density))
-                   
+
                     asteroid_size_min = 2
                     asteroid_size_max = 3
                     belt_points = get_random_points_on_circle(width / 2, sun_center, x, n=density)
