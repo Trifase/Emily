@@ -52,8 +52,8 @@ async def get_reaction_count(user_id, chat_id):
             try:
                 if message.date.year <= 2021:
                     continue
-            except Exception:
-                continue
+            except Exception as e:
+                print(e)
 
             else:
                 n_2022 += 1
@@ -74,7 +74,7 @@ async def get_reaction_count(user_id, chat_id):
 
         for reaction in r:
             data['reactions'][reaction[0]] = reaction[1]
-       
+
         return data
 
 

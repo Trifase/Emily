@@ -313,17 +313,17 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
         return response
 
-    async def get_home_data(access_token):
-        headers = {
-            'accept': 'application/json',
-            'Authorization': f'Bearer {access_token}',
-        }
+    # async def get_home_data(access_token):
+    #     headers = {
+    #         'accept': 'application/json',
+    #         'Authorization': f'Bearer {access_token}',
+    #     }
 
-        async with httpx.AsyncClient() as session:
-            r = await session.get('https://api.netatmo.com/api/homesdata', headers=headers)
-        response = r.json()
+    #     async with httpx.AsyncClient() as session:
+    #         r = await session.get('https://api.netatmo.com/api/homesdata', headers=headers)
+    #     response = r.json()
 
-        return response
+    #     return response
 
     async def get_home_status(access_token, home_id):
         headers = {
@@ -443,7 +443,7 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     px = 1/plt.rcParams['figure.dpi']
 
-    fig,bars = plt.subplots(figsize=(1280*px, 500*px))
+    _, bars = plt.subplots(figsize=(1280*px, 500*px))
 
     bars.set_xlabel("Time of the day")
     bars.set_title(f"Temperature and boiler activity (last {N_HOURS}hrs)\nCurrent: {current_temp}°C - Desidered: {set_temp}°C · Boiler active: {is_boiler_active}")

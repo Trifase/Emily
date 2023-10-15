@@ -188,7 +188,7 @@ async def change_my_mind(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "-composite",
             str(destination_photo)
         ]
-        subprocess.check_call(command)
+        subprocess.check_call(command) #nosec
         return destination_photo
     if not context.args:
         return

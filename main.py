@@ -107,7 +107,7 @@ async def post_init(app: Application) -> None:
         sets = json.load(sets_db)
         app.bot_data['current_sets'] = sets
 
-    k, v = count_k_v(sets)
+    _, v = count_k_v(sets)
     print(f"{get_now()} Sets caricati. {v} keywords totali.")
 
     # Recupero i reminders e programmo i job

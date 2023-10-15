@@ -37,7 +37,7 @@ async def make_poll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     explanation = unescape(f"{poll_data['category']} - {diff}")
     random.shuffle(risposte)
     risp_giusta_index = risposte.index(risposta_corretta)
-   
+
     sent_poll = await context.bot.send_poll(
         chat_id=update.message.chat_id,
         question=domanda,
@@ -140,7 +140,8 @@ async def classifica(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         try:
             user = await context.bot.get_chat(user_id)
             risposta += f"{i+1} · <b>[ {points} ]</b> · {user.full_name} <i>({wrongs})</i>\n"
-        except Exception:
+        except Exception as e:
+            print(e)
             continue
        
     await update.message.reply_html(risposta)

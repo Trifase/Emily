@@ -176,7 +176,7 @@ async def executecode(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     try:
         exec_str = update.message.text[6:]
-        exec(exec_str)
+        exec(exec_str) #nosec
         await update.message.reply_text("Fatto!")
     except Exception as e:
         await update.message.reply_text(f"{e}")
@@ -467,7 +467,7 @@ async def wakeup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message.from_user.id not in config.ADMINS:
         return
     await printlog(update, "accende il PC di casa")
-    process = subprocess.Popen(
+    process = subprocess.Popen( #nosec
         ['sudo', 'etherwake', '-i', 'eth0', '18:C0:4D:86:AC:82'],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE

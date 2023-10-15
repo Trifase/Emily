@@ -20,15 +20,15 @@ SECRET_ID = config.SECRET_ID
 SECRET_KEY = config.SECRET_KEY
 redirect = "http://www.morsmordre.it"
 
-def get_new_token(id, key):
+def get_new_token(secret_id, secret_key):
     headers = {
         'accept': 'application/json',
         'Content-Type': 'application/json',
     }
 
     data = {
-        "secret_id": id,
-        "secret_key": key
+        "secret_id": secret_id,
+        "secret_key": secret_key
         }
 
     response = requests.post('https://ob.nordigen.com/api/v2/token/new/', headers=headers, json=data)

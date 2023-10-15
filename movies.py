@@ -302,7 +302,7 @@ async def get_doveguardo_result(titolo: str, index_n):
         poster_url = "https://i.imgur.com/FEbLwXk.png"
 
     name_title = f"<b>{name}</b>, <i>{title['type'].lower()}</i>, {title['year']}"
-    
+
     imdb_text = ''
     if title.get('imdb_score') and title.get('imdb_id'):
         imdb_url = f'https://www.imdb.com/title/{title["imdb_id"]}/'
