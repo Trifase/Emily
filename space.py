@@ -884,7 +884,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
 
             # Set the composition operator to multiply
             cr.set_operator(cairo.Operator.MULTIPLY)
-           
+
             # Create a pattern from the texture
             texture_pattern = cairo.SurfacePattern(texture)
 

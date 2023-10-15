@@ -310,7 +310,7 @@ def generate_handlers_dict() -> dict:
     h[101] = [CommandHandler(['listaset', 'setlist'], listaset, filters=~filters.UpdateType.EDITED)]
     h[102] = [CommandHandler(['deleteset', 'delset'], deleteset, filters=~filters.UpdateType.EDITED)]
     h[103] = [CommandHandler(['jukebox', 'audio'], jukebox, filters=~filters.UpdateType.EDITED)]
-   
+
     # smarthome.py
     h[104] = [CommandHandler(['status_luci', 'statusluci', 'luci', 'luci_status'], luci_status, filters=~filters.UpdateType.EDITED)]
     h[105] = [CommandHandler(['toggle', 'luce', 'toggla'], toggle_light, filters=~filters.UpdateType.EDITED)]

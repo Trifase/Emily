@@ -51,7 +51,7 @@ async def nuova_chat_rilevata(update: Update, context: ContextTypes.DEFAULT_TYPE
                 context.bot_data['listen_to'].append(chat_id)
             else:
                 pass
-               
+
         elif chat_id not in context.bot_data['listen_to'] and SPY:
             context.bot_data['listen_to'].append(chat_id)
 

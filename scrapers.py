@@ -358,7 +358,6 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     match url_path[0]:
         case 'reel' | 'p' | 'tv':
-           
             shortcode = url_path[1]
 
             await printlog(update, f"chiede un contenuto ({url_path[0]}) da instagram", f"https://www.instagram.com/{url_path[0]}/{shortcode}/")

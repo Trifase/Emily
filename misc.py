@@ -151,14 +151,13 @@ async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     elif '-report' in context.args:
         max_secs = 1_209_600//2
         # max_secs = 295_000
-   
+
     else:
         try:
             max_secs = int(context.args[0])
         except IndexError:
             # max_secs = 86400  # 24h
             max_secs = 1_209_600  # 2 settimane
-
 
     for user in context.bot_data["timestamps"][chat_id].keys():
         deltas[user] = int(time.time()) - context.bot_data["timestamps"][chat_id][user]
@@ -629,15 +628,15 @@ async def condominioweb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         dateCreated: datetime
         author_name: str
 
-    @dataclass
-    class DiscussionForumPosting:
-        """Small subset of https://schema.org/DiscussionForumPosting"""
-        discussionUrl: str
-        headline: str
-        text: str
-        dateCreated: datetime
-        author_name: str
-        comment: list[Comment]
+    # @dataclass
+    # class DiscussionForumPosting:
+    #     """Small subset of https://schema.org/DiscussionForumPosting"""
+    #     discussionUrl: str
+    #     headline: str
+    #     text: str
+    #     dateCreated: datetime
+    #     author_name: str
+    #     comment: list[Comment]
 
     def generate_condominioweb_threads(use_zip=True):
         if use_zip:
@@ -1038,7 +1037,7 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_html(messaggio, disable_web_page_preview=True)
     except KeyError:
         await update.message.reply_html(messaggio, disable_web_page_preview=True)
-    pass
+
 
 async def voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):

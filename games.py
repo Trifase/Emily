@@ -139,7 +139,7 @@ def sudoku():
             for c in range(col_i, col_i + 3):
                 if puzzle[r][c] == guess:
                     return False
-       
+
         return True
 
     def solve_sudoku(puzzle):

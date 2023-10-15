@@ -353,7 +353,6 @@ async def whisper_transcribe(update: Update, context: ContextTypes.DEFAULT_TYPE)
         )
         return
 
-   
     openai.api_key = config.OPENAI_API_KEY
     f = open(filename_mp3.name, "rb")
     transcript = await openai.Audio.atranscribe("whisper-1", f)

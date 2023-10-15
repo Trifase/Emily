@@ -315,7 +315,6 @@ async def bot_get_saldo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # print("acc_id ok")
     await printlog(update, "chiede il saldo della banca")
     await update.message.reply_text(f"{get_saldo(token, acc_id, 1)} €")
-    pass
 
 async def bot_get_transazioni(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:

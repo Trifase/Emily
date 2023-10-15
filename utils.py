@@ -215,7 +215,7 @@ async def printlog(update, action, additional_data=None, error=False):
         cprint(f"{get_now()} [red1]!! ERROR !![/red1]\n{action}")
         logging.error(f"{action}")
         return
-   
+
     if isinstance(update, CallbackQuery):
         user = update.from_user
         chat_id = update.message.chat.id

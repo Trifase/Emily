@@ -636,7 +636,7 @@ async def draw_cards(spread, reverse=False, deck='rws', context=None):
 
     deck_dir = deck
     n = spread['total_cards']
-   
+
 
     # if "tarot_deck" not in context.bot_data:
     if context:

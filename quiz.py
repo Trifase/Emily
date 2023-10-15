@@ -143,5 +143,5 @@ async def classifica(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         except Exception as e:
             print(e)
             continue
-       
+
     await update.message.reply_html(risposta)

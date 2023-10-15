@@ -318,7 +318,7 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 await update.message.reply_html(message, disable_web_page_preview=True)
                 await reddit.close()
                 return
-           
+
         else:
             # pprint.pprint(vars(submission))
             print(f"{get_now()} Tipo di contenuto di reddit sconosciuto.")

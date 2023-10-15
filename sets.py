@@ -134,9 +134,9 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         if comando.startswith('media:'):
             medialist[comando.split(':')[1]].append(key)
-       
+
         else:
-       
+
             if comando.lower().startswith('nsfw'):
                 comando = "[NSFW whitespace]"
 

@@ -128,9 +128,3 @@ async def zoom_link(update: Update, context: CallbackContext):
         await context.bot.send_message(-1001551199754, message, parse_mode=ParseMode.HTML)
     else:
         await update.message.reply_html(message)
-
-
-
-
-
-   

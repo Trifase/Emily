@@ -11,13 +11,13 @@ from utils import ForgeCommand, no_can_do, printlog
 
 def get_bulb(name: str):
     ip_pranzo = "192.168.1.206"
-    token_pranzo = "e9466aedeab8b3eecd97ac6f337257fe"
+    token_pranzo = "e9466aedeab8b3eecd97ac6f337257fe"  #nosec
 
     ip_cucina = "192.168.1.207"
-    token_cucina = "33188b32b80cca8eeead7036b4da32da"
+    token_cucina = "33188b32b80cca8eeead7036b4da32da"  #nosec
 
     ip_salotto = "192.168.1.150"
-    token_salotto = "8b81464003a7a0d4126ea8e6cb8d28e3"
+    token_salotto = "8b81464003a7a0d4126ea8e6cb8d28e3"  #nosec
 
     ip_penisola = "192.168.1.50"
 
@@ -169,7 +169,6 @@ async def purificatore(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id not in config.ADMINS:
             return
     await printlog(update, "chiede lo status del purificatore d'aria")
-    import miio
     air = miio.AirPurifierMiot("192.168.1.84", "e8e5a8bb036e21662c4708b61a829c04") # 54:48:E6:55:B3:72
     s = air.status()
     message = ""

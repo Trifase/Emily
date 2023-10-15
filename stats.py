@@ -54,19 +54,19 @@ def json_to_stats(json_filename):
 
         if day not in stats:
             stats[day] = {}
-       
+
         if 'total' not in stats[day]:
             stats[day]['total'] = 0
-       
+
         if hour not in stats[day]:
             stats[day][hour] = 0
-       
+
         stats[day][hour] += 1
         stats[day]['total'] += 1
     return stats
 
 def make_triplot(stats, name):
-   
+
     messages_days = last_30_days()
     for x in messages_days:
         if x not in stats:

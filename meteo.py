@@ -128,7 +128,6 @@ async def prometeo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     try:
         meteo = data['current']
     except KeyError:
-        data['error']
         await update.message.reply_text("Errore.")
         return
 
@@ -300,7 +299,7 @@ async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} chiede il forecast metereologico')
-   
+
     if not context.args:
         await update.message.reply_text("Inserisci una città")
         return

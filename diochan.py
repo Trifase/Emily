@@ -291,7 +291,7 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             tempphoto.close()
         else:
             await context.bot.send_message(update.message.chat.id, "Devi rispondere ad una foto con didascalia")
-           
+
     except AttributeError:
         return
 
