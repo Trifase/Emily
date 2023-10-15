@@ -72,7 +72,8 @@ async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     print(f'{get_now()} ### RIAVVIO IN CORSO ###')
 
-    raise SystemExit()
+    context.application.stop_running()
+    # raise SystemExit()
 
 async def commandlist(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:
