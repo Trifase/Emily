@@ -98,7 +98,7 @@ async def ispirami(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "-composite",  # fine
             str(destination_photo)
         ]
-        subprocess.check_call(command)
+        subprocess.check_call(command) #nosec
 
         return destination_photo
     if not update.message.reply_to_message:
@@ -118,7 +118,7 @@ async def ispirami(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if text.lower().endswith(chars):
         text += "."
     url = "https://picsum.photos/800/600"
-    urllib.request.urlretrieve(url, "templates/motivational_poster.jpg")
+    urllib.request.urlretrieve(url, "templates/motivational_poster.jpg") #nosec
 
     first_name = ""
     last_name = ""

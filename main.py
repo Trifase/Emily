@@ -18,7 +18,7 @@ from cron_jobs import (
     do_global_backup,
     lotto_member_count,
     parse_diochan,
-    parse_niuchan,
+    # parse_niuchan,
     post_solarsystem_mastodon,
 )
 from database import Chatlog, Compleanni, Quote, Reminders, TensorMessage

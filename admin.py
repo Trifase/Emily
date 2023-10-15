@@ -15,7 +15,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram import __version__ as TG_VER
 from telegram.constants import ChatMemberStatus, ParseMode
 from telegram.ext import CallbackContext, ContextTypes
-
+from telegram.error import Forbidden
 import config
 from cron_jobs import do_global_backup
 from scrapers import file_in_limits
@@ -115,7 +115,7 @@ async def cancella(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     else:
         try:
             await context.bot.delete_message(update.message.chat.id, update.message.reply_to_message.message_id)
-        except Exception:
+        except Forbidden:
             pass
 
 async def send_custom_media(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -385,6 +385,7 @@ async def lista_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_html(message)
     except Exception as e:
         print(message)
+        print(e)
 
 async def listen_to(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:
@@ -459,8 +460,8 @@ async def ip(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await printlog(update, "chiede gli indirizzi IP")
     local_ip = get_ip()
-    external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
-    await update.message.reply_text(f'IP Locale: {local_ip}\nIP Pubblico: {external_ip} o trifase.smelly.cc')
+    external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8') #nosec
+    await update.message.reply_text(f'IP Locale: {local_ip}\nIP Pubblico: {external_ip} o trifase.online')
 
 async def wakeup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message.from_user.id not in config.ADMINS:

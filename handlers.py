@@ -96,7 +96,7 @@ from quiz import classifica, make_poll, punteggio, ricevi_risposta_quiz
 from reddit import reddit
 from reminders import remindelete, reminder_helper, reminders_list, remindme
 from scrapers import (
-    facebook_video,
+    # facebook_video,
     instagram_stories,
     new_instagram,
     ninofrassica,

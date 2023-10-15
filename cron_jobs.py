@@ -207,6 +207,7 @@ async def parse_niuchan(context: ContextTypes.DEFAULT_TYPE) -> None:
 async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     _localize = humanize.i18n.activate("it_IT")
+    type(_localize)
 
     print(f"{get_now()} [AUTO] controllo i lurkers")
     groups_to_check = [config.ID_DIOCHAN2]
