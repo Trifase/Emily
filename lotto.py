@@ -11,10 +11,10 @@ from utils import no_can_do, printlog
 
 async def maesta_primo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     def feminize(word):
-        if word.endswith('o'):
-            return word[:-1] + 'a'
-        elif word.endswith('e'):
-            return word[:-1] + 'a'
+        if word.endswith("o"):
+            return word[:-1] + "a"
+        elif word.endswith("e"):
+            return word[:-1] + "a"
         else:
             return word
 
@@ -59,13 +59,26 @@ async def maesta_primo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "bello",
         "bella",
         "godo",
-        "scopare"
+        "scopare",
     ]
 
     if word not in titoli:
         return
 
-    if word not in ["sesso", "sexy", "lgbt", "napl", "minchia", "sole", "fastidio", "drama", "ritardo", "merda", "godo", "scopare"]: # unisex
+    if word not in [
+        "sesso",
+        "sexy",
+        "lgbt",
+        "napl",
+        "minchia",
+        "sole",
+        "fastidio",
+        "drama",
+        "ritardo",
+        "merda",
+        "godo",
+        "scopare",
+    ]:  # unisex
         word = feminize(word)
 
     if "titoli" not in context.chat_data:
@@ -73,7 +86,7 @@ async def maesta_primo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if "titoli_holders" not in context.chat_data:
         context.chat_data["titoli_holders"] = {}
 
-    today = datetime.datetime.today().strftime('%Y-%m-%d')
+    today = datetime.datetime.today().strftime("%Y-%m-%d")
 
     if today not in context.chat_data["titoli"]:
         context.chat_data["titoli"][today] = {}
@@ -82,16 +95,21 @@ async def maesta_primo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     if word in context.chat_data["titoli"][today]:
         user = await context.bot.get_chat_member(update.message.chat.id, update.message.from_user.id)
-        if context.chat_data['titoli'][today][word] == user.user.full_name:
-            await update.message.reply_html(f"Ho un deja-vu, mi sembrava che Sua Maestà {word.capitalize()} fossi già tu!", quote=False)
+        if context.chat_data["titoli"][today][word] == user.user.full_name:
+            await update.message.reply_html(
+                f"Ho un deja-vu, mi sembrava che Sua Maestà {word.capitalize()} fossi già tu!", quote=False
+            )
         else:
-            await update.message.reply_html(f"Mi dispiace, ma per oggi Sua Maestà {word.capitalize()} è {context.chat_data['titoli'][today][word]}", quote=False)
+            await update.message.reply_html(
+                f"Mi dispiace, ma per oggi Sua Maestà {word.capitalize()} è {context.chat_data['titoli'][today][word]}",
+                quote=False,
+            )
         return
     else:
         user = await context.bot.get_chat_member(update.message.chat.id, update.message.from_user.id)
         title_holder = user.user.full_name
         if title_holder in context.chat_data["titoli_holders"][today]:
-            title = context.chat_data['titoli_holders'][today][title_holder]
+            title = context.chat_data["titoli_holders"][today][title_holder]
             await update.message.reply_html(f"Sei già Sua Maestà {title.capitalize()}.", quote=False)
             return
         else:
@@ -102,9 +120,8 @@ async def maesta_primo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             await update.message.reply_html(f"👑 Per oggi sei <b>Sua Maestà {word.capitalize()}!</b> 👑", quote=False)
             return
 
+
 async def stat_maesta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-
-
     if await no_can_do(update, context):
         return
     if update.message.chat_id != config.ID_LOTTO:
@@ -121,7 +138,7 @@ async def stat_maesta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         for holder in context.chat_data["titoli_holders"][day].keys():
             most_user[holder] += 1
 
-    message = ''
+    message = ""
     message += "Classifiche:\n"
 
     u = Counter(most_user)
@@ -137,6 +154,7 @@ async def stat_maesta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     await update.message.reply_html(message)
 
+
 async def elenco_maesta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
@@ -146,11 +164,11 @@ async def elenco_maesta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     await printlog(update, "chiede l'elenco maestà")
     if "titoli" in context.chat_data:
-        today = datetime.datetime.today().strftime('%Y-%m-%d')
+        today = datetime.datetime.today().strftime("%Y-%m-%d")
 
         if today in context.chat_data["titoli"]:
             message = ""
-            for titolo, utente in context.chat_data['titoli'][today].items():
+            for titolo, utente in context.chat_data["titoli"][today].items():
                 message += f"👑 <b>Sua Maestà {titolo.capitalize()}</b>: {utente}\n"
             await update.message.reply_html(message, quote=False)
             return
@@ -160,6 +178,7 @@ async def elenco_maesta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     else:
         await update.message.reply_text("Nessuna Sua Maestà per oggi.", quote=False)
         return
+
 
 async def conta_morti(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.chat_member.chat.id not in [config.ID_LOTTO]:
@@ -174,4 +193,3 @@ async def conta_morti(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     if update.chat_member.new_chat_member.status in [ChatMemberStatus.LEFT, ChatMemberStatus.BANNED]:
         print(f"È uscito {update.chat_member.new_chat_member.user.first_name}.")
-

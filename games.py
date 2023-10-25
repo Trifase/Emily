@@ -1,4 +1,3 @@
-
 import random
 
 import requests
@@ -14,7 +13,7 @@ async def sassocartaforbici(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     if await no_can_do(update, context):
         return
 
-    lista = ['sasso', 'carta', 'forbici', 'lucertola', 'spock']
+    lista = ["sasso", "carta", "forbici", "lucertola", "spock"]
 
     if not context.args or (context.args[0].lower() not in lista):
         await update.message.reply_text("Devi scegliere uno tra: carta, sasso, forbici, lucertola, spock")
@@ -24,26 +23,11 @@ async def sassocartaforbici(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     b = random.choice(lista)
 
     winners = {
-        "sasso": {
-            "lucertola": "schiaccia la",
-            "forbici": "rompe le"
-        },
-        "carta": {
-            "sasso": "avvolge il",
-            "spock": "invalida"
-        },
-        "forbici": {
-            "carta": "tagliano la",
-            "lucertola": "decapitano la"
-        },
-        "lucertola": {
-            "carta": "mangia la",
-            "spock": "avvelena"
-        },
-        "spock": {
-            "forbici": "rompe le",
-            "sasso": "vaporizza il"
-        },
+        "sasso": {"lucertola": "schiaccia la", "forbici": "rompe le"},
+        "carta": {"sasso": "avvolge il", "spock": "invalida"},
+        "forbici": {"carta": "tagliano la", "lucertola": "decapitano la"},
+        "lucertola": {"carta": "mangia la", "spock": "avvelena"},
+        "spock": {"forbici": "rompe le", "sasso": "vaporizza il"},
     }
 
     await printlog(update, "gioca a sasso carta forbici lucertola spock", f"{a.capitalize()} vs {b.capitalize()}")
@@ -54,27 +38,28 @@ async def sassocartaforbici(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     try:
         verbo = winners[a][b]
-        await update.message.reply_text(f"Scelgo {b.capitalize()}!\n\n{a.capitalize()} {verbo} {b.capitalize()}\n✅ Hai vinto!")
+        await update.message.reply_text(
+            f"Scelgo {b.capitalize()}!\n\n{a.capitalize()} {verbo} {b.capitalize()}\n✅ Hai vinto!"
+        )
         return
     except KeyError:
         verbo = winners[b][a]
-        await update.message.reply_text(f"Scelgo {b.capitalize()}!\n\n{b.capitalize()} {verbo} {a.capitalize()}\n❌ Hai perso!")
+        await update.message.reply_text(
+            f"Scelgo {b.capitalize()}!\n\n{b.capitalize()} {verbo} {a.capitalize()}\n❌ Hai perso!"
+        )
         return
 
-def sudoku():
 
+def sudoku():
     def get_sudoku(diff):
         url = "https://sudoku-board.p.rapidapi.com/new-board"
 
-        querystring = {"diff":str(diff),"stype":"list","solu":"true"}
+        querystring = {"diff": str(diff), "stype": "list", "solu": "true"}
 
-        headers = {
-            "X-RapidAPI-Key": config.RAPIDAPI_KEY,
-            "X-RapidAPI-Host": "sudoku-board.p.rapidapi.com"
-        }
+        headers = {"X-RapidAPI-Key": config.RAPIDAPI_KEY, "X-RapidAPI-Host": "sudoku-board.p.rapidapi.com"}
 
         response = requests.request("GET", url, headers=headers, params=querystring).json()
-        puzzle = response['response']['unsolved-sudoku']
+        puzzle = response["response"]["unsolved-sudoku"]
         for c in range(9):
             for r in range(9):
                 if puzzle[c][r] == 0:
@@ -82,7 +67,6 @@ def sudoku():
         return puzzle
 
     def print_sudoku(puzzle):
-
         max_len = len(puzzle[0])
         # print(f"\n+{'---+' * max_len}")
         print()
@@ -92,19 +76,19 @@ def sudoku():
             elif c % 3 == 0:
                 print(f"-{'----' * max_len}")
 
-            print(' ', end='')
+            print(" ", end="")
             for r in range(max_len):
-                if (r == 0) or ((r+1) % 3 != 0) or (r == max_len-1):
+                if (r == 0) or ((r + 1) % 3 != 0) or (r == max_len - 1):
                     if puzzle[c][r] < 0:
-                        print('    ', end='')
+                        print("    ", end="")
                     else:
-                        print(f' {puzzle[c][r]}  ', end='')
+                        print(f" {puzzle[c][r]}  ", end="")
 
                 else:
                     if puzzle[c][r] < 0:
-                        print('   |', end='')
+                        print("   |", end="")
                     else:
-                        print(f' {puzzle[c][r]} |', end='')
+                        print(f" {puzzle[c][r]} |", end="")
 
             # print(f"\n+{'---+' * max_len}")
             print()
@@ -149,18 +133,16 @@ def sudoku():
             return True
 
         for guess in range(1, 10):
-
             if is_valid(puzzle, guess, row, col):
                 puzzle[row][col] = guess
 
                 if solve_sudoku(puzzle):
-                    return True # Vinto
+                    return True  # Vinto
 
                 puzzle[row][col] = -1
 
         # print_sudoku(puzzle)
-        return False # unsolvable
-
+        return False  # unsolvable
 
     # 3x3
 
@@ -168,16 +150,16 @@ def sudoku():
 
     # 9x9
     sudoku9x9 = [
-        [-1,  2,  3, -1, -1, -1, -1,  9,  7],
-        [-1,  8, -1,  1, -1, -1, -1,  3,  6],
-        [ 5,  6,  7, -1, -1, -1, -1, -1,  8],
-        [-1,  1, -1, -1, -1, -1,  8,  7,  9],
-        [ 3, -1,  8, -1,  9, -1,  6,  2, -1],
-        [-1,  9,  6, -1, -1,  2,  4,  5, -1],
-        [-1,  4, -1, -1, -1, -1, -1,  1, -1],
-        [-1, -1, -1,  9, -1,  1,  7, -1, -1],
-        [ 9, -1, -1,  5, -1, -1,  3,  6,  2]
-        ]
+        [-1, 2, 3, -1, -1, -1, -1, 9, 7],
+        [-1, 8, -1, 1, -1, -1, -1, 3, 6],
+        [5, 6, 7, -1, -1, -1, -1, -1, 8],
+        [-1, 1, -1, -1, -1, -1, 8, 7, 9],
+        [3, -1, 8, -1, 9, -1, 6, 2, -1],
+        [-1, 9, 6, -1, -1, 2, 4, 5, -1],
+        [-1, 4, -1, -1, -1, -1, -1, 1, -1],
+        [-1, -1, -1, 9, -1, 1, 7, -1, -1],
+        [9, -1, -1, 5, -1, -1, 3, 6, 2],
+    ]
 
     # hardest sudoku
     # https://abcnews.go.com/blogs/headlines/2012/06/can-you-solve-the-hardest-ever-sudoku
@@ -194,5 +176,6 @@ def sudoku():
     with Timer(name="solver"):
         solve_sudoku(sudoku)
         print_sudoku(sudoku)
+
 
 # sudoku()

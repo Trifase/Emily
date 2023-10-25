@@ -30,11 +30,28 @@ class StelleResult:
     seed: str
     file: tempfile._TemporaryFileWrapper
 
-async def make_solar_system(update=None, download:bool=False, width:int=1080, height:int=1920, orbit:bool=True, line:bool=False,
-                            rings:bool=True, moons:bool=True, belts:bool=True, starfield:bool=True, binary:bool=True,
-                            blackholes:bool=True, skips:bool=True, gradients:bool=True, textures:bool=True,
-                            stars:int=50, bordersize:int=50, noise:int=3, seed=None):
 
+async def make_solar_system(
+    update=None,
+    download: bool = False,
+    width: int = 1080,
+    height: int = 1920,
+    orbit: bool = True,
+    line: bool = False,
+    rings: bool = True,
+    moons: bool = True,
+    belts: bool = True,
+    starfield: bool = True,
+    binary: bool = True,
+    blackholes: bool = True,
+    skips: bool = True,
+    gradients: bool = True,
+    textures: bool = True,
+    stars: int = 50,
+    bordersize: int = 50,
+    noise: int = 3,
+    seed=None,
+):
     def planet_name():
         part1 = [
             "Æ",
@@ -269,7 +286,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
             "Zed",
             "Zer",
             "Zem",
-            "Zeng"
+            "Zeng",
         ]
         part2 = [
             "-o",
@@ -454,7 +471,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
             "'am",
             "'an",
             "'us",
-            "al"
+            "al",
         ]
         return f"{random.choice(part1)}{random.choice(part2)}"
 
@@ -491,7 +508,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
             "Old",
             "Las",
             "Los",
-            "La"
+            "La",
         ]
         suffix = [
             "Alpha",
@@ -507,10 +524,40 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
             "Epsilon",
             "Zeta",
             "Quintus",
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
-            "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIV", "XV", "XVI",
-            "World", "Moon", "gas giant",
-            "e1", "e2", "e3", "e4"
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "I",
+            "II",
+            "III",
+            "IV",
+            "V",
+            "VI",
+            "VII",
+            "VIII",
+            "IX",
+            "X",
+            "XI",
+            "XII",
+            "XIV",
+            "XV",
+            "XVI",
+            "World",
+            "Moon",
+            "gas giant",
+            "e1",
+            "e2",
+            "e3",
+            "e4",
         ]
         posession = [
             "Haven",
@@ -529,7 +576,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
             "Terminus",
             "Moon",
             "World",
-            "Planetoid"
+            "Planetoid",
         ]
         planetname = planet_name()
 
@@ -585,8 +632,8 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
                 "Rho",
                 "Minor",
                 "Major",
-                "Greater"
-                ]
+                "Greater",
+            ]
             return random.choice(prefixes)
 
         def gen_system_name():
@@ -742,7 +789,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
                 "Evans",
                 "Myanmar",
                 "Dilhan",
-                "Eryurt"
+                "Eryurt",
             ]
             return random.choice(systems)
 
@@ -830,10 +877,10 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
         cr.set_source_rgba(r, g, b, a)
         cr.set_line_width(line)
 
-        if lato == 'sx':
+        if lato == "sx":
             cr.arc_negative(x, y, radius, 270 * (math.pi / 180), 90 * (math.pi / 180))
 
-        elif lato == 'dx':
+        elif lato == "dx":
             cr.arc(x, y, radius, 90 * (math.pi / 180), 270 * (math.pi / 180))
 
         else:
@@ -845,7 +892,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
     def draw_circle_fill(cr, x, y, radius, r, g, b, a=1.0, gradient=False):
         if GRADIENTS and gradient:
             orbit_angle = random.randint(0, 20)
-            pattern = cairo.LinearGradient(x + orbit_angle, y + radius, x -orbit_angle, y - radius)
+            pattern = cairo.LinearGradient(x + orbit_angle, y + radius, x - orbit_angle, y - radius)
             n_colors = random.randint(2, 4)
             for i in range(n_colors):
                 rand_color = random.choice(list_of_colors)
@@ -859,10 +906,9 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
         cr.fill()
 
     def draw_planet(cr, x, y, radius, r, g, b, a=1.0, gradient=False, texture_file=None):
-
         if GRADIENTS and gradient:
             orbit_angle = random.randint(0, 20)
-            pattern = cairo.LinearGradient(x + orbit_angle, y + radius, x -orbit_angle, y - radius)
+            pattern = cairo.LinearGradient(x + orbit_angle, y + radius, x - orbit_angle, y - radius)
             n_colors = random.randint(2, 4)
             for i in range(n_colors):
                 rand_color = random.choice(list_of_colors)
@@ -880,7 +926,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
 
         if texture_file:
             # Load the texture
-            texture = cairo.ImageSurface.create_from_png(f'images/planet_textures/{texture_file}.png')
+            texture = cairo.ImageSurface.create_from_png(f"images/planet_textures/{texture_file}.png")
 
             # Set the composition operator to multiply
             cr.set_operator(cairo.Operator.MULTIPLY)
@@ -894,24 +940,25 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
             # Matrix transformation: random rotation angle
             angle = math.radians(random.randint(1, 360))
             rotation_matrix = cairo.Matrix(
-                math.cos(angle), math.sin(angle),
-                -math.sin(angle), math.cos(angle),
+                math.cos(angle),
+                math.sin(angle),
+                -math.sin(angle),
+                math.cos(angle),
                 x - math.cos(angle) * x + math.sin(angle) * y,
-                y - math.sin(angle) * x - math.cos(angle) * y
-                )
+                y - math.sin(angle) * x - math.cos(angle) * y,
+            )
 
             # Matrix transformation: scaling the texture to the planet
             texture_width, texture_height = 400, 400
-            scale_factor = max(texture_width, texture_height) / (radius*2)
+            scale_factor = max(texture_width, texture_height) / (radius * 2)
             scale_matrix = cairo.Matrix(scale_factor, 0, 0, scale_factor, 0, 0)
 
             # Matrix transformation: aligning the texture to the planet
-            move_matrix = cairo.Matrix(1, 0, 0, 1, -x-radius, -y-radius)
+            move_matrix = cairo.Matrix(1, 0, 0, 1, -x - radius, -y - radius)
 
             # Matrix transformation: combining all the transformations
             rotate_move_scale_matrix = rotation_matrix * move_matrix * scale_matrix
             texture_pattern.set_matrix(rotate_move_scale_matrix)
-
 
             # Apply the texture to the circle
             cr.set_source(texture_pattern)
@@ -922,8 +969,8 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
             cr.set_operator(cairo.Operator.OVER)
 
             # Set the opacity of the texture
-            cr.set_source_rgba(1, 1, 1, 0) # Set the color with alpha value (RGBA)
-            cr.paint_with_alpha(0) # Set the opacity of the texture
+            cr.set_source_rgba(1, 1, 1, 0)  # Set the color with alpha value (RGBA)
+            cr.paint_with_alpha(0)  # Set the opacity of the texture
 
     def draw_border(cr, size, r, g, b, width, height):
         cr.set_source_rgb(r, g, b)
@@ -966,13 +1013,18 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
 
         segments = []
         min_distance_between_gaps = math.ceil((total_space / n_segs) / 4)
-        gaps = [min_distance_between_gaps * i + x for i, x in enumerate(sorted(random.sample(range(5, total_space - 10), k=n_segs - 1)))]
+        gaps = [
+            min_distance_between_gaps * i + x
+            for i, x in enumerate(sorted(random.sample(range(5, total_space - 10), k=n_segs - 1)))
+        ]
         gaps.sort()
 
         seg_start = 0
 
         for gap in gaps:
-            gap_size = random.randint(1, math.ceil((total_space / n_segs) * 0.2))  # gap between segments, 1px - 20% of average segment
+            gap_size = random.randint(
+                1, math.ceil((total_space / n_segs) * 0.2)
+            )  # gap between segments, 1px - 20% of average segment
             half_gap_1 = round(gap_size / 2)
             half_gap_2 = gap_size - half_gap_1
             gap_start = gap - half_gap_1
@@ -1128,18 +1180,39 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
     #     return
 
     list_of_colors = [
-        (145, 185, 141), (229, 192, 121), (210, 191, 88), (140, 190, 178), (255, 183, 10),
-        (189, 190, 220), (221, 79, 91), (16, 182, 98), (227, 146, 80), (241, 133, 123),
-        (110, 197, 233), (235, 205, 188), (197, 239, 247), (190, 144, 212), (41, 241, 195),
-        (101, 198, 187), (255, 246, 143), (243, 156, 18), (189, 195, 199), (243, 241, 239)
-        ]
+        (145, 185, 141),
+        (229, 192, 121),
+        (210, 191, 88),
+        (140, 190, 178),
+        (255, 183, 10),
+        (189, 190, 220),
+        (221, 79, 91),
+        (16, 182, 98),
+        (227, 146, 80),
+        (241, 133, 123),
+        (110, 197, 233),
+        (235, 205, 188),
+        (197, 239, 247),
+        (190, 144, 212),
+        (41, 241, 195),
+        (101, 198, 187),
+        (255, 246, 143),
+        (243, 156, 18),
+        (189, 195, 199),
+        (243, 241, 239),
+    ]
 
     list_of_sun_colors = [
-        (255, 95, 83), (253, 209, 162), (255, 243, 161), (252, 255, 212),
-        (248, 247, 253), (201, 216, 255), (154, 175, 255)
-        ]
+        (255, 95, 83),
+        (253, 209, 162),
+        (255, 243, 161),
+        (252, 255, 212),
+        (248, 247, 253),
+        (201, 216, 255),
+        (154, 175, 255),
+    ]
 
-    list_of_planet_textures = ['craters', 'fibers', 'nubi', 'perlin_poly', 'stripes', 'voronoi', 'splat', 'splot']
+    list_of_planet_textures = ["craters", "fibers", "nubi", "perlin_poly", "stripes", "voronoi", "splat", "splot"]
 
     stelle = {}
 
@@ -1167,7 +1240,6 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
     if not seed:
         seed = uuid.uuid4()
 
-
     random.seed(str(seed))
     if update:
         await printlog(update, "crea un sistema solare con il seed", str(seed))
@@ -1182,25 +1254,24 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
     description = f"<b>· {system_name.upper()} ·</b>\n<i>{system_distance}</i>\n\n"
     planet_list = ""
 
-    stelle['seed'] = str(seed)
-    stelle['system_name'] = system_name
-    stelle['settings'] = {}
-    stelle['settings']['width'] = WIDTH
-    stelle['settings']['height'] = HEIGHT
-    stelle['settings']['border_size'] = BORDERSIZE
-    stelle['settings']['orbit'] = ORBIT
-    stelle['settings']['line'] = LINE
-    stelle['settings']['rings'] = RINGS
-    stelle['settings']['moons'] = MOONS
-    stelle['settings']['belts'] = BELTS
-    stelle['settings']['starfield'] = STARFIELD
-    stelle['settings']['binary'] = BINARY
-    stelle['settings']['blackholes'] = BLACKHOLES
-    stelle['settings']['skips'] = SKIPS
-    stelle['settings']['gradients'] = GRADIENTS
-    stelle['settings']['textures'] = TEXTURES
-    stelle['settings']['n_background_stars'] = STARS
-
+    stelle["seed"] = str(seed)
+    stelle["system_name"] = system_name
+    stelle["settings"] = {}
+    stelle["settings"]["width"] = WIDTH
+    stelle["settings"]["height"] = HEIGHT
+    stelle["settings"]["border_size"] = BORDERSIZE
+    stelle["settings"]["orbit"] = ORBIT
+    stelle["settings"]["line"] = LINE
+    stelle["settings"]["rings"] = RINGS
+    stelle["settings"]["moons"] = MOONS
+    stelle["settings"]["belts"] = BELTS
+    stelle["settings"]["starfield"] = STARFIELD
+    stelle["settings"]["binary"] = BINARY
+    stelle["settings"]["blackholes"] = BLACKHOLES
+    stelle["settings"]["skips"] = SKIPS
+    stelle["settings"]["gradients"] = GRADIENTS
+    stelle["settings"]["textures"] = TEXTURES
+    stelle["settings"]["n_background_stars"] = STARS
 
     ims = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
     cr = cairo.Context(ims)
@@ -1208,11 +1279,15 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
     # Sfondo
     bg_min = 0.05
     bg_max = 0.2
-    bg_color = (random_bg_color(bg_min, bg_max), random_bg_color(bg_min, bg_max), random_bg_color(bg_min, bg_max),)
+    bg_color = (
+        random_bg_color(bg_min, bg_max),
+        random_bg_color(bg_min, bg_max),
+        random_bg_color(bg_min, bg_max),
+    )
 
     draw_background(cr, *bg_color, width, height)
-    stelle['background'] = {}
-    stelle['background']['color'] = bg_color
+    stelle["background"] = {}
+    stelle["background"]["color"] = bg_color
 
     # Starfield
     if STARFIELD:
@@ -1234,11 +1309,11 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
     sun_r, sun_g, sun_b = sun_color[0] / 255.0, sun_color[1] / 255.0, sun_color[2] / 255.0
 
     if random.randint(1, 100) < 30 and BLACKHOLES:
-        stelle['star'] = {'type': 'blackhole', 'color': sun_color, 'size': sun_size, 'center': sun_center}
+        stelle["star"] = {"type": "blackhole", "color": sun_color, "size": sun_size, "center": sun_center}
         draw_black_hole2(cr, width / 2, sun_center, sun_size, sun_r, sun_g, sun_b, a=1.0, gradient=True)
     else:
         if sun_size > 300 and random.randint(1, 100) > 10 and BINARY:
-              # binary
+            # binary
             sun_color_1 = random.choice(list_of_sun_colors)
             sun_color_2 = random.choice(list_of_sun_colors)
             sun_r_1, sun_g_1, sun_b_1 = sun_color_1[0] / 255.0, sun_color_1[1] / 255.0, sun_color_1[2] / 255.0
@@ -1247,14 +1322,42 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
             r1 = sun_size * ratio
             r2 = sun_size * (1 - ratio)
             # draw_circle_fill(cr, ((width / 2) - (sun_size - r1)), sun_center, int(r1 * 0.9), sun_r_1, sun_g_1, sun_b_1, a=1, gradient=True)
-            draw_sun(cr, ((width / 2) - (sun_size - r1)), sun_center, int(r1 * 0.9), sun_r_1, sun_g_1, sun_b_1, a=1, gradient=True)
+            draw_sun(
+                cr,
+                ((width / 2) - (sun_size - r1)),
+                sun_center,
+                int(r1 * 0.9),
+                sun_r_1,
+                sun_g_1,
+                sun_b_1,
+                a=1,
+                gradient=True,
+            )
             # draw_circle_fill(cr, ((width / 2) + (sun_size - r2)), sun_center, int(r2 * 0.9), sun_r_2, sun_g_2, sun_b_2, a=1, gradient=True)
-            draw_sun(cr, ((width / 2) + (sun_size - r2)), sun_center, int(r2 * 0.9), sun_r_2, sun_g_2, sun_b_2, a=1, gradient=True)
-            stelle['star'] = {'type': 'binary', 'color1': sun_color_1, 'color2': sun_color_2, 'size1': int(r1 * 0.9), 'size2': int(r2 * 0.9), 'center1': ((width / 2) - (sun_size - r1)), 'center2': ((width / 2) + (sun_size - r2))}
+            draw_sun(
+                cr,
+                ((width / 2) + (sun_size - r2)),
+                sun_center,
+                int(r2 * 0.9),
+                sun_r_2,
+                sun_g_2,
+                sun_b_2,
+                a=1,
+                gradient=True,
+            )
+            stelle["star"] = {
+                "type": "binary",
+                "color1": sun_color_1,
+                "color2": sun_color_2,
+                "size1": int(r1 * 0.9),
+                "size2": int(r2 * 0.9),
+                "center1": ((width / 2) - (sun_size - r1)),
+                "center2": ((width / 2) + (sun_size - r2)),
+            }
         else:
             # draw_circle_fill(cr, width / 2, sun_center, sun_size, sun_r, sun_g, sun_b, gradient=True)
             draw_sun(cr, width / 2, sun_center, sun_size, sun_r, sun_g, sun_b, gradient=True)
-            stelle['star'] = {'type': 'sun', 'color': sun_color, 'size': sun_size, 'center': sun_center}
+            stelle["star"] = {"type": "sun", "color": sun_color, "size": sun_size, "center": sun_center}
 
     distance_between_planets = 20
     last_center = sun_center
@@ -1265,7 +1368,7 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
     max_size = 150
 
     # print(f"Sole: \t{time.perf_counter() - start}")
-    stelle['planets'] = []
+    stelle["planets"] = []
     for x in range(1, 20):
         planet = {}
 
@@ -1275,11 +1378,11 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
 
         # Seleziono un colore random
         rand_color = random.choice(list_of_colors)
-        while (rand_color is last_color):
+        while rand_color is last_color:
             rand_color = random.choice(list_of_colors)
         r, g, b = rand_color[0] / 255.0, rand_color[1] / 255.0, rand_color[2] / 255.0
 
-        if not(next_center - next_size < border_size):
+        if not (next_center - next_size < border_size):
             if random.randint(0, 100) <= 10 and SKIPS:  # SKIP!
                 # if context.args:
                 #     if "-star" in context.args:
@@ -1287,11 +1390,11 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
                 last_color = rand_color
                 last_center = next_center
                 last_size = next_size
-                planet['type'] = 'skip'
-                stelle['planets'].append(planet)
+                planet["type"] = "skip"
+                stelle["planets"].append(planet)
                 continue
             p_name = generate_planet_name()
-            planet['name'] = p_name
+            planet["name"] = p_name
 
             planet_list += f"— {p_name}\n"
             planet_size = next_size
@@ -1307,11 +1410,11 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
                 midpoint = (belt_radius_max - belt_radius_min) / 2.0 + belt_radius_min
                 inner_range = 0.6 * (belt_radius_max - belt_radius_min) / 2.0
 
-                planet['type'] = 'asteroid_belt'
-                planet['details'] = {}
-                planet['details']['radius_min'] = belt_radius_min
-                planet['details']['radius_max'] = belt_radius_max
-                planet['pos'] = (width / 2, midpoint)
+                planet["type"] = "asteroid_belt"
+                planet["details"] = {}
+                planet["details"]["radius_min"] = belt_radius_min
+                planet["details"]["radius_max"] = belt_radius_max
+                planet["pos"] = (width / 2, midpoint)
 
                 for x in range(belt_radius_min, belt_radius_max + 1, 2):
                     max_density = 120
@@ -1329,17 +1432,26 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
                         else:
                             draw_circle_fill(cr, point[0], point[1], asteroid_size, r, g, b, a=random.uniform(0.8, 1))
 
-
                 last_color = rand_color
                 last_center = next_center
                 last_size = next_size
                 BELTS = False
-                stelle['planets'].append(planet)
+                stelle["planets"].append(planet)
                 continue
 
             # Planets Generation
             if ORBIT:
-                draw_orbit(cr, random.randint(4, max(4, round(planet_size / 10))), width / 2, sun_center, height - next_center - border_size, r, g, b, a=random.uniform(0.5, 1))
+                draw_orbit(
+                    cr,
+                    random.randint(4, max(4, round(planet_size / 10))),
+                    width / 2,
+                    sun_center,
+                    height - next_center - border_size,
+                    r,
+                    g,
+                    b,
+                    a=random.uniform(0.5, 1),
+                )
 
             elif LINE:
                 cr.move_to(border_size * 2, next_center)
@@ -1353,86 +1465,118 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
             planet_radius = next_size
 
             if planet_type == "rings" and RINGS and planet_radius >= 50:
+                planet["type"] = "rings"
+                planet["pos"] = (width / 2, next_center)
+                planet["radius"] = planet_radius
+                planet["details"] = {}
+                planet["details"]["size"] = planet_size
+                planet["details"]["color"] = (r, g, b)
 
-                planet['type'] = 'rings'
-                planet['pos'] = (width / 2, next_center)
-                planet['radius'] = planet_radius
-                planet['details'] = {}
-                planet['details']['size'] = planet_size
-                planet['details']['color'] = (r, g, b)
-
-                planet_size = round(next_size * random.uniform(0.2, 0.5))  # il pianeta è il 20-50% della dimensione totale.
+                planet_size = round(
+                    next_size * random.uniform(0.2, 0.5)
+                )  # il pianeta è il 20-50% della dimensione totale.
                 draw_planet(cr, width / 2, next_center, planet_size, r, g, b, gradient=True)  # pianeta
-                empty_space = round(next_size * random.uniform(0.05, 0.2))  # il buffer è il 5-20% della dimensione totale.
+                empty_space = round(
+                    next_size * random.uniform(0.05, 0.2)
+                )  # il buffer è il 5-20% della dimensione totale.
                 space_remaining = next_size - planet_size - empty_space
                 n_rings = random.randint(1, 4)
 
-                planet['details']['empty_space'] = empty_space
-                planet['details']['n_rings'] = n_rings
-                planet['rings'] = []
+                planet["details"]["empty_space"] = empty_space
+                planet["details"]["n_rings"] = n_rings
+                planet["rings"] = []
 
                 rings_list = get_random_gaps_segments(space_remaining, n_rings)
                 ring_start = planet_size + empty_space
 
                 for i, ring_size in enumerate(rings_list):
                     if i % 2 == 0:  # è pari, segment
-                        draw_ring(cr, x=width / 2, y=next_center, rad_min=ring_start, rad_max=ring_start + ring_size, r=r, g=g, b=b, a=random.uniform(0.1, 1), gradient=True)
-                        planet['rings'].append({'type': 'segment', 'radius_min': ring_start, 'radius_max': ring_start + ring_size, 'color': (r, g, b)})
-                    else:   # gap
+                        draw_ring(
+                            cr,
+                            x=width / 2,
+                            y=next_center,
+                            rad_min=ring_start,
+                            rad_max=ring_start + ring_size,
+                            r=r,
+                            g=g,
+                            b=b,
+                            a=random.uniform(0.1, 1),
+                            gradient=True,
+                        )
+                        planet["rings"].append(
+                            {
+                                "type": "segment",
+                                "radius_min": ring_start,
+                                "radius_max": ring_start + ring_size,
+                                "color": (r, g, b),
+                            }
+                        )
+                    else:  # gap
                         pass
                     ring_start += ring_size
                 # write_planet_name(cr=cr, x=width / 2, y=next_center, radius=planet_radius, name=p_name, type="rings")
 
-                stelle['planets'].append(planet)
+                stelle["planets"].append(planet)
 
             elif planet_type == "moons" and MOONS and planet_radius >= 50:
                 n_moons = random.randint(1, 3)
 
-                planet['type'] = 'moons'
-                planet['pos'] = (width / 2, next_center)
-                planet['radius'] = planet_radius
-                planet['details'] = {}
-                planet['details']['size'] = planet_radius * 2
-                planet['details']['color'] = (r, g, b)
-                planet['details']['n_moons'] = n_moons
-                planet['moons'] = []
+                planet["type"] = "moons"
+                planet["pos"] = (width / 2, next_center)
+                planet["radius"] = planet_radius
+                planet["details"] = {}
+                planet["details"]["size"] = planet_radius * 2
+                planet["details"]["color"] = (r, g, b)
+                planet["details"]["n_moons"] = n_moons
+                planet["moons"] = []
 
                 moons = []
                 for i in range(n_moons):
                     moon_radius = round(planet_radius * random.uniform(0.1, 0.3))  # la luna è il 10%-30% del pianeta
                     orbit_radius = planet_radius + moon_radius + (10 * (i + 1))  # orbita sempre più grande ogni luna
-                    moon_pos = get_uniform_points_on_circle(width / 2, next_center, orbit_radius, n=5)[i + 3]  # seleziono n posizioni sull'orbita e piazzo le lune in ordine
-                    mr, mg, mb = r + random.uniform(-0.1, 0.1), g + random.uniform(-0.1, 0.1), b + random.uniform(-0.1, 0.1)  # modifico un po' il colore
+                    moon_pos = get_uniform_points_on_circle(width / 2, next_center, orbit_radius, n=5)[
+                        i + 3
+                    ]  # seleziono n posizioni sull'orbita e piazzo le lune in ordine
+                    mr, mg, mb = (
+                        r + random.uniform(-0.1, 0.1),
+                        g + random.uniform(-0.1, 0.1),
+                        b + random.uniform(-0.1, 0.1),
+                    )  # modifico un po' il colore
                     moons.append((moon_radius, orbit_radius, moon_pos, mr, mg, mb))
 
-                    planet['moons'].append({'pos': moon_pos, 'radius': moon_radius, 'orbit_radius': orbit_radius, 'color': (mr, mg, mb)})
+                    planet["moons"].append(
+                        {"pos": moon_pos, "radius": moon_radius, "orbit_radius": orbit_radius, "color": (mr, mg, mb)}
+                    )
 
                 for m in moons:
                     moon_radius, orbit_radius, moon_pos, mr, mg, mb = m
-                    draw_orbit(cr, 2, width / 2, next_center, orbit_radius, r=mr, g=mg, b=mb)  # mi disegno l'orbita della luna
+                    draw_orbit(
+                        cr, 2, width / 2, next_center, orbit_radius, r=mr, g=mg, b=mb
+                    )  # mi disegno l'orbita della luna
 
                 for m in moons:
                     moon_radius, orbit_radius, moon_pos, mr, mg, mb = m
-                    draw_circle_fill(cr=cr, x=moon_pos[0], y=moon_pos[1], radius=moon_radius, r=mr, g=mg, b=mb, gradient=True)  # disegno luna
+                    draw_circle_fill(
+                        cr=cr, x=moon_pos[0], y=moon_pos[1], radius=moon_radius, r=mr, g=mg, b=mb, gradient=True
+                    )  # disegno luna
 
                 draw_planet(cr=cr, x=width / 2, y=next_center, radius=planet_radius, r=r, g=g, b=b, gradient=True)
                 # write_planet_name(cr=cr, x=width / 2, y=next_center, radius=planet_radius, name=p_name, type="moon")
 
-                stelle['planets'].append(planet)
-
+                stelle["planets"].append(planet)
 
             else:
-                planet['type'] = 'normal'
-                planet['pos'] = (width / 2, next_center)
-                planet['radius'] = planet_radius
-                planet['details'] = {}
-                planet['details']['size'] = planet_radius * 2
-                planet['details']['color'] = (r, g, b)
+                planet["type"] = "normal"
+                planet["pos"] = (width / 2, next_center)
+                planet["radius"] = planet_radius
+                planet["details"] = {}
+                planet["details"]["size"] = planet_radius * 2
+                planet["details"]["color"] = (r, g, b)
 
                 draw_planet(cr=cr, x=width / 2, y=next_center, radius=planet_radius, r=r, g=g, b=b, gradient=True)
                 # write_planet_name(cr=cr, x=width / 2, y=next_center, radius=planet_radius, name=p_name, type="planet")
 
-                stelle['planets'].append(planet)
+                stelle["planets"].append(planet)
 
             last_color = rand_color
             last_center = next_center
@@ -1441,20 +1585,19 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
                 last_size = orbit_radius
 
     draw_border(cr, border_size, sun_r, sun_g, sun_b, width, height)
-    fp = tempfile.NamedTemporaryFile(suffix='.png')
+    fp = tempfile.NamedTemporaryFile(suffix=".png")
 
     image_path = fp.name
     ims.write_to_png(image_path)
 
     img = Image.open(image_path)
     if BORDERSIZE >= 20:
-
         font_size = BORDERSIZE - 10
 
         rgb_bgcolor = tuple(int(x) for x in bg_color)
 
         draw = ImageDraw.Draw(img)
-        font = ImageFont.truetype('fonts/geonms-font.ttf', font_size)
+        font = ImageFont.truetype("fonts/geonms-font.ttf", font_size)
 
         anchor = (int(WIDTH / 2), int((HEIGHT - (BORDERSIZE / 2))))
 
@@ -1471,17 +1614,17 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
         # Create grayscale Gaussian noise array and add it to image
         noise = np.random.normal(mean, stddev, img.shape[:2])
         noisy_img = np.zeros(img.shape, dtype=np.uint8)
-        noisy_img[:,:,0] = np.clip(img[:,:,0] + noise, 0, 255)
-        noisy_img[:,:,1] = np.clip(img[:,:,1] + noise, 0, 255)
-        noisy_img[:,:,2] = np.clip(img[:,:,2] + noise, 0, 255)
+        noisy_img[:, :, 0] = np.clip(img[:, :, 0] + noise, 0, 255)
+        noisy_img[:, :, 1] = np.clip(img[:, :, 1] + noise, 0, 255)
+        noisy_img[:, :, 2] = np.clip(img[:, :, 2] + noise, 0, 255)
 
         # Convert to grayscale
-        noisy_img_gray = np.dot(noisy_img[...,:3], [0.2989, 0.5870, 0.1140])
+        noisy_img_gray = np.dot(noisy_img[..., :3], [0.2989, 0.5870, 0.1140])
 
         # Add opacity to the noisy image
         alpha = np.random.randint(0, 255, img.shape[:2]).astype(np.uint8)
-        noisy_img_gray = np.stack((noisy_img_gray,)*3, axis=-1)
-        noisy_img_gray = np.concatenate((noisy_img_gray, alpha[:,:,np.newaxis]), axis=2)
+        noisy_img_gray = np.stack((noisy_img_gray,) * 3, axis=-1)
+        noisy_img_gray = np.concatenate((noisy_img_gray, alpha[:, :, np.newaxis]), axis=2)
 
         # Save the noisy image
         noisy_img_pil = Image.fromarray(noisy_img)
@@ -1492,15 +1635,16 @@ async def make_solar_system(update=None, download:bool=False, width:int=1080, he
     description += f"\nSeed:\n<code>{seed}</code>"
 
     res: StelleResult = StelleResult(
-        raw_dict = stelle,
-        system_name = system_name,
-        system_distance = system_distance,
-        description = description,
-        planet_list = planet_list,
-        seed = seed,
-        file = fp
+        raw_dict=stelle,
+        system_name=system_name,
+        system_distance=system_distance,
+        description=description,
+        planet_list=planet_list,
+        seed=seed,
+        file=fp,
     )
     return res
+
 
 async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await no_can_do(update, context):
@@ -1513,43 +1657,51 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if context.args:
         if "-help" in context.args:
-            await update.message.reply_html("<code>/stars 1500 2000</code> (larghezza e altezza) come primi due parametri per specificare una dimensione di rendering\n<code>-seed [stringa]</code> per specificare un seed\n<code>-download</code> per farsi mandare il file full-res\n<code>-tinyborder</code> per un bordo più piccolo\n<code>-noborder</code> per eliminare il bordo completamente\n<code>-nostars</code> per non generare le stelline dietro\n<code>-origin</code> disattiva tutte le feature randomiche e lascia solo i pianeti\n<code>-help</code> visualizza questo messaggio")
+            await update.message.reply_html(
+                "<code>/stars 1500 2000</code> (larghezza e altezza) come primi due parametri per specificare una dimensione di rendering\n<code>-seed [stringa]</code> per specificare un seed\n<code>-download</code> per farsi mandare il file full-res\n<code>-tinyborder</code> per un bordo più piccolo\n<code>-noborder</code> per eliminare il bordo completamente\n<code>-nostars</code> per non generare le stelline dietro\n<code>-origin</code> disattiva tutte le feature randomiche e lascia solo i pianeti\n<code>-help</code> visualizza questo messaggio"
+            )
             return
 
         if "-download" in context.args:
-            kwargs['download'] = True
+            kwargs["download"] = True
 
         if "-seed" in context.args:
             i = context.args.index("-seed")
             seed = context.args[i + 1]
-            kwargs['seed'] = seed
+            kwargs["seed"] = seed
 
         if "-nostars" in context.args:
-            kwargs['starfield'] = False
+            kwargs["starfield"] = False
 
         if "-origin" in context.args:
-            kwargs['starfield'] = False
-            kwargs['belts'] = False
-            kwargs['moons'] = False
-            kwargs['rings'] = False
-            kwargs['binary'] = False
-            kwargs['blackholes'] = False
-            kwargs['skips'] = True
+            kwargs["starfield"] = False
+            kwargs["belts"] = False
+            kwargs["moons"] = False
+            kwargs["rings"] = False
+            kwargs["binary"] = False
+            kwargs["blackholes"] = False
+            kwargs["skips"] = True
 
         if "-noborder" in context.args:
-            kwargs['bordersize'] = 0
+            kwargs["bordersize"] = 0
 
         if "-tinyborder" in context.args:
-            kwargs['bordersize'] = 5
+            kwargs["bordersize"] = 5
 
         if len(context.args) >= 2 and context.args[0].isdigit() and context.args[1].isdigit():
-            if int(context.args[0]) < 500 or int(context.args[1]) < 500 or int(context.args[0]) + int(context.args[1]) > 10000:
-                await update.message.reply_text("Troppo o troppo poco! Minimo 500x500, e le dimensioni sommate non possono superare 10000")
+            if (
+                int(context.args[0]) < 500
+                or int(context.args[1]) < 500
+                or int(context.args[0]) + int(context.args[1]) > 10000
+            ):
+                await update.message.reply_text(
+                    "Troppo o troppo poco! Minimo 500x500, e le dimensioni sommate non possono superare 10000"
+                )
                 return
             WIDTH = int(context.args[0])
             HEIGHT = int(context.args[1])
-            kwargs['width'] = WIDTH
-            kwargs['height'] = HEIGHT
+            kwargs["width"] = WIDTH
+            kwargs["height"] = HEIGHT
 
     result: StelleResult = await make_solar_system(update, **kwargs)
 
@@ -1566,20 +1718,26 @@ async def solarsystem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     fp = result.file
     stelle = result.raw_dict
 
-
-    if kwargs.get('download'):
-        await context.bot.send_document(chat_id=update.effective_chat.id, document=open(image_path, 'rb'), caption=description, parse_mode='HTML')
+    if kwargs.get("download"):
+        await context.bot.send_document(
+            chat_id=update.effective_chat.id, document=open(image_path, "rb"), caption=description, parse_mode="HTML"
+        )
     else:
-        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(image_path, 'rb'), caption=f"<b>· {system_name.upper()} ·</b>\n<code>{seed}</code>", parse_mode='HTML')
+        await context.bot.send_photo(
+            chat_id=update.effective_chat.id,
+            photo=open(image_path, "rb"),
+            caption=f"<b>· {system_name.upper()} ·</b>\n<code>{seed}</code>",
+            parse_mode="HTML",
+        )
 
-    if '-raw' in context.args:
-
+    if "-raw" in context.args:
         rawtext = pprint.pformat(stelle, sort_dicts=False)
         rawtext = html.escape(rawtext)
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=f"<pre>{rawtext}</pre>", parse_mode='HTML')
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id, text=f"<pre>{rawtext}</pre>", parse_mode="HTML"
+        )
     fp.close()
     return
-
 
 
 async def launches(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -1588,10 +1746,10 @@ async def launches(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         days, rem = divmod(secs, 86400)  # Seconds per day: 24 * 60 * 60
         hours, rem = divmod(rem, 3600)  # Seconds per hour: 60 * 60
         mins, secs = divmod(rem, 60)
-        return '{:02}:{:02}:{:02}:{:02}'.format(int(days), int(hours), int(mins), int(secs))
+        return "{:02}:{:02}:{:02}:{:02}".format(int(days), int(hours), int(mins), int(secs))
 
     def utc_to_local(utc_dt):
-        local_tz = pytz.timezone('Europe/Rome')
+        local_tz = pytz.timezone("Europe/Rome")
         local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
         return local_tz.normalize(local_dt)
 
@@ -1601,12 +1759,14 @@ async def launches(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} chiede la lista dei lanci')
     await printlog(update, "chiede la lista dei lanci spaziali")
 
-    r = requests.get("https://ll.thespacedevs.com/2.2.0/launch/?mode=detailed&name=&slug=&rocket__configuration__name=&rocket__configuration__id=&status=1&rocket__spacecraftflight__spacecraft__name=&rocket__spacecraftflight__spacecraft__name__icontains=&rocket__spacecraftflight__spacecraft__id=&rocket__configuration__manufacturer__name=&rocket__configuration__manufacturer__name__icontains=&rocket__configuration__full_name=&rocket__configuration__full_name__icontains=&mission__orbit__name=&mission__orbit__name__icontains=&r_spacex_api_id=&net__gt=&net__lt=&net__gte=&net__lte=&window_start__gt=&window_start__lt=&window_start__gte=&window_start__lte=&window_end__gt=&window_end__lt=&window_end__gte=&window_end__lte=&last_updated__gte=&last_updated__lte=")
+    r = requests.get(
+        "https://ll.thespacedevs.com/2.2.0/launch/?mode=detailed&name=&slug=&rocket__configuration__name=&rocket__configuration__id=&status=1&rocket__spacecraftflight__spacecraft__name=&rocket__spacecraftflight__spacecraft__name__icontains=&rocket__spacecraftflight__spacecraft__id=&rocket__configuration__manufacturer__name=&rocket__configuration__manufacturer__name__icontains=&rocket__configuration__full_name=&rocket__configuration__full_name__icontains=&mission__orbit__name=&mission__orbit__name__icontains=&r_spacex_api_id=&net__gt=&net__lt=&net__gte=&net__lte=&window_start__gt=&window_start__lt=&window_start__gte=&window_start__lte=&window_end__gt=&window_end__lt=&window_end__gte=&window_end__lte=&last_updated__gte=&last_updated__lte="
+    )
 
     launches = r.json()
     # print(launches)
     try:
-        detail = launches['detail']
+        detail = launches["detail"]
         if detail:
             print(launches)
             if detail.startswith("Request was throttled"):
@@ -1628,25 +1788,25 @@ async def launches(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             continue
         infourl = f"https://spacelaunchnow.me/launch/{lancio['slug']}"
         moreinfo = f'[<a href="{infourl}">More info</a>]\n'
-        launchtime = datetime.strptime(lancio['net'], '%Y-%m-%dT%H:%M:%S%z')
+        launchtime = datetime.strptime(lancio["net"], "%Y-%m-%dT%H:%M:%S%z")
         local_launch_time = utc_to_local(launchtime)
         now = datetime.now(timezone.utc)
         delta = launchtime - now
 
         try:
-            link = lancio['vidURLs'][0]['url']
+            link = lancio["vidURLs"][0]["url"]
             videolink = f' [<a href="{link}">Stream</a>]'
         except (IndexError, KeyError):
             videolink = ""
 
-        if lancio['mission']:
-            tipo = lancio['mission']['type']
-            desc = lancio['mission']['description']
+        if lancio["mission"]:
+            tipo = lancio["mission"]["type"]
+            desc = lancio["mission"]["description"]
         else:
             tipo = "Sconosciuto"
             desc = "Missione sconosciuta"
 
-        name = lancio['name']
+        name = lancio["name"]
         messaggio += f"<b>[{tipo}] {name}</b>\n"
         messaggio += f"<i>{local_launch_time.strftime('%Y-%m-%d %H:%M:%S')} (Rome) - {launchtime.strftime('%Y-%m-%d %H:%M:%S')} (UTC)</i>\n"
         messaggio += f"Al lancio: <code>-{delta_to_string(delta)}</code>{videolink}\n"

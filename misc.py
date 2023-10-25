@@ -22,9 +22,11 @@ import upsidedown
 import zstandard
 from aiohttp_client_cache import CachedSession, FileBackend
 from codetiming import Timer
+
 # from dataclassy import dataclass
 from dateutil.parser import parse, parserinfo
 from gtts import gTTS
+
 # from nudenet import NudeClassifier, NudeDetector
 from PIL import Image
 from pydub import AudioSegment
@@ -45,29 +47,32 @@ async def movie(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     movies = os.listdir(movie_dir)
 
     r_movie = random.choice(movies)
-    this_movie = f'{movie_dir}{r_movie}'
+    this_movie = f"{movie_dir}{r_movie}"
 
     await printlog(update, "posta un frame di un film", r_movie)
 
     probe = ffmpeg.probe(this_movie)
 
-    if probe['streams'][0].get('duration'):
-        duration_seconds = int(float(probe['streams'][0]['duration']))
+    if probe["streams"][0].get("duration"):
+        duration_seconds = int(float(probe["streams"][0]["duration"]))
 
     else:
-        tot_frames = int(probe['streams'][0]['tags']['NUMBER_OF_FRAMES'])
+        tot_frames = int(probe["streams"][0]["tags"]["NUMBER_OF_FRAMES"])
 
-        avg_frame_rate = probe['streams'][0]['avg_frame_rate']
-        frame_rate = avg_frame_rate.split('/')
-        frame_rate = int(frame_rate[0])/int(frame_rate[1])
+        avg_frame_rate = probe["streams"][0]["avg_frame_rate"]
+        frame_rate = avg_frame_rate.split("/")
+        frame_rate = int(frame_rate[0]) / int(frame_rate[1])
 
-        duration_seconds = tot_frames//frame_rate
+        duration_seconds = tot_frames // frame_rate
 
     r = random.randint(100, duration_seconds)
 
-    with tempfile.NamedTemporaryFile(suffix='.png') as tempphoto:
-        ffmpeg.input(this_movie, ss=r).output(f'{tempphoto.name}', vframes=1, loglevel="quiet").run(overwrite_output=True)
-        await update.message.reply_photo(photo=open(tempphoto.name, 'rb'), quote=False)
+    with tempfile.NamedTemporaryFile(suffix=".png") as tempphoto:
+        ffmpeg.input(this_movie, ss=r).output(f"{tempphoto.name}", vframes=1, loglevel="quiet").run(
+            overwrite_output=True
+        )
+        await update.message.reply_photo(photo=open(tempphoto.name, "rb"), quote=False)
+
 
 async def self_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -77,39 +82,38 @@ async def self_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     await query.answer()
     await query.message.delete()
 
-async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
+async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     def get_corpus(filename, user_id):
-        with open(filename, encoding='utf') as json_file:
+        with open(filename, encoding="utf") as json_file:
             data = json.load(json_file)
             messages = []
             for m in data:
-                if m.get('user_id') == f"user{user_id}":
-                    messages.append(m['text'])
-            corpus = '\n'.join(messages)
+                if m.get("user_id") == f"user{user_id}":
+                    messages.append(m["text"])
+            corpus = "\n".join(messages)
             return corpus
 
     chats = {
-        -1001329447461: 'parsed-ungruppo-diochan-combined.json',
-        -1001255745056: 'parsed-asphalto.json',
-        -1001809875381: 'parsed-ungruppo-diochan-combined.json',
+        -1001329447461: "parsed-ungruppo-diochan-combined.json",
+        -1001255745056: "parsed-asphalto.json",
+        -1001809875381: "parsed-ungruppo-diochan-combined.json",
     }
 
     filename = chats.get(update.effective_chat.id, None)
 
     if update.effective_chat.id == config.ID_TESTING:
-        filename = 'parsed-ungruppo-diochan-combined.json'
+        filename = "parsed-ungruppo-diochan-combined.json"
     if not filename:
         return
     if not update.message.reply_to_message:
         return
 
-
     user_id = update.message.reply_to_message.from_user.id
 
-    corpus = get_corpus(f'db/corpuses/{filename}', user_id)
+    corpus = get_corpus(f"db/corpuses/{filename}", user_id)
     text_model = markovify.NewlineText(corpus)
-    stopwords = [lin.strip() for lin in open('db/stopwords-it.txt', encoding='utf8').readlines()]
+    stopwords = [lin.strip() for lin in open("db/stopwords-it.txt", encoding="utf8").readlines()]
     startword = random.choice([word for word in update.message.reply_to_message.text.split() if word not in stopwords])
     await printlog(update, f"genera markov chain che inizia con la parola '{startword}' per", user_id)
     try:
@@ -126,8 +130,8 @@ async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # print(f"Quale di queste due frasi è realmente stata scritta da tensor?\nA) {messages[0]}\nB) {messages[1]}")
 
-async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
+async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     _localize = humanize.i18n.activate("it_IT")
     type(_localize)
 
@@ -145,11 +149,11 @@ async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     deltas = {}
 
-    if '-all' in context.args:
+    if "-all" in context.args:
         max_secs = -1
 
-    elif '-report' in context.args:
-        max_secs = 1_209_600//2
+    elif "-report" in context.args:
+        max_secs = 1_209_600 // 2
         # max_secs = 295_000
 
     else:
@@ -169,32 +173,34 @@ async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # print(deltas)
     allmembers = await get_all_chatmembers(chat_id)
     for lurker in sorted(deltas.items(), key=lambda x: x[1], reverse=True):
-
         if lurker[1] > max_secs:
             for u in allmembers:
                 if u.user.id == lurker[0]:
                     mylurker = u
                     break
                 else:
-            # try:
+                    # try:
                     mylurker = await context.bot.get_chat_member(chat_id, lurker[0])
-            if mylurker and mylurker.status in ['left', 'kicked']:
+            if mylurker and mylurker.status in ["left", "kicked"]:
                 context.bot_data["timestamps"][chat_id].pop(lurker[0])
                 continue
 
             else:
-                message += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="seconds"))} fa\n'
-                messaggio_automatico += f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="days"))} fa\n'
+                message += (
+                    f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="seconds"))} fa\n'
+                )
+                messaggio_automatico += (
+                    f'{mylurker.user.first_name} - {str(humanize.precisedelta(lurker[1], minimum_unit="days"))} fa\n'
+                )
                 listona.append(mylurker.user.id)
 
     # print(listona)
 
-    if '-report' in context.args:
-
+    if "-report" in context.args:
         keyboard = [
             [
                 InlineKeyboardButton("👎 Kick", callback_data=listona),
-                InlineKeyboardButton("👍 Passo", callback_data=["LURKERS_LIST", None])
+                InlineKeyboardButton("👍 Passo", callback_data=["LURKERS_LIST", None]),
             ]
         ]
 
@@ -210,6 +216,7 @@ async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(message)
     else:
         await update.message.reply_text(f"Nessuno lurka da più di {max_secs} secondi")
+
 
 async def lurkers_callbackqueryhandlers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # print(update.to_dict())
@@ -245,6 +252,7 @@ async def lurkers_callbackqueryhandlers(update: Update, context: ContextTypes.DE
             except Exception:
                 print(traceback.format_exc())
 
+
 async def wikihow(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
@@ -254,18 +262,14 @@ async def wikihow(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     url_text = "https://hargrimm-wikihow-v1.p.rapidapi.com/steps"
     url_images = "https://hargrimm-wikihow-v1.p.rapidapi.com/images"
 
-    querystring = {"count":f"{count}"}
-    headers = {
-        "X-RapidAPI-Key": config.RAPIDAPI_KEY,
-        "X-RapidAPI-Host": "hargrimm-wikihow-v1.p.rapidapi.com"
-    }
+    querystring = {"count": f"{count}"}
+    headers = {"X-RapidAPI-Key": config.RAPIDAPI_KEY, "X-RapidAPI-Host": "hargrimm-wikihow-v1.p.rapidapi.com"}
 
     async with httpx.AsyncClient() as session:
         r = await session.get(url_text, headers=headers, params=querystring)
         r2 = await session.get(url_images, headers=headers, params=querystring)
     response_text = r.json()
     response_images = r2.json()
-
 
     await printlog(update, "chiede aiuto a wikihow")
     mystring = ""
@@ -275,6 +279,7 @@ async def wikihow(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     images = [url for url in response_images.values()]
     medialist = [InputMediaPhoto(media=url) for url in images]
     await update.message.reply_media_group(media=medialist, caption=mystring)
+
 
 async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message.chat.id not in [config.ID_TIMELINE, config.ID_AOC]:
@@ -293,9 +298,9 @@ async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     SESSION = config.AOC_SESSION
 
     url = f"https://adventofcode.com/2022/leaderboard/private/view/{LB_ID}.json"
-    headers = {'Cookie': f'session={SESSION}'}
+    headers = {"Cookie": f"session={SESSION}"}
 
-    cache = FileBackend(cache_name='aiohttp_cache', use_temp=True, expire_after=900)
+    cache = FileBackend(cache_name="aiohttp_cache", use_temp=True, expire_after=900)
 
     async with CachedSession(cache=cache) as session:
         response = await session.get(url, headers=headers)
@@ -304,15 +309,15 @@ async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     leaderboard = []
     classifica = ""
 
-    for member in response['members']:
+    for member in response["members"]:
         m = []
-        member = response['members'][member]
-        m.append(int(member.get('local_score')))
-        if member.get('name'):
-            m.append(member.get('name'))
+        member = response["members"][member]
+        m.append(int(member.get("local_score")))
+        if member.get("name"):
+            m.append(member.get("name"))
         else:
             m.append(f"Anonymous User #{member.get('id')}")
-        m.append(member.get('stars'))
+        m.append(member.get("stars"))
         leaderboard.append(m)
 
     top5 = sorted(leaderboard, reverse=True)[:10]
@@ -321,6 +326,7 @@ async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         classifica += f"{i: >2})\t[{value[0]}] {value[2]: >2} ⭐️ {value[1]}\n"
 
     await update.message.reply_html(f"<code>{classifica}</code>")
+
 
 async def random_trifase(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await no_can_do(update, context):
@@ -335,54 +341,56 @@ async def random_trifase(update: Update, context: ContextTypes.DEFAULT_TYPE):
     random_file = random.choice(random_list)
     pos = random_list.index(random_file)
     name = random_file[:-4]
-    name = name.replace('Luca', 'Trifase')
+    name = name.replace("Luca", "Trifase")
     name = f"[{pos}/{len(random_list)}] · {name}"
     await printlog(update, "chiede un'immagine di trifase random", name)
     await update.message.reply_photo(open(f"{trifasi_dir}{random_file}", "rb"), caption=name)
 
-async def polls_callbackqueryhandlers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
+async def polls_callbackqueryhandlers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
 
     # print(query.to_dict())
-    MAX_TIMEOUT = 28800 # 8 ore
+    MAX_TIMEOUT = 28800  # 8 ore
 
     await query.answer()
 
     mybutton = query.data
-    votazione = context.chat_data['votazioni_attive'][mybutton.original_msg_id]
-    domanda = votazione.get('domanda')
+    votazione = context.chat_data["votazioni_attive"][mybutton.original_msg_id]
+    domanda = votazione.get("domanda")
 
-    if (update.effective_user.id != config.ID_TRIF) and (update.effective_user.id in votazione['voters']):
+    if (update.effective_user.id != config.ID_TRIF) and (update.effective_user.id in votazione["voters"]):
         return
     else:
-        votazione['voters'].append(update.effective_user.id)
+        votazione["voters"].append(update.effective_user.id)
 
     await printlog(update, "ha votato", mybutton.vote)
 
-    if (mybutton.vote == 'sì') and (votazione['current_votes'] < votazione['max_votes']):
-        votazione['current_votes'] += 1
-    elif (mybutton.vote == 'no') and (votazione['current_votes'] > 0):
-        votazione['current_votes'] -= 1
+    if (mybutton.vote == "sì") and (votazione["current_votes"] < votazione["max_votes"]):
+        votazione["current_votes"] += 1
+    elif (mybutton.vote == "no") and (votazione["current_votes"] > 0):
+        votazione["current_votes"] -= 1
 
     messaggio = f"<code>{domanda if domanda else ''}Conferme: {votazione['current_votes']}/{votazione['max_votes']}\n"
-    messaggio += f"{print_progressbar(votazione['current_votes'], votazione['max_votes'], votazione['max_votes'])}</code>"
+    messaggio += (
+        f"{print_progressbar(votazione['current_votes'], votazione['max_votes'], votazione['max_votes'])}</code>"
+    )
     # print(f"Sondaggio originale: {votazione['timestamp']} - ora voto {int(time.time())}: {int(time.time()) - votazione['timestamp']}")
-    if (int(time.time()) - votazione['timestamp']) > MAX_TIMEOUT:
+    if (int(time.time()) - votazione["timestamp"]) > MAX_TIMEOUT:
         messaggio += "\n\nTempo scaduto."
-        context.chat_data['votazioni_attive'].pop(mybutton.original_msg_id, None)
+        context.chat_data["votazioni_attive"].pop(mybutton.original_msg_id, None)
         context.bot.callback_data_cache.clear_callback_data(time_cutoff=time.time() - (MAX_TIMEOUT + 10))
         await query.edit_message_text(messaggio)
         return
 
-    if votazione['current_votes'] == votazione['max_votes']:
+    if votazione["current_votes"] == votazione["max_votes"]:
         messaggio += "\n\nRisultato Raggiunto!"
         if update.effective_chat.id in [config.ID_ASPHALTO]:
             await query.unpin_message()
 
         await query.delete_message()
         # await query.edit_message_text(messaggio)
-        context.chat_data['votazioni_attive'].pop(mybutton.original_msg_id, None)
+        context.chat_data["votazioni_attive"].pop(mybutton.original_msg_id, None)
 
         try:
             context.args = mybutton.original_update.message.text.split()[1:]
@@ -393,18 +401,19 @@ async def polls_callbackqueryhandlers(update: Update, context: ContextTypes.DEFA
         await function_to_call(mybutton.original_update, context, poll_passed=True)
         return
 
-    elif votazione['current_votes'] == 0:
+    elif votazione["current_votes"] == 0:
         messaggio += "\n\nMi dispiace."
         if update.effective_chat.id in [config.ID_ASPHALTO]:
             await query.unpin_message()
         context.bot.callback_data_cache.clear_callback_data(time_cutoff=time.time() - 150)
-        context.chat_data['votazioni_attive'].pop(mybutton.original_msg_id, None)
+        context.chat_data["votazioni_attive"].pop(mybutton.original_msg_id, None)
         await query.edit_message_text(messaggio)
 
     else:
         await query.edit_message_text(messaggio, reply_markup=query.message.reply_markup)
 
     return
+
 
 # async def is_safe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 #     if await no_can_do(update, context):
@@ -448,6 +457,7 @@ async def polls_callbackqueryhandlers(update: Update, context: ContextTypes.DEFA
 
 #         await msg.edit_text(text, parse_mode='HTML')
 
+
 async def greet_BT_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.id not in [config.ID_TIMELINE]:
         return
@@ -461,10 +471,11 @@ async def greet_BT_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Weee anche tu qua",
         "Weeeee da quanto tempo!",
         "Weeeeee quanto tempo",
-        "Weeeeeeee quanto tempo"
+        "Weeeeeeee quanto tempo",
     ]
 
     await update.message.reply_html(random.choice(greets))
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = """
@@ -485,6 +496,7 @@ Se hai altre domande, puoi chiedere qui: @Trifase
     await update.message.reply_html(message)
     return
 
+
 async def get_user_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
@@ -497,6 +509,7 @@ async def get_user_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     print(user_summary)
     await update.message.reply_html(user_summary)
 
+
 async def set_auto_reaction(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
@@ -508,21 +521,25 @@ async def set_auto_reaction(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     user_id = update.message.reply_to_message.from_user.id
 
     if not context.args or context.args[0] == "-off":
-        context.application.user_data[user_id].pop('auto_reaction')
+        context.application.user_data[user_id].pop("auto_reaction")
         await update.message.reply_text("Auto reaction disabilitata")
-        await printlog(update, "disabilita auto reaction", f"{user_id} ({update.message.reply_to_message.from_user.username})")
+        await printlog(
+            update, "disabilita auto reaction", f"{user_id} ({update.message.reply_to_message.from_user.username})"
+        )
         # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} disabilita Auto Reaction su {user_id} ({update.message.reply_to_message.from_user.username})')
         return
 
-    context.application.user_data[user_id]['auto_reaction'] = context.args[0]
+    context.application.user_data[user_id]["auto_reaction"] = context.args[0]
     await update.message.reply_text(f"Auto reaction abilitata: {context.args[0]}")
     await printlog(update, "abilita auto reaction", f"{user_id} ({update.message.reply_to_message.from_user.username})")
+
 
 async def send_auto_reaction(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-    if context.user_data.get('auto_reaction'):
-        await send_reaction(update.message.chat_id, update.message.message_id, context.user_data['auto_reaction'])
+    if context.user_data.get("auto_reaction"):
+        await send_reaction(update.message.chat_id, update.message.message_id, context.user_data["auto_reaction"])
+
 
 async def bomb_react(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -538,12 +555,15 @@ async def bomb_react(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
     await pyro_bomb_reaction(update.message.chat_id, username, limit=120, sample=20)
 
+
 async def bioritmo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
     specificdate = False
     if not context.args or "/" not in context.args[0]:
-        await update.message.reply_text("Devi fornire la data di nascita (lo so), tipo <code>/bioritmo 08/03/1987</code> o simile.")
+        await update.message.reply_text(
+            "Devi fornire la data di nascita (lo so), tipo <code>/bioritmo 08/03/1987</code> o simile."
+        )
         return
     if len(context.args) == 2 and "/" in context.args[0] and "/" in context.args[1]:
         specificdate = True
@@ -561,21 +581,18 @@ async def bioritmo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         dt_now = datetime.datetime.now()
         dt_now_ymd = datetime.datetime(dt_now.year, dt_now.month, dt_now.day)
 
-
     dt_diff = dt_now_ymd - dt_bd
     dt_diff_days = dt_diff.days
-
 
     dt_start_delta = 7
 
     dt_end_delta = 7
 
-
     dt_start = dt_now_ymd - datetime.timedelta(days=dt_start_delta)
 
     dt_end = dt_now_ymd + datetime.timedelta(days=dt_end_delta)
 
-    dt_range = dt_end - dt_start  + datetime.timedelta(days=1)
+    dt_range = dt_end - dt_start + datetime.timedelta(days=1)
 
     dates = [dt_start + datetime.timedelta(days=i) for i in range(dt_range.days)]
 
@@ -585,17 +602,16 @@ async def bioritmo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     vals3 = [np.sin(2 * np.pi * (i + dt_diff_days - dt_start_delta) / 33) for i in range(dt_range.days)]
 
-
     plt.figure(figsize=plt.figaspect(0.5))
 
     ax = plt.subplot()
-    ax.axvline(x=dt_start + datetime.timedelta(days=7), color='k')
-    ax.axhline(y=0, xmin=0, xmax=1, color='k')
-    ax.plot(dates, vals1, color='red')
-    ax.plot(dates, vals2, color='green')
-    ax.plot(dates, vals3, color='blue')
+    ax.axvline(x=dt_start + datetime.timedelta(days=7), color="k")
+    ax.axhline(y=0, xmin=0, xmax=1, color="k")
+    ax.plot(dates, vals1, color="red")
+    ax.plot(dates, vals2, color="green")
+    ax.plot(dates, vals3, color="blue")
 
-    xfmt = mdates.DateFormatter('%m/%d')
+    xfmt = mdates.DateFormatter("%m/%d")
     xloc = mdates.DayLocator()
     ax.xaxis.set_tick_params(rotation=90)
 
@@ -603,23 +619,21 @@ async def bioritmo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     ax.xaxis.set_major_formatter(xfmt)
 
+    ax.text(dt_start + datetime.timedelta(days=1), 1.2, "Fisico", color="red")
 
-    ax.text(dt_start + datetime.timedelta(days=1), 1.2, 'Fisico', color='red')
+    ax.text(dt_start + datetime.timedelta(days=5), 1.2, "Emotivo", color="green")
 
-    ax.text(dt_start + datetime.timedelta(days=5), 1.2, 'Emotivo', color='green')
-
-    ax.text(dt_start + datetime.timedelta(days=9), 1.2, 'Intellettuale', color='blue')
-
+    ax.text(dt_start + datetime.timedelta(days=9), 1.2, "Intellettuale", color="blue")
 
     ax.set_xlim(dt_start, dt_end)
 
     ax.grid(True)
 
-    plt.savefig('images/bioritmo.png')
-    await update.message.reply_photo(open('images/bioritmo.png', 'rb'))
+    plt.savefig("images/bioritmo.png")
+    await update.message.reply_photo(open("images/bioritmo.png", "rb"))
+
 
 async def condominioweb(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     # @dataclass
     # class Comment:
     #     text: str
@@ -638,15 +652,15 @@ async def condominioweb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     def generate_condominioweb_threads(use_zip=True):
         if use_zip:
-            with open('db/condominioweb.jsonl.zst', 'rb') as fh:
+            with open("db/condominioweb.jsonl.zst", "rb") as fh:
                 dctx = zstandard.ZstdDecompressor()
                 stream_reader = dctx.stream_reader(fh)
-                text_stream = io.TextIOWrapper(stream_reader, encoding='utf-8')
+                text_stream = io.TextIOWrapper(stream_reader, encoding="utf-8")
                 for line in text_stream:
                     obj = json.loads(line)
                     yield obj
         else:
-            with jsonlines.open('db/condominioweb.jsonl') as reader:
+            with jsonlines.open("db/condominioweb.jsonl") as reader:
                 for obj in reader:
                     yield obj
 
@@ -669,32 +683,38 @@ async def condominioweb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     await printlog(update, "cerca su condominioweb")
-    await context.bot.send_message(config.ID_RITALY, "Ok, un attimo, vado a scegliere un thread casuale", parse_mode='HTML', disable_web_page_preview=True)
+    await context.bot.send_message(
+        config.ID_RITALY,
+        "Ok, un attimo, vado a scegliere un thread casuale",
+        parse_mode="HTML",
+        disable_web_page_preview=True,
+    )
     with Timer(name="unzip"):
         threadlist = [thread for thread in generate_condominioweb_threads()]
     thread = random.choice(threadlist)
-    author = thread.get('author').get('name')
-    url = thread.get('discussionUrl')
-    title = thread.get('name')
-    text = thread.get('text')
+    author = thread.get("author").get("name")
+    url = thread.get("discussionUrl")
+    title = thread.get("name")
+    text = thread.get("text")
     message = f"<a href='{url}'><b>{title}</b></a>\n{author} ha scritto:\n{text}"
-    await context.bot.send_message(config.ID_RITALY, message, parse_mode='HTML', disable_web_page_preview=True)
+    await context.bot.send_message(config.ID_RITALY, message, parse_mode="HTML", disable_web_page_preview=True)
     # print(message)
     # print("=====")
     time.sleep(1)
 
-    if not thread.get('comment'):
-        await context.bot.send_message(config.ID_RITALY, "Nessuno ha mai risposto.", parse_mode='HTML')
+    if not thread.get("comment"):
+        await context.bot.send_message(config.ID_RITALY, "Nessuno ha mai risposto.", parse_mode="HTML")
         return
 
-    for comment in thread.get('comment'):
-        author = comment.get('author').get('name')
-        text = comment.get('text')
+    for comment in thread.get("comment"):
+        author = comment.get("author").get("name")
+        text = comment.get("text")
         message = f"{author} risponde:\n{text}"
         # print(message)
         # print()
-        await context.bot.send_message(config.ID_RITALY, message, parse_mode='HTML')
+        await context.bot.send_message(config.ID_RITALY, message, parse_mode="HTML")
         time.sleep(1.5)
+
 
 async def traduci(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     reply = False
@@ -706,12 +726,40 @@ async def traduci(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await printlog(update, "chiede una traduzione")
     translator = deepl.Translator(config.DEEPL_API_KEY)
     target_language = "EN-GB"
-    languages = ["BG", "CS", "DA", "DE", "EL", "EN-GB", "EN-US", "ES", "ET", "FI", "FR", "HU", "IT", "JA", "LT", "LV", "NL", "PL", "PT-PT", "PT-BR", "RO", "RU", "SK", "SL", "SV", "TR", "ZH"]
+    languages = [
+        "BG",
+        "CS",
+        "DA",
+        "DE",
+        "EL",
+        "EN-GB",
+        "EN-US",
+        "ES",
+        "ET",
+        "FI",
+        "FR",
+        "HU",
+        "IT",
+        "JA",
+        "LT",
+        "LV",
+        "NL",
+        "PL",
+        "PT-PT",
+        "PT-BR",
+        "RO",
+        "RU",
+        "SK",
+        "SL",
+        "SV",
+        "TR",
+        "ZH",
+    ]
 
     if update.message.reply_to_message:  # è una reply
         reply = True
         if context.args:  # c'è qualcosa oltre a traduci
-            if context.args[0].startswith('@'):  # la prima parola è @
+            if context.args[0].startswith("@"):  # la prima parola è @
                 if context.args[0][1:].upper() not in languages:  # non è una lingua accettata
                     await update.message.reply_text("Non riconosco quella lingua.")
                     return
@@ -727,7 +775,7 @@ async def traduci(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     else:
         if context.args:
-            if context.args[0].startswith('@'):  # la prima parola è @
+            if context.args[0].startswith("@"):  # la prima parola è @
                 if context.args[0][1:].upper() not in languages:  # non è una lingua accettata
                     await update.message.reply_text("Non riconosco quella lingua.")
                     return
@@ -742,7 +790,7 @@ async def traduci(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             return
 
     result = translator.translate_text(text, target_lang=target_language)
-    translated_text = f'[{target_language}] {result.text}'
+    translated_text = f"[{target_language}] {result.text}"
     if not translated_text:
         await update.message.reply_text("boh")
     else:
@@ -752,6 +800,7 @@ async def traduci(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         else:
             await update.message.reply_text(translated_text)
     return
+
 
 async def fatfingers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -764,10 +813,13 @@ async def fatfingers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
             line_index, index = [(i, lin.find(key)) for i, lin in enumerate(lines) if key in lin][0]
         except IndexError:
             return [key]
-        lines = lines[line_index - 1: line_index + 2] if line_index else lines[0: 2]
+        lines = lines[line_index - 1 : line_index + 2] if line_index else lines[0:2]
         return [
-            line[index + i] for line in lines for i in [-1, 0, 1]
-            if len(line) > index + i and line[index + i] != key and index + i >= 0]
+            line[index + i]
+            for line in lines
+            for i in [-1, 0, 1]
+            if len(line) > index + i and line[index + i] != key and index + i >= 0
+        ]
 
     def substitution(c):
         c = c.replace(c, random.choice(get_keys_around(c)))
@@ -797,8 +849,6 @@ async def fatfingers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} digita con le dita ciccione!')
     await printlog(update, "digita con le dita ciccionazze")
-
-
 
     for c in text:
         ifupper = c.isupper()
@@ -835,9 +885,10 @@ async def fatfingers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
             else:
                 newtext.append(c)
 
-    string = ''.join(x for x in newtext)
+    string = "".join(x for x in newtext)
     string = string.replace("<", "&lt;").replace(">", "&gt;")
-    await update.message.reply_to_message.reply_text(f'{string}')
+    await update.message.reply_to_message.reply_text(f"{string}")
+
 
 async def spongebob(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -856,13 +907,16 @@ async def spongebob(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     newmessage = []
     for index, character in message:
-        if (index % 2 != 0):
+        if index % 2 != 0:
             newmessage.append(character.lower())
         else:
             newmessage.append(character.upper())
 
-    string = ''.join(x for x in newmessage)
-    await context.bot.send_photo(update.message.chat.id, photo=open('images/spongebob.jpg', 'rb'), caption=string, reply_to_message_id=message_id)
+    string = "".join(x for x in newmessage)
+    await context.bot.send_photo(
+        update.message.chat.id, photo=open("images/spongebob.jpg", "rb"), caption=string, reply_to_message_id=message_id
+    )
+
 
 async def call_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -872,20 +926,24 @@ async def call_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if update.message.chat.id == config.ID_ASPHALTO:
         await update.message.reply_markdown_v2(
-            f'Ciao {update.effective_user.username}, i comandi disponibili in questo canale sono:\n`/square`\n`/set`, `/listaset` e `/deleteset`\n`/remindme`,`/reminderlist` e `remindelete`\n`/tweet` in risposta, `/tweet <qualcosa>` o `/tweets` per la lista, `/listaset` e `deleteset`\n`/azzurro nome@messaggio` \(in pvt\)\.')
+            f"Ciao {update.effective_user.username}, i comandi disponibili in questo canale sono:\n`/square`\n`/set`, `/listaset` e `/deleteset`\n`/remindme`,`/reminderlist` e `remindelete`\n`/tweet` in risposta, `/tweet <qualcosa>` o `/tweets` per la lista, `/listaset` e `deleteset`\n`/azzurro nome@messaggio` \(in pvt\)\."
+        )
         return
     elif update.message.chat.id == config.ID_DIOCHAN:
         await update.message.reply_markdown_v2(
-            f'Ciao {update.effective_user.username}, i comandi disponibili in questo canale sono:\n`/square`\n`/set`, `/listaset` e `/deleteset`\n`/remindme`,`/reminderlist` e `remindelete`\n`/tweet` in risposta, `/tweet <qualcosa>` o `/tweets` per la lista\.')
+            f"Ciao {update.effective_user.username}, i comandi disponibili in questo canale sono:\n`/square`\n`/set`, `/listaset` e `/deleteset`\n`/remindme`,`/reminderlist` e `remindelete`\n`/tweet` in risposta, `/tweet <qualcosa>` o `/tweets` per la lista\."
+        )
     else:
         await update.message.reply_markdown_v2(
-            f'Ciao {update.effective_user.username}, i comandi disponibili in questo canale sono:\n`/square`\n`/set`, `/listaset` e `/deleteset`\n`/remindme`,`/reminderlist` e `remindelete`\n`/tweet` in risposta, `/tweet <qualcosa>` o `/tweets` per la lista\.')
+            f"Ciao {update.effective_user.username}, i comandi disponibili in questo canale sono:\n`/square`\n`/set`, `/listaset` e `/deleteset`\n`/remindme`,`/reminderlist` e `remindelete`\n`/tweet` in risposta, `/tweet <qualcosa>` o `/tweets` per la lista\."
+        )
+
 
 async def square(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:  # SQUARE!
     if await no_can_do(update, context):
         return
     if not context.args:
-        await update.message.reply_text('Devi scrivere qualche cosa.')
+        await update.message.reply_text("Devi scrivere qualche cosa.")
         return
 
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {get_chat(update.message.chat.id)} triggera SQUARE!')  # debug
@@ -894,18 +952,19 @@ async def square(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:  #
 
     text = " ".join(context.args)  # SQUARE (6) "S Q U A R E" (6*2)-1 = 11
     if len(text) == 1:
-        await update.message.reply_text('Fallo tu un quadrato con un carattere solo, coglione')
+        await update.message.reply_text("Fallo tu un quadrato con un carattere solo, coglione")
         return
     inversetext = text[::-1]  # ERAUQS
     lung = (len(text) * 2) - 1
-    fill = (lung - 2) * ' '
+    fill = (lung - 2) * " "
     message = []
     message.append("`" + expand(text) + "`")
     for i in range(1, len(text) - 1):
         message.append("`" + text[i] + fill + inversetext[i] + "`")
     message.append("`" + expand(inversetext) + "`")
     squared = "\n".join(message)
-    await update.message.reply_markdown_v2(f'{squared}')
+    await update.message.reply_markdown_v2(f"{squared}")
+
 
 async def fascio(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await no_can_do(update, context):
@@ -928,7 +987,7 @@ async def fascio(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 message = message
             picture = update.message.reply_to_message.photo[-1]
             # tempphoto = tempfile.mktemp(suffix='.jpg')
-            tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
+            tempphoto = tempfile.NamedTemporaryFile(suffix=".jpg")
             actual_picture = await picture.get_file()
             await actual_picture.download_to_drive(custom_path=tempphoto.name)
             im = Image.open(tempphoto.name)
@@ -946,6 +1005,7 @@ async def fascio(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         return
 
+
 async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
@@ -961,75 +1021,83 @@ async def scacchi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if nick == "amichevole":
         post_data = {
-            'rated': 'false',
-            'clock.limit': limit,
-            'clock.increment': increment,
-            'variant': 'standard',
-            'name': 'r/italy scacchi'
+            "rated": "false",
+            "clock.limit": limit,
+            "clock.increment": increment,
+            "variant": "standard",
+            "name": "r/italy scacchi",
         }
-        response = requests.post('https://lichess.org/api/challenge/open', data=post_data)
+        response = requests.post("https://lichess.org/api/challenge/open", data=post_data)
         reply = response.json()
-        url = reply['challenge']['url']
-        await update.message.reply_html(f'Nuova partita creata!\n{url}\nTipo di partita: amichevole 5+3', disable_web_page_preview=True)
+        url = reply["challenge"]["url"]
+        await update.message.reply_html(
+            f"Nuova partita creata!\n{url}\nTipo di partita: amichevole 5+3", disable_web_page_preview=True
+        )
         return
 
     if nick == "corrispondenza":
         post_data = {
-            'rated': 'false',
-            'clock.limit': "",
-            'clock.increment': "",
-            'variant': 'standard',
-            'name': 'r/italy scacchi'
+            "rated": "false",
+            "clock.limit": "",
+            "clock.increment": "",
+            "variant": "standard",
+            "name": "r/italy scacchi",
         }
-        response = requests.post('https://lichess.org/api/challenge/open', data=post_data)
+        response = requests.post("https://lichess.org/api/challenge/open", data=post_data)
         reply = response.json()
-        url = reply['challenge']['url']
-        await update.message.reply_html(f'Nuova partita creata!\n{url}\nTipo di partita: corrispondenza', disable_web_page_preview=True)
+        url = reply["challenge"]["url"]
+        await update.message.reply_html(
+            f"Nuova partita creata!\n{url}\nTipo di partita: corrispondenza", disable_web_page_preview=True
+        )
         return
 
     if nick == "rated" or nick == "ranked":
         post_data = {
-            'rated': 'true',
-            'clock.limit': limit,
-            'clock.increment': increment,
-            'variant': 'standard',
-            'name': 'r/italy scacchi'
+            "rated": "true",
+            "clock.limit": limit,
+            "clock.increment": increment,
+            "variant": "standard",
+            "name": "r/italy scacchi",
         }
-        response = requests.post('https://lichess.org/api/challenge/open', data=post_data)
+        response = requests.post("https://lichess.org/api/challenge/open", data=post_data)
         reply = response.json()
-        url = reply['challenge']['url']
-        await update.message.reply_html(f'Nuova partita creata!\n{url}\nTipo di partita: classificata 10+3', disable_web_page_preview=True)
+        url = reply["challenge"]["url"]
+        await update.message.reply_html(
+            f"Nuova partita creata!\n{url}\nTipo di partita: classificata 10+3", disable_web_page_preview=True
+        )
         return
 
     if not nick:
-        await update.message.reply_text('Inserisci un nick per le statistiche, oppure "rated" per una 10+3 rated, oppure "amichevole" per una 10+3 amichevole')
+        await update.message.reply_text(
+            'Inserisci un nick per le statistiche, oppure "rated" per una 10+3 rated, oppure "amichevole" per una 10+3 amichevole'
+        )
         return
     try:
         user = lichess.api.user(nick, auth=token)
     except Exception as e:
-        await update.message.reply_text(f'{e}: Nick {nick} non trovato.')
+        await update.message.reply_text(f"{e}: Nick {nick} non trovato.")
         return
     # print(user['perfs'])
     # print(user['count'])
-    giocate = user['count']['all']
-    vinte = user['count']['win']
-    last_seen = datetime.datetime.fromtimestamp(int(str(user['seenAt'])[:10])).strftime('%Y-%m-%d %H:%M:%S')
+    giocate = user["count"]["all"]
+    vinte = user["count"]["win"]
+    last_seen = datetime.datetime.fromtimestamp(int(str(user["seenAt"])[:10])).strftime("%Y-%m-%d %H:%M:%S")
     if int(giocate) == 0:
         vinte_ratio = "100"
     else:
         vinte_ratio = round(int(vinte) / int(giocate) * 100, 2)
 
-    url = user['url']
+    url = user["url"]
     messaggio = ""
     messaggio += f"\nVinte: {vinte}/{giocate} ({vinte_ratio}%)\n\n"
-    for k, v in user['perfs'].items():
+    for k, v in user["perfs"].items():
         try:
             messaggio += f"{k.capitalize()}: <code>{v['rating']}</code> ({v['games']} partite)\n"
         except KeyError:
             pass
     messaggio += f"\nLast seen: {last_seen}\n"
     try:
-        url_partita = user['playing']
+        url_partita = user["playing"]
         messaggio = f'<a href="{url}">{nick}</a> <a href="{url_partita}">[in partita]</a>:\n' + messaggio
         await update.message.reply_html(messaggio, disable_web_page_preview=True)
     except KeyError:
@@ -1041,8 +1109,7 @@ async def voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     def text_to_audio(string):
-
-        language = 'it'
+        language = "it"
         voice_tts = gTTS(text=string, lang=language, slow=False)
         voice_tts.save("tts/tts_mp3.mp3")
         song = AudioSegment.from_mp3("tts/tts_mp3.mp3")
@@ -1061,10 +1128,10 @@ async def voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         # text = update.message.reply_to_message.from_user.username + " dice: " + update.message.reply_to_message.text
     else:
         text = f"{update.effective_user.username} non sa che scrivere"
-    await update.effective_chat.send_chat_action(action='record_voice')
+    await update.effective_chat.send_chat_action(action="record_voice")
     text_to_audio(text)
-    file = open("tts/tts_ogg.ogg", 'rb')
-    await update.effective_chat.send_chat_action(action='upload_voice')
+    file = open("tts/tts_ogg.ogg", "rb")
+    await update.effective_chat.send_chat_action(action="upload_voice")
     await bot.send_voice(update.message.chat_id, file, reply_to_message_id=update.message.reply_to_message.id)
 
 
@@ -1079,8 +1146,8 @@ async def alexa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} chiede una canzone ad alexa: {search_term}')
     await printlog(update, "chiede una canzone ad alexa", search_term)
 
-    videosSearch = VideosSearch(search_term, limit=1, region='IT')
-    my_video = videosSearch.result()['result'][0]
+    videosSearch = VideosSearch(search_term, limit=1, region="IT")
+    my_video = videosSearch.result()["result"][0]
     message = f"<a href='{my_video['link']}'>{my_video['title']}</a>\n"
     message += f"<a href='{my_video['channel']['link']}'>{my_video['channel']['name']}</a> | {my_video['viewCount']['text']} · {my_video['publishedTime']}"
     await update.message.reply_html(message)

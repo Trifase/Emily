@@ -13,7 +13,6 @@ api_id = config.API_ID
 api_hash = config.API_HASH
 
 
-
 async def get_user_from_username(username):
     async with Client("db/pyro-session-trifase.session", api_id, api_hash) as pyro:
         myuser = await pyro.get_users(username)
@@ -22,15 +21,18 @@ async def get_user_from_username(username):
         mymessage += f"Status: {myuser.status}"
         return mymessage
 
+
 async def get_user_from_user_id(user_id):
     async with Client("db/pyro-session-trifase.session", api_id, api_hash) as pyro:
         myuser = await pyro.get_users(user_id)
         return myuser
 
+
 async def get_chatmember_pyrog(chat_id, user_id):
     async with Client("db/pyro-session-trifase.session", api_id, api_hash) as pyro:
         mychatmember = await pyro.get_chat_member(chat_id, user_id)
         return mychatmember
+
 
 async def get_all_chatmembers(chat_id):
     async with Client("db/pyro-session-trifase.session", api_id, api_hash) as pyro:
@@ -66,14 +68,14 @@ async def get_reaction_count(user_id, chat_id):
 
         r = sorted(r.items(), key=lambda kv: kv[1], reverse=True)
         data = {}
-        data['user_id'] = user_id
-        data['chat_id'] = chat_id
-        data['messages_total'] = n
-        data['messages_reacted'] = n_r
-        data['reactions'] = {}
+        data["user_id"] = user_id
+        data["chat_id"] = chat_id
+        data["messages_total"] = n
+        data["messages_reacted"] = n_r
+        data["reactions"] = {}
 
         for reaction in r:
-            data['reactions'][reaction[0]] = reaction[1]
+            data["reactions"][reaction[0]] = reaction[1]
 
         return data
 
@@ -81,6 +83,7 @@ async def get_reaction_count(user_id, chat_id):
 async def send_reaction(chat_id: int, message_id: int, emoji="👎"):
     async with Client("db/pyro-session-trifase.session", api_id, api_hash) as pyro:
         await pyro.send_reaction(chat_id, message_id, emoji)
+
 
 async def pyro_bomb_reaction(chat_id, user_id, limit=100, sample=20):
     async with Client("db/pyro-session-trifase.session", api_id, api_hash) as pyro:
@@ -94,6 +97,7 @@ async def pyro_bomb_reaction(chat_id, user_id, limit=100, sample=20):
                 print(e)
                 continue
             await asyncio.sleep(0.5)
+
 
 async def reaction_karma(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await no_can_do(update, context):
@@ -122,11 +126,12 @@ async def reaction_karma(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message += f"Chat ID: {chat_id}\n\n"
 
     m = ""
-    for react in r['reactions'].items():
+    for react in r["reactions"].items():
         m += f"{react[0]} {react[1]}\n"
     message += m
     await mymsg.edit_text(message)
     # await update.message.reply_html(message)
+
 
 def get_dialogs():
     with Client("db/pyro-session-trifase.session", api_id, api_hash) as pyro:
@@ -134,6 +139,7 @@ def get_dialogs():
         for d in mydialogs:
             print(f"{d.chat.id}\t{d.chat.first_name or d.chat.title}")
         print(f"Chat totali: {pyro.get_dialogs_count()}")
+
 
 def get_reactions_from_post_id(chat_id, message_id):
     with Client("db/pyro-session-trifase.session", api_id, api_hash) as pyro:
@@ -147,8 +153,4 @@ def get_reactions_from_post_id(chat_id, message_id):
         return reactions
 
 
-
 # print(get_reactions_from_post_id(-1001155308424, 629368))
-
-
-

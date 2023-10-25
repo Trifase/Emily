@@ -26,6 +26,7 @@ last_search = ""
 last_results = []
 index_results = 0
 
+
 # Tensor
 async def save_tensor(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(update.message.text) <= 25:
@@ -41,6 +42,7 @@ async def save_tensor(update: Update, context: ContextTypes.DEFAULT_TYPE):
     newtensor = TensorMessage.create(tensor_text=message_to_add)
     newtensor.save()
 
+
 async def random_tensor(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await no_can_do(update, context):
         return
@@ -54,6 +56,7 @@ async def random_tensor(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tensor_message = random.choice(tensors).tensor_text
 
     await update.message.reply_text(tensor_message, quote=False)
+
 
 # Quotes
 async def search_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -70,7 +73,6 @@ async def search_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             quote = random.choice(quotes).quote_text
 
             return ("0", "0", quote)
-
 
         else:  # qualcosa da cercare
             if searchterm == last_search:  # abbiamo appena cercato
@@ -113,15 +115,13 @@ async def search_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             mymessage += f"{quote.quote_text}\n-----\n"
 
         URL = "https://hastebin.com"
-        response = requests.post(URL + "/documents", mymessage.encode('utf-8'))
+        response = requests.post(URL + "/documents", mymessage.encode("utf-8"))
 
         r = json.loads(response.text)
 
         pastebin_url = f"{URL}/raw/{r['key']}"
         await update.message.reply_html(f'<a href="{pastebin_url}">Ecco a te</a>', quote=False)
         return
-
-
 
     quote = get_quotes(searchquery)  # ('1', '8', 'text')
     if quote[0] == "0":  # random quote
@@ -142,6 +142,7 @@ async def search_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         message_text = f"Quote {quote[0]} di {quote[1]}\n{myquote}"
         await update.message.reply_html(message_text, quote=False)
 
+
 async def add_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
@@ -150,9 +151,7 @@ async def add_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await printlog(update, "vuole aggiungere una quote di diochan")
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} vuole aggiungere una quote')
 
-
     if not context.args:  # il messaggio non ha testo
-
         if update.message.reply_to_message.text:  # è una reply
             user_id = update.message.reply_to_message.from_user.id
             chat_id = update.message.chat.id
@@ -167,19 +166,19 @@ async def add_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             quote_to_add = "<" + nickname + "> " + text_to_add
 
         else:  # non è una reply
-            await update.message.reply_text('Addami sta minchia')
+            await update.message.reply_text("Addami sta minchia")
             return
 
     else:  # il messaggio è dopo il comando
         text_to_add = " ".join(context.args)
-
 
         quote_to_add = text_to_add
 
     newquote = Quote.create(quote_text=quote_to_add)
     newquote.save()
 
-    await update.message.reply_text('Fatto', quote=False)
+    await update.message.reply_text("Fatto", quote=False)
+
 
 # Diochan
 async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -190,17 +189,17 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chiave = config.CHIAVE_DIOCHAN
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} vuole postare su diochan')
     await printlog(update, "vuole postare su diochan")
-    listaboard = ['b', 's', 'x', 'hd', '420', 'aco', 'v', 'cul', 'yt', 'ck', 'mu', 'pol', 'p', 'sug']
+    listaboard = ["b", "s", "x", "hd", "420", "aco", "v", "cul", "yt", "ck", "mu", "pol", "p", "sug"]
     board = ""
     message = " ".join(context.args)
 
     for b in listaboard:
-        if f'/{b}/' in message[:5]:
+        if f"/{b}/" in message[:5]:
             board = b
-            message = message[(len(b) + 2):]
-        elif f'/{b}' in message[:5]:
+            message = message[(len(b) + 2) :]
+        elif f"/{b}" in message[:5]:
             board = b
-            message = message[(len(b) + 1):]
+            message = message[(len(b) + 1) :]
 
     if not board:
         await context.bot.send_message(update.message.chat.id, "Devi specificare una board")
@@ -217,16 +216,16 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     message = "Ho il culo pieno di ovatta"
             picture = update.message.reply_to_message.photo[-1]
             # tempphoto = tempfile.mktemp(suffix='.jpg')
-            tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
+            tempphoto = tempfile.NamedTemporaryFile(suffix=".jpg")
             actual_picture = await picture.get_file()
             await actual_picture.download_to_drive(custom_path=tempphoto.name)
 
-            baseurl = 'https://www.diochan.com/'
-            referurl = f'{baseurl}{board}/index.html'
+            baseurl = "https://www.diochan.com/"
+            referurl = f"{baseurl}{board}/index.html"
 
             HEADERS = {
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36',
-                'referer': referurl
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36",
+                "referer": referurl,
             }
             # delpass = ''.join(random.choice(string.ascii_letters + string.digits + string.punctuation) for _ in range(8))
             delpass = chiave
@@ -239,40 +238,40 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 "imageurl": "",
                 "embed": "",
                 "password": delpass,
-                "json_response": "0"
+                "json_response": "0",
             }
 
             r = requests.get(baseurl + board + "/", headers=HEADERS)
-            soup = BeautifulSoup(r.text, 'html.parser')
+            soup = BeautifulSoup(r.text, "html.parser")
 
             # Get every input
-            for tag in soup.find_all('input'):
+            for tag in soup.find_all("input"):
                 tag = str(tag).strip()
-                htmltag = BeautifulSoup(tag, 'html.parser').input
+                htmltag = BeautifulSoup(tag, "html.parser").input
                 try:
-                    name = str(htmltag['name'])
-                    value = str(htmltag['value'])
+                    name = str(htmltag["name"])
+                    value = str(htmltag["value"])
                 except (ValueError, KeyError):
                     continue
-                if name not in ['report', 'delete', 'password']:
+                if name not in ["report", "delete", "password"]:
                     payload[name] = value
 
             # Get every textarea
-            for tag in soup.find_all('textarea'):
+            for tag in soup.find_all("textarea"):
                 tag = str(tag).strip()
-                htmltag = BeautifulSoup(tag, 'html.parser').textarea
+                htmltag = BeautifulSoup(tag, "html.parser").textarea
                 try:
-                    name = str(htmltag['name'])
+                    name = str(htmltag["name"])
                     value = htmltag.string
                 except ValueError:
                     continue
-                if name not in ['body']:
+                if name not in ["body"]:
                     payload[name] = value
 
             # Textboox upload multipart-encoded files with Requests
             image_file_descriptor = tempphoto
-            files = {'file': image_file_descriptor}
-            posturl = f'{baseurl}post.php'
+            files = {"file": image_file_descriptor}
+            posturl = f"{baseurl}post.php"
             richiesta = requests.post(posturl, headers=HEADERS, data=payload, files=files)
             image_file_descriptor.close()
             response = richiesta.json()
@@ -280,9 +279,9 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
             try:
                 thread_id = response["id"]
-                link = f'https://www.diochan.com/{board}/res/{thread_id}.html'
+                link = f"https://www.diochan.com/{board}/res/{thread_id}.html"
                 reply_link = f"Postato! {link}"
-                print(f'{get_now()} Fatto! {reply_link} - pass per cancellare: {delpass}')
+                print(f"{get_now()} Fatto! {reply_link} - pass per cancellare: {delpass}")
                 await context.bot.send_message(update.message.chat.id, reply_link)
 
             except Exception as e:
@@ -295,12 +294,13 @@ async def diochan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except AttributeError:
         return
 
+
 async def ascendi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
     await printlog(update, "A S C E N D E")
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} A S C E N D E')
-    message = ' '.join(context.args)
+    message = " ".join(context.args)
     if not message:
         try:
             message = update.message.reply_to_message.text
@@ -310,9 +310,10 @@ async def ascendi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     newmessage = "```\n" + expand(message.upper()) + "\n```"
 
-    string = ''.join(newmessage)
-    await update.message.reply_markdown_v2(f'{string}', quote=False)
+    string = "".join(newmessage)
+    await update.message.reply_markdown_v2(f"{string}", quote=False)
     return
+
 
 async def mon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -327,28 +328,28 @@ async def mon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     mon += 1
     context.bot_data["numero_di_mon"] = mon
 
-    await update.message.reply_html(f'<i>({mon})</i>', quote=False)
+    await update.message.reply_html(f"<i>({mon})</i>", quote=False)
 
     if mon % 100 == 0:
-        await update.message.reply_text('PEPPEREPÈ!!! - Si vede che vi manca, eh?!', quote=False)
+        await update.message.reply_text("PEPPEREPÈ!!! - Si vede che vi manca, eh?!", quote=False)
 
     await printlog(update, "ha nominato mon", mon)
+
 
 async def get_thread_from_dc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_user.id not in config.ADMINS:
         return
-    BOARDS = ['b', 's', 'x', 'hd', 'aco', 'v', 'cul', 'yt', 'pol']
+    BOARDS = ["b", "s", "x", "hd", "aco", "v", "cul", "yt", "pol"]
 
     async def get_last_threads_from_board(board):
         async with httpx.AsyncClient(timeout=30) as client:
-            response = await client.get(f'https://www.diochan.com/{board}/catalog.json')
+            response = await client.get(f"https://www.diochan.com/{board}/catalog.json")
             response.raise_for_status()
             return response.json()
 
     if context.args[0] not in BOARDS:
         await update.message.reply_text(f"Board non valida. Devi usare una di queste: {', '.join(BOARDS)}")
         return
-
 
     if len(context.args) < 2:
         await update.message.reply_text("Devi specificare il numero del thread")
@@ -361,49 +362,55 @@ async def get_thread_from_dc(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     post = []
     for page in boards:
-        for thread in page['threads']:
-            if thread['no'] == thread_no:
+        for thread in page["threads"]:
+            if thread["no"] == thread_no:
                 t = {
-                    'board': board,
-                    'thread': thread['no'],
-                    'time': thread['time'],
-                    'title': thread.get('sub'),
-                    'text': thread['com'],
-                    'thread_url' : f"https://www.diochan.com/{board}/res/{thread['no']}.html"
+                    "board": board,
+                    "thread": thread["no"],
+                    "time": thread["time"],
+                    "title": thread.get("sub"),
+                    "text": thread["com"],
+                    "thread_url": f"https://www.diochan.com/{board}/res/{thread['no']}.html",
                 }
 
-                if thread.get('tim'):
-                    t['image_url'] = f"https://www.diochan.com/{board}/src/{thread['tim']}{thread['ext']}"
-                    t['is_video'] = False
+                if thread.get("tim"):
+                    t["image_url"] = f"https://www.diochan.com/{board}/src/{thread['tim']}{thread['ext']}"
+                    t["is_video"] = False
 
-                elif thread.get('embed'):
-                    t['is_video'] = True
-                    youtube_id = thread['embed'].split('"')[11][39:]
-                    t['image_url'] = f'http://i3.ytimg.com/vi/{youtube_id}/hqdefault.jpg'
-                    t['video_url'] = f"https://www.youtube.com/watch?v={youtube_id}"
+                elif thread.get("embed"):
+                    t["is_video"] = True
+                    youtube_id = thread["embed"].split('"')[11][39:]
+                    t["image_url"] = f"http://i3.ytimg.com/vi/{youtube_id}/hqdefault.jpg"
+                    t["video_url"] = f"https://www.youtube.com/watch?v={youtube_id}"
                 post.append(t)
 
     if not post:
         await update.message.reply_html("Thread non trovato")
         return
 
-    await printlog(update, 'richiede un post da diochan', f"/{board}/ | No.{thread_no}")
+    await printlog(update, "richiede un post da diochan", f"/{board}/ | No.{thread_no}")
 
     for thread in post:
-        timestamp = datetime.datetime.fromtimestamp(thread['time']).strftime('%d/%m/%Y %H:%M')
-        text = thread['text']
+        timestamp = datetime.datetime.fromtimestamp(thread["time"]).strftime("%d/%m/%Y %H:%M")
+        text = thread["text"]
         if len(text) > 2000:
             text = text[:2000] + "..."
         link = f"<a href='{thread['thread_url']}'>/{thread['board']}/ | No.{thread['thread']}</a> | {timestamp}"
 
-        if thread['is_video']:
+        if thread["is_video"]:
             link += f"\n<a href='{thread['video_url']}'>[YouTube]</a>"
 
         text = html.unescape(text)
-        text = text.replace('<br/>','\n').replace('<span class="quote">', '').replace('<span class="spoiler">', '').replace('</span>', '')
+        text = (
+            text.replace("<br/>", "\n")
+            .replace('<span class="quote">', "")
+            .replace('<span class="spoiler">', "")
+            .replace("</span>", "")
+        )
         message = f"{link}\n{text}"
 
         await update.message.reply_html(text=message)
+
 
 async def greet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_chat.id != config.ID_DIOCHAN2:
@@ -416,28 +423,35 @@ async def greet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     was_member, is_member = result
 
-    greetings = context.chat_data.get('greeting', 'Benvenuto $FIRST_NAME!')
-    greeting_pic = context.chat_data.get('greeting_pic')
+    greetings = context.chat_data.get("greeting", "Benvenuto $FIRST_NAME!")
+    greeting_pic = context.chat_data.get("greeting_pic")
 
-    first_name = update.chat_member.new_chat_member.user.first_name if update.chat_member.new_chat_member.user.first_name else ''
-    last_name = update.chat_member.new_chat_member.user.last_name if update.chat_member.new_chat_member.user.last_name else ''
-    username = update.chat_member.new_chat_member.user.username if update.chat_member.new_chat_member.user.username else ''
-    chat_title = update.effective_chat.title if update.effective_chat.title else ''
+    first_name = (
+        update.chat_member.new_chat_member.user.first_name if update.chat_member.new_chat_member.user.first_name else ""
+    )
+    last_name = (
+        update.chat_member.new_chat_member.user.last_name if update.chat_member.new_chat_member.user.last_name else ""
+    )
+    username = (
+        update.chat_member.new_chat_member.user.username if update.chat_member.new_chat_member.user.username else ""
+    )
+    chat_title = update.effective_chat.title if update.effective_chat.title else ""
 
-    greetings = greetings.replace('$FIRST_NAME', first_name)
-    greetings = greetings.replace('$LAST_NAME', last_name)
-    greetings = greetings.replace('$USERNAME', username)
-    greetings = greetings.replace('$CHAT_TITLE', chat_title)
+    greetings = greetings.replace("$FIRST_NAME", first_name)
+    greetings = greetings.replace("$LAST_NAME", last_name)
+    greetings = greetings.replace("$USERNAME", username)
+    greetings = greetings.replace("$CHAT_TITLE", chat_title)
 
     if not was_member and is_member:
-        await printlog(update, 'è entrato su diochan2')
+        await printlog(update, "è entrato su diochan2")
         if greeting_pic:
-            await update.effective_chat.send_photo(greeting_pic, caption=greetings, parse_mode='HTML')
+            await update.effective_chat.send_photo(greeting_pic, caption=greetings, parse_mode="HTML")
         else:
             await update.effective_chat.send_message(greetings)
     elif was_member and not is_member:
-        await printlog(update, 'è uscito da diochan2')
-        await update.effective_chat.send_message('👋')
+        await printlog(update, "è uscito da diochan2")
+        await update.effective_chat.send_message("👋")
+
 
 async def set_greet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_chat.id != config.ID_DIOCHAN2:
@@ -447,19 +461,22 @@ async def set_greet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("Devi specificare il messaggio di benvenuto")
         return
 
-    if '-help' in context.args:
-        await update.message.reply_text("Puoi usare le seguenti variabili:\n$FIRST_NAME\n$LAST_NAME\n$USERNAME\n$CHAT_TITLE")
+    if "-help" in context.args:
+        await update.message.reply_text(
+            "Puoi usare le seguenti variabili:\n$FIRST_NAME\n$LAST_NAME\n$USERNAME\n$CHAT_TITLE"
+        )
         return
 
-    context.chat_data['greeting'] = ' '.join(context.args)
+    context.chat_data["greeting"] = " ".join(context.args)
     await update.message.reply_text("Messaggio di benvenuto impostato")
+
 
 async def set_greet_pic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_chat.id != config.ID_DIOCHAN2:
         return
 
-    if '-delete' in context.args:
-        context.chat_data['greeting_pic'] = None
+    if "-delete" in context.args:
+        context.chat_data["greeting_pic"] = None
         await update.message.reply_text("Immagine di benvenuto rimossa")
         return
 
@@ -467,7 +484,7 @@ async def set_greet_pic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         if update.message.reply_to_message.photo:
             greeting_pic_id = f"{update.message.reply_to_message.photo[-1].file_id}"
 
-            context.chat_data['greeting_pic'] = greeting_pic_id
+            context.chat_data["greeting_pic"] = greeting_pic_id
             await update.message.reply_text("Immagine di benvenuto impostata")
         else:
             await update.message.reply_text("Devi rispondere ad un'immagine")
