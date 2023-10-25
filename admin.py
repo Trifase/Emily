@@ -38,7 +38,7 @@ async def check_temp(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         return
     await printlog(update, "controlla la temperatura")
     mycommand = ["vcgencmd", "measure_temp"]
-    response = subprocess.run(mycommand, capture_output=True, encoding="utf-8")
+    response = subprocess.run(mycommand, capture_output=True, encoding="utf-8")  #nosec
     temp = response.stdout.split("=")[1].strip()[:-2]
     await update.message.reply_html(f"Temperatura interna: {temp}° C")
 
