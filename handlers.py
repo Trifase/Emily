@@ -119,6 +119,7 @@ from testing import getfile, test
 from torrent import lista_torrent
 from twitter import lista_tweets, tweet
 from utils import is_forged_command, is_inline_button, is_lurkers_list
+from videogiochi import giochino
 from zoom import zoom_link
 
 
@@ -513,6 +514,9 @@ def generate_handlers_dict() -> dict:
             ["tweetlists", "listatweet", "tweets", "twlist"], lista_tweets, filters=~filters.UpdateType.EDITED
         )
     ]
+
+    # videogiochi.py
+    h[121] = [CommandHandler(["giochino", "game"], giochino, filters=~filters.UpdateType.EDITED)]
 
     # zoom.py
     h[120] = [CommandHandler(["zoom", "zoomlink", "zoomlinks"], zoom_link, filters=~filters.UpdateType.EDITED)]
