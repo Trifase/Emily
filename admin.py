@@ -38,7 +38,7 @@ async def check_temp(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         return
     await printlog(update, "controlla la temperatura")
     mycommand = ["vcgencmd", "measure_temp"]
-    response = subprocess.run(mycommand, capture_output=True, encoding="utf-8")  #nosec
+    response = subprocess.run(mycommand, capture_output=True, encoding="utf-8")  # nosec
     temp = response.stdout.split("=")[1].strip()[:-2]
     await update.message.reply_html(f"Temperatura interna: {temp}° C")
 
@@ -262,9 +262,11 @@ async def tg_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 rawtext = html.escape(rawtext)
                 if len(rawtext) > 4096:
                     for x in range(0, len(rawtext), 4096):
-                        await update.message.reply_html(f"<pre>{rawtext[x:x + 4096]}</pre>")
+                        await update.message.reply_html(
+                            f'<pre><code class="language-python">{rawtext[x:x + 4096]}</code></pre>'
+                        )
                 else:
-                    await update.message.reply_html(f"<pre>{rawtext}</pre>")
+                    await update.message.reply_html(f'<pre><code class="language-python">{rawtext}</code></pre>')
                 # pprint.pprint(ast.literal_eval(update.__str__()))
             elif context.args[0] == "-id":
                 text += file_id

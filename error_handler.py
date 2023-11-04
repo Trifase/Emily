@@ -12,5 +12,5 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
     await printlog(update, f"{tb_string}", error=True)
 
     await context.bot.send_message(
-        chat_id=config.ID_BOTCENTRAL, text=f"<code>{tb_string[:4000]}</code>", parse_mode="HTML"
+        chat_id=config.ID_BOTCENTRAL, text=f'<pre><code class="language-python">{tb_string[:4000]}</code></pre>', parse_mode="HTML"
     )
