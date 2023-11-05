@@ -4,9 +4,9 @@ from telegram.ext import ContextTypes
 import config
 from utils import no_can_do, printlog
 
+
 # Asphalto
 async def azzurro(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-
     if await no_can_do(update, context):
         return
     await printlog(update, "usa azzurro")
@@ -30,12 +30,12 @@ async def azzurro(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if "@" in testo:
         messaggio = testo.split("@")
-        nickname = f'<b>{messaggio[0]}</b>'
-        newmessage = f'{messaggio[1]}'
-        text = f'&lt;{nickname}&gt;: {newmessage}'
+        nickname = f"<b>{messaggio[0]}</b>"
+        newmessage = f"{messaggio[1]}"
+        text = f"&lt;{nickname}&gt;: {newmessage}"
         await bot.send_message(config.ID_ASPHALTO, text, parse_mode="HTML")
         if update.message.chat.id == config.ID_ASPHALTO:
             await bot.delete_message(update.message.chat.id, update.message.message_id)
     else:
-        await update.message.reply_text('Per azzurrare manda un messaggio tipo /azzurro nickname@messaggio')
+        await update.message.reply_text("Per azzurrare manda un messaggio tipo /azzurro nickname@messaggio")
     return

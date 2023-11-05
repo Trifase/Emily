@@ -10,6 +10,7 @@ from utils import no_can_do, print_progressbar, printlog
 _localize = humanize.i18n.activate("it_IT")
 type(_localize)
 
+
 async def lista_torrent(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await no_can_do(update, context):
         return
@@ -19,7 +20,12 @@ async def lista_torrent(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await printlog(update, "chiede la lista torrent")
     # instantiate a Client using the appropriate WebUI configuration
     # TORRENT
-    qbt_client = qbittorrentapi.Client(host=f'{config.TORRENT_IP}:{config.TORRENT_PORT}', username=config.TORRENT_USER, password=config.TORRENT_PASSWORD, REQUESTS_ARGS={'timeout': 2.1})
+    qbt_client = qbittorrentapi.Client(
+        host=f"{config.TORRENT_IP}:{config.TORRENT_PORT}",
+        username=config.TORRENT_USER,
+        password=config.TORRENT_PASSWORD,
+        REQUESTS_ARGS={"timeout": 2.1},
+    )
 
     # the Client will automatically acquire/maintain a logged in state in line with any request.
     # therefore, this is not necessary; however, you many want to test the provided login credentials.
@@ -36,14 +42,14 @@ async def lista_torrent(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # retrieve and show all torrents
     message = ""
     try:
-        torrents_info = qbt_client.torrents_info(sort='progress')
+        torrents_info = qbt_client.torrents_info(sort="progress")
         if not torrents_info:
             await update.message.reply_text("Nessun torrent in download")
             return
         else:
             for torrent in torrents_info:
                 if torrent.progress == 1:
-                    message += f'[100%] <b>{torrent.name}</b> (<i>{torrent.state}</i>)\n\n'
+                    message += f"[100%] <b>{torrent.name}</b> (<i>{torrent.state}</i>)\n\n"
                 else:
                     progress_perc = round(torrent.progress * 100, 2)
                     message += f'<b>{torrent.name}</b> (<i>{torrent.state}</i>) {size(torrent.total_size)}\n↓ {str(round(torrent.dlspeed/1024/1024, 2))} MB/s · ↑ {str(round(torrent.upspeed/1024/1024, 2))} MB/s\nETA: {"∞" if torrent.eta == 8640000 else (str(humanize.precisedelta(torrent.eta, suppress=["days"], minimum_unit="seconds")))}\n{str(progress_perc)}% {print_progressbar(progress_perc, suffix="", prefix="")}\n\n'

@@ -26,10 +26,7 @@ async def ora(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     # citta += ",,it"
     geocoding_url = "http://api.openweathermap.org/geo/1.0/direct"
-    query = {
-        "q": citta,
-        "appid": API_KEY
-    }
+    query = {"q": citta, "appid": API_KEY}
     geocoding = requests.get(geocoding_url, query)
     geodata = geocoding.json()
 
@@ -37,10 +34,10 @@ async def ora(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("Nessuna città trovata.")
         return
 
-    lat = geodata[0]['lat']
-    lon = geodata[0]['lon']
-    country = geodata[0]['country']
-    name = geodata[0]['name']
+    lat = geodata[0]["lat"]
+    lon = geodata[0]["lon"]
+    country = geodata[0]["country"]
+    name = geodata[0]["name"]
     print(f"[Open Weather Map] Cerco: {name}, {country} [{lat}, {lon}]")
 
     weather_url = "https://api.openweathermap.org/data/2.5/onecall"
@@ -50,13 +47,13 @@ async def ora(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "units": "metric",
         "lang": "it",
         "exclude": "minutely,hourly",
-        "appid": API_KEY
+        "appid": API_KEY,
     }
     weather = requests.get(weather_url, weather_query)
     data = weather.json()
 
     try:
-        meteo = data['current']
+        meteo = data["current"]
     except KeyError:
         # data['error']
         await update.message.reply_text("Errore.")
@@ -72,15 +69,17 @@ async def prometeo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         return
     citta = ""
     if not context.args:
-        if 'default_meteo_city' in context.user_data:
-            citta = context.user_data['default_meteo_city']
+        if "default_meteo_city" in context.user_data:
+            citta = context.user_data["default_meteo_city"]
         else:
-            await update.message.reply_html("Inserisci una città.\nSe vuoi impostare una città di default puoi usare <code>-setdefault [città]</code>, ad esempio: <code>/prometeo -setdefault Napoli</code>")
+            await update.message.reply_html(
+                "Inserisci una città.\nSe vuoi impostare una città di default puoi usare <code>-setdefault [città]</code>, ad esempio: <code>/prometeo -setdefault Napoli</code>"
+            )
             return
     else:
         if context.args[0] == "-setdefault":
-            default_city = ' '.join(context.args[1:])
-            context.user_data['default_meteo_city'] = default_city
+            default_city = " ".join(context.args[1:])
+            context.user_data["default_meteo_city"] = default_city
             await update.message.reply_text(f"Salvata: {default_city}")
             return
 
@@ -97,10 +96,7 @@ async def prometeo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     await printlog(update, "chiede prometeo di oggi", citta)
     # citta += ",,it"
     geocoding_url = "http://api.openweathermap.org/geo/1.0/direct"
-    query = {
-        "q": citta,
-        "appid": API_KEY
-    }
+    query = {"q": citta, "appid": API_KEY}
     geocoding = requests.get(geocoding_url, query)
     geodata = geocoding.json()
 
@@ -108,10 +104,10 @@ async def prometeo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         await update.message.reply_text("Nessuna città trovata.")
         return
 
-    lat = geodata[0]['lat']
-    lon = geodata[0]['lon']
-    country = geodata[0]['country']
-    name = geodata[0]['name']
+    lat = geodata[0]["lat"]
+    lon = geodata[0]["lon"]
+    country = geodata[0]["country"]
+    name = geodata[0]["name"]
     # print(f"[Open Weather Map] Cerco: {name}, {country} [{lat}, {lon}]")
 
     weather_url = "https://api.openweathermap.org/data/2.5/onecall"
@@ -121,27 +117,23 @@ async def prometeo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         "units": "metric",
         "lang": "it",
         "exclude": "minutely,hourly",
-        "appid": API_KEY
+        "appid": API_KEY,
     }
     weather = requests.get(weather_url, weather_query)
     data = weather.json()
     try:
-        meteo = data['current']
+        meteo = data["current"]
     except KeyError:
         await update.message.reply_text("Errore.")
         return
 
     air_url = "http://api.openweathermap.org/data/2.5/air_pollution"
-    air_query = {
-        "lon": lon,
-        "lat": lat,
-        "appid": API_KEY
-    }
+    air_query = {"lon": lon, "lat": lat, "appid": API_KEY}
     airdata = requests.get(air_url, air_query)
     air = airdata.json()
 
-    H = meteo['humidity']
-    T = meteo['temp']
+    H = meteo["humidity"]
+    T = meteo["temp"]
 
     THOM = T - 0.55 * (1 - (0.01 * H)) * (T - 14.5)
     if THOM <= 21:
@@ -159,7 +151,7 @@ async def prometeo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     else:
         disagio = "sconosciuto"
 
-    aqi = air['list'][0]['main']['aqi']
+    aqi = air["list"][0]["main"]["aqi"]
     if aqi == 1:
         aria = f"🟢 [{aqi}] buona"
     elif aqi == 2:
@@ -184,9 +176,9 @@ async def prometeo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         "10": "🌦️",  # nuvole pioggia e sole
         "11": "🌩️",  # nuvolacce e fulmini
         "13": "🌨️",  # neve
-        "50": "🌫️"  # fog
+        "50": "🌫️",  # fog
     }
-    uv = meteo['uvi']
+    uv = meteo["uvi"]
     if uv < 3:
         uvi = f"🟩 [{uv}] basso"
     elif uv < 6:
@@ -216,15 +208,17 @@ async def meteo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         return
     citta = ""
     if not context.args:
-        if 'default_meteo_city' in context.user_data:
-            citta = context.user_data['default_meteo_city']
+        if "default_meteo_city" in context.user_data:
+            citta = context.user_data["default_meteo_city"]
         else:
-            await update.message.reply_html("Inserisci una città.\nSe vuoi impostare una città di default puoi usare <code>-setdefault [città]</code>, ad esempio: <code>/meteo -setdefault Napoli</code>")
+            await update.message.reply_html(
+                "Inserisci una città.\nSe vuoi impostare una città di default puoi usare <code>-setdefault [città]</code>, ad esempio: <code>/meteo -setdefault Napoli</code>"
+            )
             return
     else:
         if context.args[0] == "-setdefault":
-            default_city = ' '.join(context.args[1:])
-            context.user_data['default_meteo_city'] = default_city
+            default_city = " ".join(context.args[1:])
+            context.user_data["default_meteo_city"] = default_city
             await update.message.reply_text(f"Salvata: {default_city}")
             return
 
@@ -240,10 +234,7 @@ async def meteo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} chiede il meteo semplice di oggi: {citta}')
     await printlog(update, "chiede meteo di oggi", citta)
     geocoding_url = "http://api.openweathermap.org/geo/1.0/direct"
-    query = {
-        "q": citta,
-        "appid": API_KEY
-    }
+    query = {"q": citta, "appid": API_KEY}
     geocoding = requests.get(geocoding_url, query)
     geodata = geocoding.json()
 
@@ -251,10 +242,10 @@ async def meteo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         await update.message.reply_text("Nessuna città trovata.")
         return
 
-    lat = geodata[0]['lat']
-    lon = geodata[0]['lon']
-    country = geodata[0]['country']
-    name = geodata[0]['name']
+    lat = geodata[0]["lat"]
+    lon = geodata[0]["lon"]
+    country = geodata[0]["country"]
+    name = geodata[0]["name"]
     # print(f"[Open Weather Map] Cerco: {name}, {country} [{lat}, {lon}]")
 
     weather_url = "https://api.openweathermap.org/data/2.5/onecall"
@@ -264,13 +255,13 @@ async def meteo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         "units": "metric",
         "lang": "it",
         "exclude": "minutely,hourly",
-        "appid": API_KEY
+        "appid": API_KEY,
     }
     weather = requests.get(weather_url, weather_query)
     data = weather.json()
 
     try:
-        meteo = data['current']
+        meteo = data["current"]
     except KeyError:
         await update.message.reply_text("Errore.")
         return
@@ -284,7 +275,7 @@ async def meteo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         "10": "🌦️",  # nuvole pioggia e sole
         "11": "🌩️",  # nuvolacce e fulmini
         "13": "🌨️",  # neve
-        "50": "🌫️"  # fog
+        "50": "🌫️",  # fog
     }
     meteo_oggi = ""
     meteo_oggi += f"<b>{name}, {country}</b> {'🌞' if meteo['sunrise'] < meteo['dt'] < meteo['sunset'] else '🌜'} {datetime.datetime.utcfromtimestamp(meteo['dt']+data['timezone_offset']).strftime('%H:%M')} del {datetime.datetime.utcfromtimestamp(meteo['dt']+data['timezone_offset']).strftime('%d/%m')}\n"
@@ -307,10 +298,7 @@ async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     citta += ",,it"
     geocoding_url = "http://api.openweathermap.org/geo/1.0/direct"
-    query = {
-        "q": citta,
-        "appid": API_KEY
-    }
+    query = {"q": citta, "appid": API_KEY}
     geocoding = requests.get(geocoding_url, query)
     geodata = geocoding.json()
 
@@ -318,10 +306,10 @@ async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("Nessuna città trovata.")
         return
     await printlog(update, "chiede le previsioni metereologiche", citta)
-    lat = geodata[0]['lat']
-    lon = geodata[0]['lon']
-    country = geodata[0]['country']
-    name = geodata[0]['name']
+    lat = geodata[0]["lat"]
+    lon = geodata[0]["lon"]
+    country = geodata[0]["country"]
+    name = geodata[0]["name"]
 
     print(f"[Open Weather Map] Cerco: {name}, {country} [{lat}, {lon}]")
 
@@ -332,7 +320,7 @@ async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "units": "metric",
         "lang": "it",
         "exclude": "minutely,hourly",
-        "appid": API_KEY
+        "appid": API_KEY,
     }
     weather = requests.get(weather_url, weather_query)
     data = weather.json()
@@ -346,20 +334,20 @@ async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "10d": "🌦️",  # nuvole pioggia e sole
         "11d": "🌩️",  # nuvolacce e fulmini
         "13d": "🌨️",  # neve
-        "50d": "🌫️"  # fog
+        "50d": "🌫️",  # fog
     }
     meteo_oggi = ""
     meteo_oggi += f"Città: {name}, {country}.\n"
     for day in giorni:
         try:
-            meteo = data['daily'][day]
+            meteo = data["daily"][day]
         except KeyError:
             await update.message.reply_text("Errore.")
             return
-        temp_min = round(meteo['temp']['min'])
-        temp_max = round(meteo['temp']['max'])
-        icon = meteo['weather'][0]['icon']
+        temp_min = round(meteo["temp"]["min"])
+        temp_max = round(meteo["temp"]["max"])
+        icon = meteo["weather"][0]["icon"]
         aspetto = f"{emojis[icon]} {meteo['weather'][0]['description']}"
-        dt = datetime.datetime.utcfromtimestamp(meteo['dt'] + data['timezone_offset']).strftime('%d/%m')
+        dt = datetime.datetime.utcfromtimestamp(meteo["dt"] + data["timezone_offset"]).strftime("%d/%m")
         meteo_oggi += f"{dt} - {temp_max}/{temp_min}°C - {aspetto}\n"
     await update.message.reply_text(meteo_oggi)

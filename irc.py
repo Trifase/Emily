@@ -7,33 +7,36 @@ token = config.BOT_TOKEN_FRAGOLONE
 chat_id = config.ID_TESTING
 
 ircbot = JustIRC.IRCConnection()
+
+
 def send_tg_message(sender: str, message: str, chat_id=chat_id):
-        TELEGRAM_URL = "https://api.telegram.org/ircbot"
-        ircbot_TOKEN = config.ircbot_TOKEN
-        # < with &lt;, > with &gt; and & with &amp;
-        message = f"<{sender}> {message}"
-        message = message.replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;")
+    TELEGRAM_URL = "https://api.telegram.org/ircbot"
+    ircbot_TOKEN = config.ircbot_TOKEN
+    # < with &lt;, > with &gt; and & with &amp;
+    message = f"<{sender}> {message}"
+    message = message.replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;")
 
-        data = {
-            "chat_id": chat_id,
-            "text": message,
-            "parse_mode": "HTML",
-        }
+    data = {
+        "chat_id": chat_id,
+        "text": message,
+        "parse_mode": "HTML",
+    }
 
-        requests.post(
-            f"{TELEGRAM_URL}{ircbot_TOKEN}/sendMessage", data=data
-        )
+    requests.post(f"{TELEGRAM_URL}{ircbot_TOKEN}/sendMessage", data=data)
 
 
 def on_connect(ircbot):
     ircbot.set_nick("EmiliaParanoica")
     ircbot.send_user_packet("EmiliaParanoica")
 
+
 def on_welcome(ircbot):
     ircbot.join_channel("#diochan")
 
+
 def on_message(ircbot, channel, sender, message):
     send_tg_message(sender, message)
+
 
 ircbot.on_connect.append(on_connect)
 ircbot.on_welcome.append(on_welcome)

@@ -37,70 +37,105 @@ async def ispirami(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "-flatten",
             ")",
             "(",
-            "-gravity", "center",
+            "-gravity",
+            "center",
             # "-size", "760x560",
-            "-font", str(font_file),
-            "-pointsize", str(size),
-            "-background", "none",
+            "-font",
+            str(font_file),
+            "-pointsize",
+            str(size),
+            "-background",
+            "none",
             # "-stroke", "#000",
-            "-fill", "#fff",
-            "-size", "760",
+            "-fill",
+            "#fff",
+            "-size",
+            "760",
             f'pango:<span font_family="Vollkorn" style="italic" size="{size * 600}">“{text}”</span>',
             "+repage",
             ")",
             "(",
-            "-clone", "1",
-            "-background", "black",
-            "-shadow", "100x2+2+2",
+            "-clone",
+            "1",
+            "-background",
+            "black",
+            "-shadow",
+            "100x2+2+2",
             ")",
             "(",
-            "-clone", "1",
-            "-clone", "2",
+            "-clone",
+            "1",
+            "-clone",
+            "2",
             "+swap",
-            "-background", "none",
-            "-layers", "merge",
+            "-background",
+            "none",
+            "-layers",
+            "merge",
             "+repage",
             ")",
-            "-delete", "1,2",
-            "-gravity", "center",
-            "-geometry", "+0-50",
-            "-compose", "over",
+            "-delete",
+            "1,2",
+            "-gravity",
+            "center",
+            "-geometry",
+            "+0-50",
+            "-compose",
+            "over",
             "-composite",  # fine
             "(",
-            "-gravity", "SouthEast",
-            "-size", "760",
-            "-font", str(font_file),
-            "-pointsize", str(size),
-            "-background", "none",
-            "-fill", "#fff",
+            "-gravity",
+            "SouthEast",
+            "-size",
+            "760",
+            "-font",
+            str(font_file),
+            "-pointsize",
+            str(size),
+            "-background",
+            "none",
+            "-fill",
+            "#fff",
             f'pango:<span font_family="Vollkorn" style="italic" size="{size * 600}"> - {nickname}</span>',
             "+repage",
             ")",
             "(",
-            "-clone", "1",
-            "-background", "black",
-            "-shadow", "100x2+2+2",
+            "-clone",
+            "1",
+            "-background",
+            "black",
+            "-shadow",
+            "100x2+2+2",
             ")",
             "(",
-            "-clone", "1",
-            "-clone", "2",
+            "-clone",
+            "1",
+            "-clone",
+            "2",
             "+swap",
-            "-background", "none",
-            "-layers", "merge",
+            "-background",
+            "none",
+            "-layers",
+            "merge",
             "+repage",
             ")",
-            "-delete", "1,2",
-            "-gravity", "SouthEast",
-            "-geometry", "+20+0",
-            "-compose", "over",
+            "-delete",
+            "1,2",
+            "-gravity",
+            "SouthEast",
+            "-geometry",
+            "+20+0",
+            "-compose",
+            "over",
             # "-geometry", "+455+777",
             # "-compose", "Multiply",
             "-composite",  # fine
-            str(destination_photo)
+            str(destination_photo),
         ]
-        subprocess.check_call(command) #nosec
+        subprocess.check_call(command)  # nosec
 
         return destination_photo
+
     if not update.message.reply_to_message:
         return
     else:
@@ -113,12 +148,45 @@ async def ispirami(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(text) > 700:
         await update.message.reply_text("It's too long man!")
         return
-    chars = ("q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v", "b", "n", "m", "è", "é", "ò", "à", "ù", "ì")
+    chars = (
+        "q",
+        "w",
+        "e",
+        "r",
+        "t",
+        "y",
+        "u",
+        "i",
+        "o",
+        "p",
+        "a",
+        "s",
+        "d",
+        "f",
+        "g",
+        "h",
+        "j",
+        "k",
+        "l",
+        "z",
+        "x",
+        "c",
+        "v",
+        "b",
+        "n",
+        "m",
+        "è",
+        "é",
+        "ò",
+        "à",
+        "ù",
+        "ì",
+    )
     text = text[0].upper() + text[1:]
     if text.lower().endswith(chars):
         text += "."
     url = "https://picsum.photos/800/600"
-    urllib.request.urlretrieve(url, "templates/motivational_poster.jpg") #nosec
+    urllib.request.urlretrieve(url, "templates/motivational_poster.jpg")  # nosec
 
     first_name = ""
     last_name = ""
@@ -161,7 +229,8 @@ async def ispirami(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
     with tempfile.TemporaryDirectory() as tmp_dir:
         photo = make_photo(text, nickname, Path(tmp_dir))
-        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=photo.open('rb'))
+        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=photo.open("rb"))
+
 
 async def change_my_mind(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await no_can_do(update, context):
@@ -175,21 +244,29 @@ async def change_my_mind(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "convert",
             str(template_photo),
             "(",
-            "-size", "650x290!",
-            "-font", str(font_file),
-            "-background", "none",
-            "-fill", "#222222",
+            "-size",
+            "650x290!",
+            "-font",
+            str(font_file),
+            "-background",
+            "none",
+            "-fill",
+            "#222222",
             f"caption:{text}",
-            "-rotate", "337",
+            "-rotate",
+            "337",
             # "+distort", "perspective", "0,0 10,0 0,290 115,254 666,290 691,-94 666,0 625,-155",
             ")",
-            "-geometry", "+910+700",
-            "-compose", "Multiply",
+            "-geometry",
+            "+910+700",
+            "-compose",
+            "Multiply",
             "-composite",
-            str(destination_photo)
+            str(destination_photo),
         ]
-        subprocess.check_call(command) #nosec
+        subprocess.check_call(command)  # nosec
         return destination_photo
+
     if not context.args:
         return
 
@@ -203,5 +280,4 @@ async def change_my_mind(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     with tempfile.TemporaryDirectory() as tmp_dir:
         photo = make_photo(text, Path(tmp_dir))
-        await update.message.reply_photo(photo=photo.open('rb'))
-
+        await update.message.reply_photo(photo=photo.open("rb"))

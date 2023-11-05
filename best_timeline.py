@@ -11,7 +11,7 @@ from utils import get_display_name, no_can_do, printlog
 
 async def scrape_tweet_bt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
-        if (update.message.sender_chat.id == config.ID_BT_CHAN): # or (update.message.chat.id == config.ID_TESTING):
+        if update.message.sender_chat.id == config.ID_BT_CHAN:  # or (update.message.chat.id == config.ID_TESTING):
             # print(f'{get_now()} [deep_pink3]{update.message.sender_chat.title}[/deep_pink3] in {await get_chat_name(update.message.chat.id)} posta un tweet: {context.match.group(1)}')
             await printlog(update, "posta un tweet su BT", context.match.group(1))
         else:
@@ -23,7 +23,6 @@ async def scrape_tweet_bt(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         #     return
         return
 
-
     CONSUMER_KEY = config.TW_API
     CONSUMER_SECRET = config.TW_API_SECRET
     ACCESS_KEY = config.TW_ACCESS_TOKEN
@@ -34,8 +33,7 @@ async def scrape_tweet_bt(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     api = tweepy.API(auth)
     tw_id = [context.match.group(1)]
 
-
-    my_tweet = api.lookup_statuses(tw_id, tweet_mode='extended')
+    my_tweet = api.lookup_statuses(tw_id, tweet_mode="extended")
     try:
         t = my_tweet[0]
     except IndexError:
@@ -45,7 +43,7 @@ async def scrape_tweet_bt(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     # print(my_tweet[0]._json)
     try:
         text = t.full_text
-        text = text.split('\n\nhttps://t.co/')[0]
+        text = text.split("\n\nhttps://t.co/")[0]
         text += "\n"
     except AttributeError:
         text = ""
@@ -54,20 +52,15 @@ async def scrape_tweet_bt(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     url = f"https://twitter.com/{name}/status/{t.id}"
 
     try:
-        text_url = t.entities.urls[0]['expanded_url']
+        text_url = t.entities.urls[0]["expanded_url"]
         text_url += "\n"
     except (AttributeError, IndexError):
         text_url = ""
-    nitter_instances = [
-        "nitter.net",
-        "nitter.it",
-        "nitter.nl",
-        "nitter.cz"
-    ]
-    nitter_url = url.replace("twitter.com",random.choice(nitter_instances))
+    nitter_instances = ["nitter.net", "nitter.it", "nitter.nl", "nitter.cz"]
+    nitter_url = url.replace("twitter.com", random.choice(nitter_instances))
     caption = f"<a href='{url}'>@{name}</a>\n{text if text else ''}{text_url if text_url else ''}\n<a href='{nitter_url}'>[Nitter]</a>"
     try:
-        medialist = t.extended_entities.get('media', [])
+        medialist = t.extended_entities.get("media", [])
     except AttributeError:
         medialist = []
 
@@ -75,19 +68,21 @@ async def scrape_tweet_bt(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     if medialist:
         i = 0
         for media in medialist:
-            if media.get('type') == 'photo':
-                media_url = media.get('media_url')
-                medias.append(InputMediaPhoto(media=media_url, caption=caption if i == 0 else '', parse_mode='HTML'))
+            if media.get("type") == "photo":
+                media_url = media.get("media_url")
+                medias.append(InputMediaPhoto(media=media_url, caption=caption if i == 0 else "", parse_mode="HTML"))
                 i += 1
-            elif media.get('type') == 'video':
-                media_url = media.get('video_info').get('variants')[0].get('url')
-                medias.append(InputMediaVideo(media=media_url, caption=caption if i == 0 else '', parse_mode='HTML'))
+            elif media.get("type") == "video":
+                media_url = media.get("video_info").get("variants")[0].get("url")
+                medias.append(InputMediaVideo(media=media_url, caption=caption if i == 0 else "", parse_mode="HTML"))
                 i += 1
 
-
-        await context.bot.send_media_group(reply_to_message_id=update.message.message_id, chat_id=update.message.chat.id, media=medias)
+        await context.bot.send_media_group(
+            reply_to_message_id=update.message.message_id, chat_id=update.message.chat.id, media=medias
+        )
     else:
         await update.message.reply_html(caption, disable_web_page_preview=True)
+
 
 async def silenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     def can_user_restrict(user: ChatMember):
@@ -97,7 +92,6 @@ async def silenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             return True
         else:
             return False
-
 
     if await no_can_do(update, context):
         return
@@ -124,8 +118,16 @@ async def silenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     expires_in = datetime.datetime.now() + datetime.timedelta(minutes=minutes)
     sta_zitto = ChatPermissions.no_permissions()
-    await context.bot.restrict_chat_member(update.message.chat.id, update.message.reply_to_message.from_user.id, until_date=expires_in, permissions=sta_zitto)
-    await update.message.reply_html(f"Silenziatə fino al <code>{expires_in}</code>", reply_to_message_id=update.message.reply_to_message.id)
+    await context.bot.restrict_chat_member(
+        update.message.chat.id,
+        update.message.reply_to_message.from_user.id,
+        until_date=expires_in,
+        permissions=sta_zitto,
+    )
+    await update.message.reply_html(
+        f"Silenziatə fino al <code>{expires_in}</code>", reply_to_message_id=update.message.reply_to_message.id
+    )
+
 
 async def permasilenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     def can_user_restrict(user: ChatMember):
@@ -135,7 +137,6 @@ async def permasilenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             return True
         else:
             return False
-
 
     if await no_can_do(update, context):
         return
@@ -153,8 +154,14 @@ async def permasilenzia(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     await printlog(update, "silenzia per sempre", f"{victim_name}")
 
     sta_zitto = ChatPermissions.no_permissions()
-    await context.bot.restrict_chat_member(update.message.chat.id, update.message.reply_to_message.from_user.id, permissions=sta_zitto)
-    await update.message.reply_html("Silenziatə fino al <code>decadimento termico dell'universo</code>", reply_to_message_id=update.message.reply_to_message.id)
+    await context.bot.restrict_chat_member(
+        update.message.chat.id, update.message.reply_to_message.from_user.id, permissions=sta_zitto
+    )
+    await update.message.reply_html(
+        "Silenziatə fino al <code>decadimento termico dell'universo</code>",
+        reply_to_message_id=update.message.reply_to_message.id,
+    )
+
 
 async def deleta_if_channel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # if update.message.chat.id != config.ID_TIMELINE:

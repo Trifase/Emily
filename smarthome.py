@@ -11,13 +11,13 @@ from utils import ForgeCommand, no_can_do, printlog
 
 def get_bulb(name: str):
     ip_pranzo = "192.168.1.206"
-    token_pranzo = "e9466aedeab8b3eecd97ac6f337257fe"  #nosec
+    token_pranzo = "e9466aedeab8b3eecd97ac6f337257fe"  # nosec
 
     ip_cucina = "192.168.1.207"
-    token_cucina = "33188b32b80cca8eeead7036b4da32da"  #nosec
+    token_cucina = "33188b32b80cca8eeead7036b4da32da"  # nosec
 
     ip_salotto = "192.168.1.150"
-    token_salotto = "8b81464003a7a0d4126ea8e6cb8d28e3"  #nosec
+    token_salotto = "8b81464003a7a0d4126ea8e6cb8d28e3"  # nosec
 
     ip_penisola = "192.168.1.50"
 
@@ -27,22 +27,10 @@ def get_bulb(name: str):
     penisola = Bulb(ip_penisola)
 
     bulbs = {
-        "salotto": {
-            "label": "Luce salotto",
-            "object": salotto
-            },
-        "pranzo": {
-            "label": "Luce pranzo",
-            "object": pranzo
-            },
-        "cucina": {
-            "label": "Luce cucina",
-            "object": cucina
-            },
-        "penisola": {
-            "label": "Luce penisola",
-            "object": penisola
-            }
+        "salotto": {"label": "Luce salotto", "object": salotto},
+        "pranzo": {"label": "Luce pranzo", "object": pranzo},
+        "cucina": {"label": "Luce cucina", "object": cucina},
+        "penisola": {"label": "Luce penisola", "object": penisola},
     }
 
     if name.lower() not in bulbs.keys():
@@ -50,9 +38,10 @@ def get_bulb(name: str):
     else:
         return bulbs[name.lower()]
 
+
 def get_status(bulbname):
     if isinstance(bulbname, Bulb):  # Yeelight
-        if bulbname.get_properties()['power'] == "on":
+        if bulbname.get_properties()["power"] == "on":
             return True
         return False
     elif isinstance(bulbname, miio.Yeelight):  # xiaomi
@@ -62,6 +51,7 @@ def get_status(bulbname):
     else:
         raise TypeError
 
+
 def toggle(bulbname):
     if isinstance(bulbname, Bulb):  # Yeelight
         bulbname.toggle()
@@ -70,18 +60,19 @@ def toggle(bulbname):
     else:
         raise TypeError
 
+
 def get_light_label(bulbname):
     bulbs = ["salotto", "pranzo", "cucina", "penisola"]
     if bulbname not in bulbs:
         return None
 
-
     bulb = get_bulb(bulbname)
 
-    if get_status(bulb['object']):
+    if get_status(bulb["object"]):
         return f"🟢 {bulb['label']}"
     else:
         return f"🔴 {bulb['label']}"
+
 
 async def luci_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await no_can_do(update, context):
@@ -93,7 +84,10 @@ async def luci_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     bulbs = ["salotto", "pranzo", "cucina", "penisola"]
 
-    callbacks = [ForgeCommand(original_update=update, new_text=f"/toggle {x}", new_args=[x], callable=toggle_light) for x in bulbs]
+    callbacks = [
+        ForgeCommand(original_update=update, new_text=f"/toggle {x}", new_args=[x], callable=toggle_light)
+        for x in bulbs
+    ]
 
     luci_keyb = [
         [
@@ -103,17 +97,15 @@ async def luci_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [
             InlineKeyboardButton(f"{get_light_label(bulbs[2])}", callback_data=callbacks[2]),
             InlineKeyboardButton(f"{get_light_label(bulbs[3])}", callback_data=callbacks[3]),
-        ]
+        ],
     ]
 
     reply_markup = InlineKeyboardMarkup(luci_keyb)
 
-
-
     await update.message.reply_html("Luci:", reply_markup=reply_markup, quote=False)
 
-async def toggle_light(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+async def toggle_light(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         if update.effective_user.id not in config.ADMINS:
             return
@@ -128,12 +120,14 @@ async def toggle_light(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await printlog(update, "toggla una luce", context.args[0])
 
-    toggle(get_bulb(context.args[0])['object'])
+    toggle(get_bulb(context.args[0])["object"])
     if update.message.reply_markup:
-
         bulbs = ["salotto", "pranzo", "cucina", "penisola"]
 
-        callbacks = [ForgeCommand(original_update=update, new_text=f"/toggle {x}", new_args=[x], callable=toggle_light) for x in bulbs]
+        callbacks = [
+            ForgeCommand(original_update=update, new_text=f"/toggle {x}", new_args=[x], callable=toggle_light)
+            for x in bulbs
+        ]
 
         luci_keyb = [
             [
@@ -143,19 +137,19 @@ async def toggle_light(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [
                 InlineKeyboardButton(f"{get_light_label(bulbs[2])}", callback_data=callbacks[2]),
                 InlineKeyboardButton(f"{get_light_label(bulbs[3])}", callback_data=callbacks[3]),
-            ]
+            ],
         ]
 
         reply_markup = InlineKeyboardMarkup(luci_keyb)
-
 
         await update.message.edit_reply_markup(reply_markup=reply_markup)
 
     return
 
+
 async def consumo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id not in config.ADMINS:
-            return
+        return
 
     await printlog(update, "controlla il consumo")
 
@@ -165,11 +159,12 @@ async def consumo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_html(f"Consumo istantaneo: {data['power']} W")
 
+
 async def purificatore(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id not in config.ADMINS:
-            return
+        return
     await printlog(update, "chiede lo status del purificatore d'aria")
-    air = miio.AirPurifierMiot("192.168.1.84", "e8e5a8bb036e21662c4708b61a829c04") # 54:48:E6:55:B3:72
+    air = miio.AirPurifierMiot("192.168.1.84", "e8e5a8bb036e21662c4708b61a829c04")  # 54:48:E6:55:B3:72
     s = air.status()
     message = ""
     message += f"Purificatore d'aria Xiaomi Air Purifier 3H: {'Acceso' if s.is_on else 'Spento'}\n"
@@ -177,12 +172,11 @@ async def purificatore(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message += f"Ore d'uso: {s.filter_hours_used}h - Aria purificati: {s.purify_volume} m³ - Filtro rimanente: {s.filter_life_remaining}%\n"
     await update.message.reply_html(message)
 
+
 async def riscaldamento_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id not in config.ADMINS:
         return
     # if '-new' in context.args:
     await plot_boiler_stats(context)
     await printlog(update, "genera un nuovo grafico della caldaia")
-    await update.message.reply_photo(open('images/boiler48h.jpg', 'rb'))
-
-
+    await update.message.reply_photo(open("images/boiler48h.jpg", "rb"))

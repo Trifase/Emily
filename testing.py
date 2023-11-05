@@ -6,6 +6,7 @@ from telegram.ext import ContextTypes
 
 from utils import printlog
 
+
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     s = time.time()
     start = time.perf_counter()
@@ -30,6 +31,7 @@ async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # await alert(update, context, "ha testato tantissimo", "errore di prova")
 
     # pprint.pprint(sys.modules['space'])
+
 
 async def getfile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     picture = update.message.reply_to_message.photo[-1]

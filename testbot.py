@@ -11,7 +11,6 @@ import logging
 logging.basicConfig(
     level=logging.DEBUG
     # format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG
-
 )
 
 logger = logging.getLogger(__name__)
@@ -30,11 +29,10 @@ def main():
     builder.rate_limiter(AIORateLimiter())
     app = builder.build()
 
-
-    app.add_handler(CommandHandler(['test'], fragolone_test, filters=~filters.UpdateType.EDITED))
+    app.add_handler(CommandHandler(["test"], fragolone_test, filters=~filters.UpdateType.EDITED))
     app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
     # app.run_polling()
 
-main()
 
+main()

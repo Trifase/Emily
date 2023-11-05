@@ -9,7 +9,9 @@ def dump_json_custom(data, file_name):
     with open(filename, "w") as f:
         json.dump(data, f, indent=4)
 
+
 file = "db/picklepersistence"
+
 
 def pickle_persistence():
     return PicklePersistence(
@@ -18,13 +20,14 @@ def pickle_persistence():
         on_flush=False,
     )
 
+
 async def main():
     chat_data = await pickle_persistence().get_chat_data()
     # bot_data = await pickle_persistence().get_bot_data()
     user_data = await pickle_persistence().get_user_data()
 
     # ====== CHAT DATA ======
-    chat_data_remove = ['jackpot','highest_wins', 'count']
+    chat_data_remove = ["jackpot", "highest_wins", "count"]
     for chat, chat_value in list(chat_data.items()):
         this_chat_id = chat
         this_chat_data = chat_data[chat]
@@ -45,7 +48,23 @@ async def main():
         await pickle_persistence().update_chat_data(chat_id=this_chat_id, data=this_chat_data)
 
     # ====== USER DATA ======
-    user_data_remove = ['last_time','balance', 'last_time_scommessa', 'time_scommessa', 'time_indovina', 'time_slot', 'soldi_gratis', 'time_bowling', 'ippodromo', 'perfavore', 'lavoro', 'banca', 'prelievo_banca', 'time_dado', 'stats']
+    user_data_remove = [
+        "last_time",
+        "balance",
+        "last_time_scommessa",
+        "time_scommessa",
+        "time_indovina",
+        "time_slot",
+        "soldi_gratis",
+        "time_bowling",
+        "ippodromo",
+        "perfavore",
+        "lavoro",
+        "banca",
+        "prelievo_banca",
+        "time_dado",
+        "stats",
+    ]
 
     for user, user_value in list(user_data.items()):
         this_user_id = user
@@ -70,15 +89,10 @@ async def main():
     # await pickle_persistence().update_bot_data(bot_data)
 
 
-
 asyncio.run(main())
 
 
-
 # lotto_history = bot_data['lotto_history']
-
-
-
 
 
 # lista = []
@@ -89,7 +103,6 @@ asyncio.run(main())
 # # print(lista)
 
 # import xlsxwriter
-
 
 
 # with xlsxwriter.Workbook('test.xlsx') as workbook:
@@ -153,18 +166,12 @@ asyncio.run(main())
 # ### FINE CLEANUP ###
 
 
-
-
-
-
 # file = "db/picklepersistence"
 # with open(file, 'rb') as pickle_file:
 #     mydict = pickle.load(pickle_file)
 
 
 # print(mydict)
-
-
 
 
 # print(mydict)
@@ -194,9 +201,6 @@ asyncio.run(main())
 #     else:
 #         mydict["chat_data"][santa]['santa2021'].pop(k, None)
 #         print(f"Cancellato {k} perché senza @")
-
-
-
 
 
 # mydict["chat_data"][santa]['santa2021'].pop('ilmionicktelegram')
@@ -248,9 +252,6 @@ asyncio.run(main())
 # print(mydict["bot_data"])
 # mydict["bot_data"]["scommesse_ippodromo"] = []
 # mydict["bot_data"]["odds_list"]
-
-
-
 
 
 # # Scrittura Finale

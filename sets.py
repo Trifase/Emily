@@ -9,12 +9,13 @@ from utils import crea_sondaggino, get_now, make_delete_button, no_can_do, print
 
 jukebox_id = 0
 
+
 # Set
 async def addset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=False) -> None:
     if await no_can_do(update, context):
         return
 
-    with open('db/sets.json') as sets_db:
+    with open("db/sets.json") as sets_db:
         sets = json.load(sets_db)
     chat_id = str(update.message.chat.id)
 
@@ -25,13 +26,15 @@ async def addset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed
     message = update.message.text[5:]
 
     try:
-        trigger = message.split(' ')[0].lower()
-        comando = message.split(' ', 1)[1]
+        trigger = message.split(" ")[0].lower()
+        comando = message.split(" ", 1)[1]
     except IndexError:
-        trigger = message.split(' ')[0].lower()
+        trigger = message.split(" ")[0].lower()
         if update.message.reply_to_message:
             if not update.message.reply_to_message.effective_attachment:
-                await update.message.reply_html('Usa: <code>/set /trigger messaggio</code>, oppure <code>/set /trigger</code> in risposta ad un media')
+                await update.message.reply_html(
+                    "Usa: <code>/set /trigger messaggio</code>, oppure <code>/set /trigger</code> in risposta ad un media"
+                )
                 return
             else:
                 if update.message.reply_to_message.animation:
@@ -51,12 +54,14 @@ async def addset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed
                 elif update.message.reply_to_message.video_note:
                     comando = f"media:video_note:{update.message.reply_to_message.video_note.file_id}"
         else:
-            await update.message.reply_html('Uso: \n<code>/set /trigger [messaggio]</code>\noppure\n<code>/set /trigger</code> in risposta ad un media')
+            await update.message.reply_html(
+                "Uso: \n<code>/set /trigger [messaggio]</code>\noppure\n<code>/set /trigger</code> in risposta ad un media"
+            )
             return
 
     if update.message.from_user.id not in config.ADMINS:
         if trigger[0] != "/":
-            await update.message.reply_text('Il trigger deve essere un /comando.')
+            await update.message.reply_text("Il trigger deve essere un /comando.")
             return
 
     if chatdict.get(trigger.lower()) and not poll_passed:
@@ -68,16 +73,17 @@ async def addset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed
     await printlog(update, "aggiunge un set", f"{trigger} -> {comando}")
 
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} aggiunge un set: {trigger} -> {comando}')
-    await update.message.reply_text('Daje.')
+    await update.message.reply_text("Daje.")
 
-    json.dump(sets, open('db/sets.json', 'w'), indent=4)
+    json.dump(sets, open("db/sets.json", "w"), indent=4)
 
     # we refresh the in-memory copy of sets
-    if 'current_sets' not in context.bot_data:
-        context.bot_data['current_sets'] = {}
-    with open('db/sets.json') as sets_db:
+    if "current_sets" not in context.bot_data:
+        context.bot_data["current_sets"] = {}
+    with open("db/sets.json") as sets_db:
         sets = json.load(sets_db)
-        context.bot_data['current_sets'] = sets
+        context.bot_data["current_sets"] = sets
+
 
 async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -85,10 +91,10 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # with open('db/sets.json') as sets_db:
     #     sets = json.load(sets_db)
-    if 'current_sets' not in context.bot_data:
-        context.bot_data['current_sets'] = {}
+    if "current_sets" not in context.bot_data:
+        context.bot_data["current_sets"] = {}
 
-    sets = context.bot_data['current_sets']
+    sets = context.bot_data["current_sets"]
 
     chat_id = str(update.message.chat.id)
 
@@ -106,38 +112,45 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chatdict = sets.get(chat_id)
 
     if not chatdict:
-        await update.message.reply_text('Non ci sono set.')
+        await update.message.reply_text("Non ci sono set.")
         return
 
-    cat_names = {'audio': '🔈 Audio', 'photo': '🖼 Immagini', 'video': '🎥 Video', 'voice': '🎙 Registrazioni vocali', 'document': '📎 Files', 'video_note': '📹 Registrazioni video', 'sticker': '🏷 Stickers', 'animation': '🎬 GIFs'}
+    cat_names = {
+        "audio": "🔈 Audio",
+        "photo": "🖼 Immagini",
+        "video": "🎥 Video",
+        "voice": "🎙 Registrazioni vocali",
+        "document": "📎 Files",
+        "video_note": "📹 Registrazioni video",
+        "sticker": "🏷 Stickers",
+        "animation": "🎬 GIFs",
+    }
 
     textlist = []
     medialist = defaultdict(list)
 
-
-    if '-listona' in context.args:
+    if "-listona" in context.args:
         for key in sorted(chatdict.keys()):
             comando = chatdict[key]
 
-            if comando.lower().startswith('nsfw'):
-                    comando = "[NSFW whitespace]"
+            if comando.lower().startswith("nsfw"):
+                comando = "[NSFW whitespace]"
 
-            if comando.startswith('media:'):
+            if comando.startswith("media:"):
                 comando = f"[{comando.split(':')[1]}]"
 
             message += f"{key} → {(comando[:25] + '...') if len(comando) > 25 else comando}\n"
-        await update.message.reply_text(f'{message}', disable_notification=True, disable_web_page_preview=True)
+        await update.message.reply_text(f"{message}", disable_notification=True, disable_web_page_preview=True)
         return
 
     for key in chatdict.keys():
         comando = chatdict[key]
 
-        if comando.startswith('media:'):
-            medialist[comando.split(':')[1]].append(key)
+        if comando.startswith("media:"):
+            medialist[comando.split(":")[1]].append(key)
 
         else:
-
-            if comando.lower().startswith('nsfw'):
+            if comando.lower().startswith("nsfw"):
                 comando = "[NSFW whitespace]"
 
             textlist.append(f"{key} → {(comando[:25] + '...') if len(comando) > 25 else comando}")
@@ -152,13 +165,16 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             message += f"{cat_names[cat]}:\n"
             message += f"{' · '.join(sorted(medialist[cat]))}\n\n"
 
-    await update.message.reply_text(f'{message}', disable_notification=True, disable_web_page_preview=True, reply_markup=make_delete_button(update))
+    await update.message.reply_text(
+        f"{message}", disable_notification=True, disable_web_page_preview=True, reply_markup=make_delete_button(update)
+    )
+
 
 async def deleteset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=False) -> None:
     if await no_can_do(update, context):
         return
 
-    with open('db/sets.json') as sets_db:
+    with open("db/sets.json") as sets_db:
         sets = json.load(sets_db)
 
     chat_id = str(update.message.chat.id)
@@ -177,22 +193,23 @@ async def deleteset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_pas
     if trigger in chatdict:
         try:
             del chatdict[trigger]
-            print(f'{get_now()} Fatto!')
-            await update.message.reply_text('Fatto.', quote=False)
-            json.dump(sets, open('db/sets.json', 'w'), indent=4)
+            print(f"{get_now()} Fatto!")
+            await update.message.reply_text("Fatto.", quote=False)
+            json.dump(sets, open("db/sets.json", "w"), indent=4)
             # we refresh the in-memory copy of sets
-            if 'current_sets' not in context.bot_data:
-                context.bot_data['current_sets'] = {}
-            with open('db/sets.json') as sets_db:
+            if "current_sets" not in context.bot_data:
+                context.bot_data["current_sets"] = {}
+            with open("db/sets.json") as sets_db:
                 sets = json.load(sets_db)
-                context.bot_data['current_sets'] = sets
+                context.bot_data["current_sets"] = sets
             return
         except KeyError:
-            await update.message.reply_text('Per qualche ragione non riesco.')
+            await update.message.reply_text("Per qualche ragione non riesco.")
             return
     else:
-        await update.message.reply_text('Non ci sta, controlla meglio con /listaset')
+        await update.message.reply_text("Non ci sta, controlla meglio con /listaset")
         return
+
 
 async def jukebox(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
@@ -201,13 +218,12 @@ async def jukebox(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # if update.message.chat.id != config.ID_DIOCHAN:
     #     return
 
-
     # with open('db/sets.json') as sets_db:
     #     sets = json.load(sets_db)
-    if 'current_sets' not in context.bot_data:
-        context.bot_data['current_sets'] = {}
+    if "current_sets" not in context.bot_data:
+        context.bot_data["current_sets"] = {}
 
-    sets = context.bot_data['current_sets']
+    sets = context.bot_data["current_sets"]
 
     chat_id = str(update.message.chat.id)
     message = ""
@@ -219,16 +235,15 @@ async def jukebox(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chatdict = sets[chat_id]
     for key in chatdict.keys():
         comando = chatdict[key]
-        if comando.startswith('media:'):
+        if comando.startswith("media:"):
             comando = f"{comando.split(':')[1]}"
 
-        if comando == 'audio':
+        if comando == "audio":
             message += f"🎶 ̄· {key}\n"
-        if comando == 'voice':
+        if comando == "voice":
             message += f"🎤 ̄· {key}\n"
 
-
     if message == "":
-        await update.message.reply_text('Non ci sono audio.')
+        await update.message.reply_text("Non ci sono audio.")
         return
-    await update.message.reply_text(f'{message}', disable_notification=True)
+    await update.message.reply_text(f"{message}", disable_notification=True)
