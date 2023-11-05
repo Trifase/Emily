@@ -1,7 +1,7 @@
-# IGDB INTEGRATION
-import httpx
 import datetime
 
+import httpx
+from howlongtobeatpy import HowLongToBeat
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -10,6 +10,7 @@ from utils import no_can_do, printlog
 
 client_id = config.twitch_client_id
 client_secret = config.twitch_client_secret
+itad_api_key = config.itad_api_key
 
 async def get_token_from_twitch(client_id, client_secret) -> str:
     data = {
@@ -35,7 +36,13 @@ async def igdb_request(endpoint, headers, data):
         response.raise_for_status()
         return response.json()
 
-async def get_games_from_igdb(search_game):
+async def itad_request(endpoint, params):
+    async with httpx.AsyncClient(timeout=30) as client:
+        response = await client.get(f"https://api.isthereanydeal.com/{endpoint}/", params=params)
+        response.raise_for_status()
+        return response.json()
+
+async def get_igdb_game(search_game):
     response = await get_token_from_twitch(client_id, client_secret)
     twitch_token = response['access_token']
 
@@ -66,13 +73,70 @@ async def get_games_from_igdb(search_game):
         g['themes'] = game.get('themes')
         if g.get('themes'):
             g['themes_str'] = ', '.join([x.get('name') for x in g['themes']])
+        if game.get('total_rating'):
+            g['rating'] = game.get('total_rating')
         games.append(g)
     return games
+
+async def get_hltb_game(search_game):
+    hltb_results = await HowLongToBeat().async_search(search_game)
+    if hltb_results is not None and len(hltb_results) > 0:
+        hltb_game = max(hltb_results, key=lambda element: element.similarity)
+        g = {}
+        g['hltb_story'] = hltb_game.main_story
+        g['hltb_main'] = hltb_game.main_extra
+        g['hltb_completionist'] = hltb_game.completionist
+        return g
+    else:
+        return None
+
+async def get_itad_game(search_game):
+    req = await itad_request('v02/game/plain', {'key': itad_api_key, 'shop': 'steam', 'title': search_game})
+    try:
+        plain = req['data']['plain']
+    except ValueError:
+        return None
+    
+    params = {
+        'key': itad_api_key,
+        'country': 'IT',
+        'plains': plain,
+    }
+    overview = await itad_request('v01/game/overview', params=params)
+
+    g = {}
+    data = overview['data'][plain]
+    g['best_price'] = data['price']['price']
+    g['best_price_str'] = f'<a href="{data["price"]["url"]}">{data["price"]["price_formatted"]} ({data["price"]["store"]})</a>'
+    g['lowest_price'] = data['lowest']['price']
+    g['lowest_price_str'] = f'<a href="{data["lowest"]["url"]}">{data["lowest"]["price_formatted"]} ({data["lowest"]["store"]})</a>'
+    return g
+
+async def aggregate_game(search_game):
+    games = await get_igdb_game(search_game)
+    if not games:
+        return None
+    igdb_game = games[0]
+
+    hltb_game = await get_hltb_game(search_game)
+    itad_game = await get_itad_game(search_game)
+
+    game = {}
+    game.update(igdb_game)
+    if hltb_game:
+        game.update(hltb_game)
+    if itad_game:
+        game.update(itad_game)
+    return game
+
 
 def format_game(g: dict) -> str:
     game_str = ''
     game_str += f"Name: {g.get('name')}"
     game_str += f"\nRelease: {g.get('release')}"
+
+    if g.get('rating'):
+        game_str += f"\n\nRating: {round(g.get('rating'), 2)}/100\n"
 
     if g.get('platforms_str'):
         game_str += f"\nPlatforms: {g.get('platforms_str')}"
@@ -80,8 +144,14 @@ def format_game(g: dict) -> str:
         game_str += f"\nGenres: {g.get('genres_str')}"
     if g.get('themes_str'):
         game_str += f"\nThemes: {g.get('themes_str')}"
-    # if g.get('cover'):
-    #     game_str += f"\nCover: {g.get('cover')}"
+
+    if g.get('hltb_main'):
+        game_str += f"\n\nHow long to beat:\nMain: {g.get('hltb_main')}h | Extra: {g.get('hltb_story')}h | Completionist: {g.get('hltb_completionist')}h"
+
+    if g.get('best_price_str'):
+        game_str += f"\n\nBest price: {g.get('best_price_str')}"
+    if g.get('lowest_price_str'):
+        game_str += f"\nHistorical Low : {g.get('lowest_price_str')}"
     return game_str
 
 async def giochino(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=False) -> None:
@@ -95,14 +165,15 @@ async def giochino(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_pass
 
     await printlog(update, "cerca un giochino", search_game)
 
-    games = await get_games_from_igdb(search_game)
+    game = await aggregate_game(search_game)
 
-    if not games:
-        await update.message.reply_text("No games found!")
+    if not game:
+        await update.message.reply_text("No game found!")
         return
     
-    for game in games:
-        if game.get('cover'):
-            await update.message.reply_photo(game.get('cover'), caption=format_game(game))
-        else:
-            await update.message.reply_text(format_game(game))
+    if game.get('cover'):
+        await update.message.reply_photo(game.get('cover'), caption=format_game(game))
+    else:
+        await update.message.reply_text(format_game(game))
+
+
