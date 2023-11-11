@@ -348,6 +348,7 @@ async def doveguardo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
     user_settings = get_user_settings(context)
     country = user_settings.get('doveguardo_country', 'IT')
+    user_id = update.effective_user.id
 
     await printlog(update, f"cerca dove guardare qualcosa ({country})", query)
 
@@ -358,7 +359,7 @@ async def doveguardo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
             max_results = 5
 
         keyboard = []
-        keyboard.append([InlineKeyboardButton(f"{i + 1}", callback_data=f"dvg_{query};;{i}") for i in range(max_results)])
+        keyboard.append([InlineKeyboardButton(f"{i + 1}", callback_data=f"dvg_{query};;{i};;{country};;{user_id}") for i in range(max_results)])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         try:
@@ -376,20 +377,25 @@ async def doveguardo_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # CallbackQueries need to be answered, even if no notification to the user is needed
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
     query = update.callback_query
-    await query.answer()
+
 
     argomenti = query.data
-    searchquery, index_n = argomenti.split(";;")
+    searchquery, index_n, country,user_id = argomenti.split(";;")
     searchquery = searchquery[4:]
+    if user_id != str(query.from_user.id):
+        await query.answer('Non è tuo, non puoi', show_alert=True)
+        return
+
+    await query.answer()
 
     try:
-        message, poster_url, max_results = await get_doveguardo_result(searchquery, index_n)
+        message, poster_url, max_results = await get_doveguardo_result(searchquery, index_n, country)
 
         if max_results > 5:
             max_results = 5
 
         keyboard = []
-        keyboard.append([InlineKeyboardButton(f"{i + 1}", callback_data=f"dvg_{searchquery};;{i}") for i in range(max_results)])
+        keyboard.append([InlineKeyboardButton(f"{i + 1}", callback_data=f"dvg_{searchquery};;{i};;{country};;{user_id}") for i in range(max_results)])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         try:

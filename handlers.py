@@ -1,12 +1,15 @@
 import re
+from telegram import Update
 from telegram.ext import (
     CallbackQueryHandler,
     ChatMemberHandler,
     CommandHandler,
+    ConversationHandler,
     InlineQueryHandler,
     MessageHandler,
     PollAnswerHandler,
     PreCheckoutQueryHandler,
+    TypeHandler,
     filters,
 )
 
@@ -43,6 +46,7 @@ from asphalto import azzurro
 from banca import bot_get_saldo, bot_get_transazioni
 from best_timeline import deleta_if_channel, permasilenzia, silenzia  # , scrape_tweet_bt
 from compleanni import compleanni_add, compleanni_list, compleanni_manual_check, compleanno_del
+from conversations import settings, settings_change_actual, settings_change_show, end_conversation
 from diochan import add_quote, ascendi, diochan, get_thread_from_dc, random_tensor, save_tensor, search_quote
 from donazioni import donazioni, precheckout_callback, successful_payment_callback
 from games import sassocartaforbici
@@ -69,7 +73,7 @@ from misc import (
     scacchi,
     self_delete,
     send_auto_reaction,
-    settings,
+    # settings,
     set_auto_reaction,
     spongebob,
     square,
@@ -357,7 +361,32 @@ def generate_handlers_dict() -> dict:
     h[58] = [CommandHandler("get_user_info", get_user_info, filters=~filters.UpdateType.EDITED)]
     h[59] = [CommandHandler("spongebob", spongebob, filters=~filters.UpdateType.EDITED)]
     h[60] = [CommandHandler("square", square, filters=~filters.UpdateType.EDITED)]
-    h[601] = [CommandHandler("settings", settings, filters=~filters.UpdateType.EDITED)]
+    # h[601] = [CommandHandler("settings", settings, filters=~filters.UpdateType.EDITED)]
+    h[-21] = [ConversationHandler(
+        entry_points=[CommandHandler("settings", settings, filters=~filters.UpdateType.EDITED)], 
+        states={
+            "WAIT_FOR_SETTING": [CallbackQueryHandler(settings_change_show, pattern="^sett:")],
+            "CHANGE_SETTING": [MessageHandler(~filters.UpdateType.EDITED & filters.TEXT, settings_change_actual)],
+            -2 : [
+                TypeHandler(Update, end_conversation)
+            ]
+        }, 
+        fallbacks=[],
+        conversation_timeout=30)
+        ]
+    # L'utente fa /settings
+    # : se è con gli argomenti chiave e valore, setto il setting e finisce la conv.
+    # : se è senza argomenti, mando la lista di bottoni con payload sett_NOMESETTING, più un bottone con sett_CANCELLA e mi metto su stato WAIT_FOR_SETTING
+    # stato WAIT_FOR_SETTING:
+    # : se premo sett_CANCELLA finisce la conv
+    # : se premo sett_NOMESETTING, gli mando un messaggio in cui gli scrivo le impostazioni di default e la descrizione del setting, e mi metto su stato CHANGE_SETTING
+    # stato CHANGE_SETTING:
+    # : se l'utente scrive annulla, finisce la conv
+    # : se l'utente scrive un valore, lo setto a NOMESETTING e rimando la lista di bottoni con payload sett_NOMESETTING, più un bottone con sett_CANCELLA e mi rimetto su stato WAIT_FOR_SETTING
+    
+    # timeout a 30secondi con conversation end
+
+
     h[61] = [CommandHandler("fascio", fascio, filters=~filters.UpdateType.EDITED)]
     h[62] = [CommandHandler(["lichess", "lichness"], scacchi, filters=~filters.UpdateType.EDITED)]
     h[63] = [CommandHandler("voice", voice, filters=~filters.UpdateType.EDITED)]
