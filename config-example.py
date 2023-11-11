@@ -2,6 +2,10 @@ BOT_TOKEN = ""
 TOKEN_PAGAMENTO = ""
 VERSION = "v2_20221203"
 
+DEFAULT_USER_SETTINGS = [
+    {'chiave': 'some_options1', 'label':'Some option1', 'default': 'default_value', 'descrizione': 'Example for options'},
+]
+
 # PYROGRAM
 API_ID = 0
 API_HASH = ""
