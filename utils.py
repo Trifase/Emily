@@ -1,14 +1,14 @@
 import datetime
-import textwrap
 import inspect
 import io
 import json
 import logging
 import logging.handlers
+import textwrap
 import time
-from database import Chatlog, Reminders
 from typing import Callable, Optional, Tuple
 
+from aiohttp import web
 from dataclassy import dataclass
 from rich import print as cprint
 from telegram import (
@@ -22,9 +22,9 @@ from telegram import (
     User,
 )
 from telegram.ext import CallbackContext
-from aiohttp import web
 
 import config
+from database import Chatlog, Reminders
 
 
 @dataclass
@@ -541,6 +541,7 @@ async def reply_html_long_message(update, context, message):
     else:
         await update.message.reply_html(message)
 
+
 def get_user_settings(context) -> dict:
     if "user_settings" not in context.user_data:
         settings = user_default_settings()
@@ -553,12 +554,11 @@ def get_user_settings(context) -> dict:
         return settings
 
 
-
 def user_default_settings() -> dict:
     s = {}
     for k in config.DEFAULT_USER_SETTINGS:
-        chiave = k['chiave']
-        valore = k['default']
+        chiave = k["chiave"]
+        valore = k["default"]
         s[chiave] = valore
     # print(f"user_default_settings: {s}")
     return s
