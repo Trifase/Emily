@@ -69,6 +69,7 @@ from misc import (
     scacchi,
     self_delete,
     send_auto_reaction,
+    settings,
     set_auto_reaction,
     spongebob,
     square,
@@ -356,6 +357,7 @@ def generate_handlers_dict() -> dict:
     h[58] = [CommandHandler("get_user_info", get_user_info, filters=~filters.UpdateType.EDITED)]
     h[59] = [CommandHandler("spongebob", spongebob, filters=~filters.UpdateType.EDITED)]
     h[60] = [CommandHandler("square", square, filters=~filters.UpdateType.EDITED)]
+    h[601] = [CommandHandler("settings", settings, filters=~filters.UpdateType.EDITED)]
     h[61] = [CommandHandler("fascio", fascio, filters=~filters.UpdateType.EDITED)]
     h[62] = [CommandHandler(["lichess", "lichness"], scacchi, filters=~filters.UpdateType.EDITED)]
     h[63] = [CommandHandler("voice", voice, filters=~filters.UpdateType.EDITED)]

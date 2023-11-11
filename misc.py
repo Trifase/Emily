@@ -36,7 +36,7 @@ from youtubesearchpython import VideosSearch
 
 import config
 from pyrog import get_all_chatmembers, get_user_from_username, pyro_bomb_reaction, send_reaction
-from utils import expand, get_display_name, no_can_do, print_progressbar, printlog
+from utils import expand, get_display_name, no_can_do, print_progressbar, printlog, get_user_settings
 
 
 async def movie(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -1151,3 +1151,47 @@ async def alexa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = f"<a href='{my_video['link']}'>{my_video['title']}</a>\n"
     message += f"<a href='{my_video['channel']['link']}'>{my_video['channel']['name']}</a> | {my_video['viewCount']['text']} · {my_video['publishedTime']}"
     await update.message.reply_html(message)
+
+
+async def settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await no_can_do(update, context):
+        return
+    
+    await printlog(update, "controlla le impostazioni")
+    if '-help' in context.args:
+        message = '<code>/settings</code> per vedere i settings personali\n<code>/settings [chiave]</code> per vedere il valore di una chiave\n<code>/settings [chiave] [valore]</code> per impostare una chiave.'
+        await update.message.reply_html(message)
+        return
+
+    settings = get_user_settings(context)
+    # print(settings)
+    message = ''
+    if not context.args:
+        message += 'Ecco le tua impostazioni attuali:\n'
+        for k, v in settings.items():
+            message += f"<code>{k}</code> = '<code>{v}</code>'\n"
+
+    elif len(context.args) == 1:
+        key = context.args[0]
+        if key in settings:
+            message += f"Impostazione attuale di <code>{key}</code>: <code>'{settings[key]}'</code>"
+        else:
+            message += f"Chiave <code>'{key}'</code> non trovata"
+
+    elif len(context.args) == 2:
+        key = context.args[0]
+        value = context.args[1]
+        if key in settings:
+            message += f"Impostazione attuale di <code>{key}</code> = <code>'{settings[key]}'</code>\n"
+            message += f"Cambio <code>{key}</code> in <code>'{value}'</code>"
+            settings[key] = value
+            context.user_data['user_settings'] = settings
+        else:
+            message += f"Chiave <code>'{key}'</code> non trovata"
+    elif len(context.args) > 2:
+        message += 'Non ho capito, scusa. Prova <code>/settings -help</code> e fallo bene.'
+    
+    await update.message.reply_html(message)
+    # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} chiede una canzone ad alexa: {search_term}')
+   
+

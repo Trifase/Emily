@@ -5,7 +5,7 @@ from imdb import Cinemagoer
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.ext import ContextTypes
 
-from utils import no_can_do, printlog
+from utils import no_can_do, printlog, get_user_settings
 
 # async def get_doveguardo_result(titolo: str, index_n):
 
@@ -100,7 +100,7 @@ from utils import no_can_do, printlog
 
 #     return message, poster_url, len(results['items'])
 
-async def get_titles(query_text: str, pretty_format=True) -> dict:
+async def get_titles(query_text: str, pretty_format=True, country='IT') -> dict:
 
     client = GraphQLClient(endpoint='https://apis.justwatch.com/graphql')
 
@@ -135,7 +135,7 @@ async def get_titles(query_text: str, pretty_format=True) -> dict:
     """
 
     variables = {
-    "country": "IT",
+    "country": country,
     "language": "it",
     "first": 5,
     "filter": {
@@ -151,7 +151,7 @@ async def get_titles(query_text: str, pretty_format=True) -> dict:
     else:
         return response.data
 
-async def get_title_detail(fullpath: str, pretty_format=True) -> dict:
+async def get_title_detail(fullpath: str, pretty_format=True, country='IT') -> dict:
 
     client = GraphQLClient(endpoint='https://apis.justwatch.com/graphql')
 
@@ -207,7 +207,7 @@ async def get_title_detail(fullpath: str, pretty_format=True) -> dict:
     "platform": "WEB",
     "fullPath": f"{fullpath}",
     "language": "it",
-    "country": "IT",
+    "country": country,
     "filterAll": {
         "monetizationTypes": [
             "FLATRATE",
@@ -230,7 +230,10 @@ async def get_title_detail(fullpath: str, pretty_format=True) -> dict:
         return response.data
 
 def format_titles(response: dict) -> list[dict]:
-    results = response['popularTitles']['edges']
+    try:
+        results = response['popularTitles']['edges']
+    except TypeError:
+        raise ValueError('Nothing Found')
     data = []
     for result in results:
         res = {}
@@ -265,12 +268,12 @@ def format_title_details(response: dict) -> list[dict]:
         data['offers'].append(off)
     return data
 
-async def aggregate_justwatch_results(query: str) -> dict:
+async def aggregate_justwatch_results(query: str, country='IT') -> dict:
     data = []
-    response = await get_titles(query)
+    response = await get_titles(query, country=country)
     for result in response:
         title = result['fullPath']
-        response = await get_title_detail(title)
+        response = await get_title_detail(title, country=country)
         r = {}
         r['full_path'] = result['fullPath']
         r['id'] = result['id']
@@ -278,7 +281,7 @@ async def aggregate_justwatch_results(query: str) -> dict:
         r['year'] = result['originalReleaseYear']
         r['type'] = result['objectType']
 
-        details = await get_title_detail(title)
+        details = await get_title_detail(title, country=country)
         r['score'] = details['score']
         r['full_poster_url'] = details['full_poster_url']
         r['imdb_id'] = details['imdb_id']
@@ -287,9 +290,9 @@ async def aggregate_justwatch_results(query: str) -> dict:
         data.append(r)
     return data
 
-async def get_doveguardo_result(titolo: str, index_n):
+async def get_doveguardo_result(titolo: str, index_n, country='IT'):
 
-    results = await aggregate_justwatch_results(query=titolo)
+    results = await aggregate_justwatch_results(query=titolo, country=country)
     if not results:
         raise ValueError('Movie not found')
 
@@ -343,10 +346,13 @@ async def doveguardo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         await update.message.reply_text("Inserisci qualcosa da cercare.")
         return
 
-    await printlog(update, "cerca dove guardare qualcosa", query)
+    user_settings = get_user_settings(context)
+    country = user_settings.get('doveguardo_country', 'IT')
+
+    await printlog(update, f"cerca dove guardare qualcosa ({country})", query)
 
     try:
-        message, poster_url, max_results = await get_doveguardo_result(query, 0)
+        message, poster_url, max_results = await get_doveguardo_result(query, 0, country)
 
         if max_results > 5:
             max_results = 5

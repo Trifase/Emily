@@ -540,3 +540,25 @@ async def reply_html_long_message(update, context, message):
             await update.message.reply_html(line)
     else:
         await update.message.reply_html(message)
+
+def get_user_settings(context) -> dict:
+    if "user_settings" not in context.user_data:
+        settings = user_default_settings()
+        context.user_data["user_settings"] = settings
+        # print(f"get_user_settings: {settings}")
+        return settings
+    else:
+        settings = context.user_data["user_settings"]
+        # print(f"get_user_settings else: {settings}")
+        return settings
+
+
+
+def user_default_settings() -> dict:
+    s = {}
+    for k in config.DEFAULT_USER_SETTINGS:
+        chiave = k['chiave']
+        valore = k['default']
+        s[chiave] = valore
+    # print(f"user_default_settings: {s}")
+    return s
