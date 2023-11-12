@@ -1,4 +1,5 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.error import BadRequest as TGBardRequest
 from telegram.ext import ContextTypes, ConversationHandler
 
 import config
@@ -43,8 +44,10 @@ async def settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_html(message, quote=False, allow_sending_without_reply=True)
         context.user_data.pop("conversation_settings", None)
         return ConversationHandler.END
-
-    await update.message.delete()
+    try:
+        await update.message.delete()
+    except TGBardRequest:
+        pass
     user_settings = get_user_settings(context)
 
     if not context.args:
@@ -105,7 +108,10 @@ async def settings_change_show(update: Update, context: ContextTypes.DEFAULT_TYP
         all_commands[k["chiave"]] = k
 
     if chiave == "annulla":
-        await query.message.delete()
+        try:
+            await query.message.delete()
+        except TGBardRequest:
+            pass
         context.user_data.pop("conversation_settings", None)
         return ConversationHandler.END
 
@@ -170,6 +176,7 @@ async def delete_all_messages(context: ContextTypes.DEFAULT_TYPE, chat_id, messa
     for msg_id in message_list:
         try:
             await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
-        except Exception as e:
-            print(e)
+        except TGBardRequest:
+            pass
     return True
+

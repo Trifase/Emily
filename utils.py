@@ -196,9 +196,16 @@ async def no_can_do(update, context):
     return False
 
 
-async def get_chat_name(chat_id, tolog=False):
+async def get_chat_name(chat_id, tolog=False, tobot=False):
     bot = Bot(config.BOT_TOKEN)
     this_chat = await bot.get_chat(chat_id)
+
+    if tobot:
+        if this_chat.id > 0:
+            return "privato"
+        else:
+            chat_title = this_chat.title
+            return f"{chat_title}"
 
     if tolog:
         if this_chat.id > 0:
@@ -217,12 +224,18 @@ async def get_chat_name(chat_id, tolog=False):
         return f"[yellow1]{chat_title}[/yellow1] ({str(this_chat.id)})"
 
 
-async def get_display_name(user: User, tolog=False):
+async def get_display_name(user: User, tolog=False, tobot=False):
     if tolog:
         if user.username:
             return f"{user.full_name} (@{user.username}) [{user.id}]"
         else:
             return f"{user.full_name} [{user.id}]"
+
+    if tobot:
+        if user.username:
+            return f"{user.full_name} (@{user.username})"
+        else:
+            return f"{user.full_name}"
 
     if user.username:
         return f"[deep_pink3]{user.full_name} (@{user.username})[/deep_pink3]"
@@ -254,13 +267,23 @@ async def printlog(update, action, additional_data=None, error=False):
             f"{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}: {additional_data}"
         )
         message_log = f"{await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}: {additional_data}"
+        message_bot = f"<code>{await get_display_name(user, tobot=True)}</code> in <code>{await get_chat_name(chat_id, tobot=True)}</code> {action}: <code>{additional_data}</code>"
+
     else:
         cprint(f"{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}")
         message_log = (
             f"{await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}"
         )
+        message_bot = (
+            f"<code>{await get_display_name(user, tobot=True)}</code> in <code>{await get_chat_name(chat_id, tobot=True)}</code> {action}"
+        )
 
     logging.info(message_log)
+
+    LOG_TO_BOT_CENTRAL = config.LOG_TO_BOT_CENTRAL
+    if LOG_TO_BOT_CENTRAL:
+        bot = Bot(config.BOT_TOKEN)
+        await bot.send_message(config.ID_BOTCENTRAL, message_bot, parse_mode="HTML")
 
 
 async def old_printlog(update, action, additional_data=None):
