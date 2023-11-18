@@ -58,7 +58,7 @@ async def settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             bottoni.append(
                 [
                     InlineKeyboardButton(
-                        f"{sett['label']}: {user_settings[sett['chiave']]}", callback_data=f"sett:{sett['chiave']}"
+                        f"{sett['label']}: {user_settings.get(sett['chiave'], sett['default'])}", callback_data=f"sett:{sett['chiave']}"
                     )
                 ]
             )

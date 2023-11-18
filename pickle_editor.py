@@ -20,71 +20,60 @@ def pickle_persistence():
         on_flush=False,
     )
 
+PROCESS_CHAT_DATA = False
+PROCESS_USER_DATA = True
+
+REMOVE_EMPTY_KEYS = False
+REMOVE_EMPTY_SUBKEYS = False
+REMOVE_SPECIFIC_KEYS = False
+
+SAVE = False
+
 
 async def main():
-    chat_data = await pickle_persistence().get_chat_data()
+    # data = await pickle_persistence().get_chat_data()
     # bot_data = await pickle_persistence().get_bot_data()
-    user_data = await pickle_persistence().get_user_data()
+    data = await pickle_persistence().get_user_data()
 
-    # ====== CHAT DATA ======
-    chat_data_remove = ["jackpot", "highest_wins", "count"]
-    for chat, chat_value in list(chat_data.items()):
-        this_chat_id = chat
-        this_chat_data = chat_data[chat]
-        this_chat_value = chat_value
-        # remove empty keys
-        if not chat_value:
-            await pickle_persistence().drop_chat_data(this_chat_id)
+    for key, value in data.items():
+        print(key, value)
 
-        # remove empty subkeys
-        for c_subkey, c_subvalue in list(this_chat_value.items()):
-            if not c_subvalue:
-                this_chat_data.pop(c_subkey, None)
+        #         print(f'user_data[{user}] = {user_value}')
+            # this_user_value = user_value
+            # print(this_user_id, this_user_data)
 
-        # remove chat_data_remove
-        for c_k in chat_data_remove:
-            this_chat_data.pop(c_k, None)
 
-        await pickle_persistence().update_chat_data(chat_id=this_chat_id, data=this_chat_data)
+            # if this_user_data:
+            #     if this_user_data.get('default_meteo_city'):
+            #         if this_user_data.get('user_settings'):
+            #             this_user_data['user_settings']['prometeo_city'] = this_user_data['default_meteo_city']
+            #             # this_user_data.pop('default_meteo_city', None)
+            #             print(f"Aggiunto prometeo_city a {this_user_id}")
+            #         else:
+            #             this_user_data['user_settings'] = {'prometeo_city': this_user_data['default_meteo_city']}
+            #             # this_user_data.pop('default_meteo_city', None)
+            #             print(f"Aggiunto prometeo_city a {this_user_id}")
 
-    # ====== USER DATA ======
-    user_data_remove = [
-        "last_time",
-        "balance",
-        "last_time_scommessa",
-        "time_scommessa",
-        "time_indovina",
-        "time_slot",
-        "soldi_gratis",
-        "time_bowling",
-        "ippodromo",
-        "perfavore",
-        "lavoro",
-        "banca",
-        "prelievo_banca",
-        "time_dado",
-        "stats",
-    ]
+            # remove empty keys
+        #     if REMOVE_EMPTY_KEYS:
+        #         if not user_value:
+        #             n += 1
+        #             await pickle_persistence().drop_user_data(this_user_id)
 
-    for user, user_value in list(user_data.items()):
-        this_user_id = user
-        this_user_data = user_data[user]
-        this_user_value = user_value
+        #     # remove empty subkeys
+        #     if REMOVE_EMPTY_SUBKEYS:
+        #         for u_subkey, u_subvalue in list(this_user_value.items()):
+        #             if not u_subvalue:
+        #                 this_user_data.pop(u_subkey, None)
 
-        # remove empty keys
-        if not user_value:
-            await pickle_persistence().drop_user_data(this_user_id)
+        #     # remove chat_data_remove
+        #     if REMOVE_SPECIFIC_KEYS:
+        #         for u_k in user_data_remove:
+        #             this_user_data.pop(u_k, None)
 
-        # remove empty subkeys
-        for u_subkey, u_subvalue in list(this_user_value.items()):
-            if not u_subvalue:
-                this_user_data.pop(u_subkey, None)
-
-        # remove chat_data_remove
-        for u_k in user_data_remove:
-            this_user_data.pop(u_k, None)
-
-        await pickle_persistence().update_user_data(user_id=this_user_id, data=this_user_data)
+        #     if SAVE:
+        #         await pickle_persistence().update_user_data(user_id=this_user_id, data=this_user_data)
+        # print(n)
 
     # await pickle_persistence().update_bot_data(bot_data)
 

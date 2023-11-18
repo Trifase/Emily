@@ -391,6 +391,16 @@ async def track_chats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
 
 async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Saves the statistics of messages in a chat.
+
+    Args:
+        update (Update): The update object containing the message.
+        context (ContextTypes.DEFAULT_TYPE): The context object.
+
+    Returns:
+        None
+    """
     def extract_day(timestamp):
         return timestamp.astimezone(pytz.timezone("Europe/Rome")).strftime("%Y-%m-%d")
 
@@ -400,6 +410,9 @@ async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE
     if not update.message or update.effective_chat.id in [0]:
         return
 
+    if update.effective_chat.id not in config.CHAT_STATS_ENABLED:
+        return
+    
     if "stats" not in context.chat_data:
         context.chat_data["stats"] = {}
 

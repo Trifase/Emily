@@ -565,16 +565,24 @@ async def reply_html_long_message(update, context, message):
         await update.message.reply_html(message)
 
 
-def get_user_settings(context) -> dict:
-    if "user_settings" not in context.user_data:
-        settings = user_default_settings()
-        context.user_data["user_settings"] = settings
-        # print(f"get_user_settings: {settings}")
-        return settings
+def get_user_settings(context, user_id=None) -> dict:
+    if user_id:
+        user_data = context.application.user_data[user_id]
     else:
-        settings = context.user_data["user_settings"]
-        # print(f"get_user_settings else: {settings}")
-        return settings
+        user_data = context.user_data
+    # First time:
+    if "user_settings" not in user_data:
+        settings = user_default_settings()
+        user_data["user_settings"] = settings
+        
+    # We check if the user has all the settings, otherwise we add them
+    for k in config.DEFAULT_USER_SETTINGS:
+        chiave = k["chiave"]
+        valore = k["default"]
+        if chiave not in user_data["user_settings"]:
+            user_data["user_settings"][chiave] = valore
+    context.application.mark_data_for_update_persistence(user_ids=[user_id])
+    return user_data["user_settings"]
 
 
 def user_default_settings() -> dict:

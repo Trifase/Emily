@@ -125,6 +125,26 @@ async def cancella(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         except Forbidden:
             pass
 
+async def clean_persistence(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.message.from_user.id not in config.ADMINS:
+        return
+
+
+    removed_users = 0
+    removed_chats = 0
+    for user_id in list(context.application.user_data.keys()):
+        if not context.application.user_data[user_id]:
+            context.application.drop_user_data(user_id)
+            removed_users += 1
+
+
+    for chat_id in list(context.application.chat_data.keys()):
+        if not context.application.chat_data[chat_id]:
+            context.application.drop_chat_data(chat_id)
+            removed_chats += 1
+
+    await printlog(update, f"Removed {removed_chats} chat_data and {removed_users} user_data keys")
+
 
 async def send_custom_media(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message.from_user.id not in config.ADMINS:
@@ -663,61 +683,135 @@ async def do_manual_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def clean_db(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:
         return
+    user_ids = set()
+    chat_ids = set()
 
     # ====== CHAT DATA ======
-    chat_data_remove = ["jackpot", "highest_wins", "count"]
+    chat_data_remove = ["jackpot", "highest_wins", "count", "votazioni_attive"]
+    whitelist_chats = [config.ID_ASPHALTO, config.ID_DIOCHAN, config.ID_TIMELINE]
     for chat, chat_value in list(context.application.chat_data.items()):
+        chat_ids.add(chat)
+        # remove all chat except whitelist
+        if chat not in whitelist_chats:
+            print(f'Removing chat_data: {chat} - not in whitelist')
+            context.application.drop_chat_data(chat)
+            # chat_ids.add(chat)
+            continue
+
         # remove empty keys
         if not chat_value:
+            print(f'Removing empty chat_data: {chat}')
             context.application.drop_chat_data(chat)
+            # chat_ids.add(chat)
+            continue
 
         # remove empty subkeys
         for c_subkey, c_subvalue in list(chat_value.items()):
             if not c_subvalue:
+                print(f"Removing {c_subkey} from {chat}: empty")
                 context.application.chat_data[chat].pop(c_subkey, None)
+                chat_ids.add(chat)
 
         # remove chat_data_remove
         for c_k in chat_data_remove:
-            context.application.chat_data[chat].pop(c_k, None)
+            if c_k in context.application.chat_data[chat]:
+                print(f"Removing {c_k} from {chat}: blacklist")
+                del context.application.chat_data[chat][c_k]
+                chat_ids.add(chat)
 
+        if 'stats' in context.application.chat_data[chat]:
+            for day in list(context.application.chat_data[chat]['stats'].keys()):
+                # if day YYYY-MM-DD is earlier than 30 days ago
+                try:
+                    if datetime.datetime.strptime(day, "%Y-%m-%d") < datetime.datetime.today() - datetime.timedelta(days=30):
+                        print(f"Key: {chat} | {day} from stats is older than 30 days, removing it")
+                        context.application.chat_data[chat]['stats'].pop(day, None)
+                        chat_ids.add(chat)
+                except ValueError: 
+                    pass
+
+    context.application.drop_chat_data(-1001180175690)
     await update.message.reply_text("chat_data pulito!")
 
     # ====== USER DATA ======
     user_data_remove = [
-        "last_time",
-        "balance",
-        "last_time_scommessa",
-        "time_scommessa",
-        "time_indovina",
-        "time_slot",
-        "soldi_gratis",
-        "time_bowling",
-        "ippodromo",
-        "perfavore",
-        "lavoro",
-        "banca",
-        "prelievo_banca",
-        "time_dado",
-        "stats",
+        'time_indovina',
+        'balance',
+        'time_scommessa',
+        'time_slot',
+        'soldi_gratis',
+        'time_bowling',
+        'ippodromo',
+        'lavoro',
+        'banca',
+        'prelievo_banca',
+        'perfavore',
+        'time_dado',
+        'triviapoints',
+        'trivia_points_new',
+        'trivia_wrongs',
+        'time_cloud_me'
     ]
-
+    user_data_whitelist = [
+        'user_settings',
+        'default_meteo_city',
+        'segno_zodiacale',
+        'last_use_ai'
+    ]
     for user, user_value in list(context.application.user_data.items()):
+        user_ids.add(user)
         # remove empty keys
         if not user_value:
+            print(f'Removing empty user_data: {user}')
             context.application.drop_user_data(user)
+            user_ids.add(user)
+            continue
 
         # remove empty subkeys
         for u_subkey, u_subvalue in list(user_value.items()):
             if not u_subvalue:
+                print(f"Removing {u_subkey} from {user}: empty")
                 context.application.user_data[user].pop(u_subkey, None)
+                user_ids.add(user)
 
-        # remove chat_data_remove
-        for u_k in user_data_remove:
-            context.application.user_data[user].pop(u_k, None)
+        # # remove chat_data_remove
+        # for u_k in user_data_remove:
+        #     context.application.user_data[user].pop(u_k, None)
+        for k in list(context.application.user_data[user].keys()):
+            if k not in user_data_whitelist:
+                print(f"Removing {k} from {user}: not in whitelist")
+                context.application.user_data[user].pop(k, None)
+                user_ids.add(user)
+
+
+        # check if all the keys in context.application.user_data[user] are in user_data_remove
+        if not set(context.application.user_data[user].keys()).difference(set(user_data_remove)):
+            print(f'Removing user_data: {user} - all keys in blacklist')
+            context.application.drop_user_data(user)
+            user_ids.add(user)
+            continue
+        else:
+            for k in user_data_remove:
+                if k in context.application.user_data[user]:
+                    print(f"Removing {k} from {user}: blacklist")
+                    del context.application.user_data[user][k]
+                    user_ids.add(user)
+    
+        if 'user_settings' in context.application.user_data[user]:
+            if 'default_meteo_city' in context.application.user_data[user]:
+                context.application.user_data[user]['user_settings']['prometeo_city'] = context.application.user_data[user]['default_meteo_city']
+                del context.application.user_data[user]['default_meteo_city']
+                user_ids.add(user)
+
+            if 'segno_zodiacale' in context.application.user_data[user]:
+                context.application.user_data[user]['user_settings']['segno_zodiacale'] = context.application.user_data[user]['segno_zodiacale']
+                del context.application.user_data[user]['segno_zodiacale']
+                user_ids.add(user)
 
     await update.message.reply_text("user_data pulito!")
 
     # ====== BOT DATA ======
+    # print(context.application.bot_data)
     bot_data_remove = [
         "cavalli_esistenti",
         "gara_in_corso",
@@ -732,6 +826,17 @@ async def clean_db(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     for chiave in bot_data_remove:
-        context.application.bot_data.pop(chiave, None)
+        if chiave in context.application.bot_data:
+            print(f"Removing {chiave} from bot_data: blacklist")
+            context.application.bot_data.pop(chiave, None)
+
+    # context.application.bot_data['trivia'] = {}
+    # context.application.bot_data['listen_to'] = []
+    # context.application.bot_data['global_bans'] = []
+    # context.application.bot_data['lista_chat'] = []
+    # context.application.bot_data['timestamps'].pop(-1001406546688, None)
+    # context.application.bot_data.pop('metaverso', None)
+    # context.application.bot_data.pop('quiz_in_corso', None)
 
     await update.message.reply_text("bot_data pulito!")
+    context.application.mark_data_for_update_persistence(chat_ids=chat_ids, user_ids=user_ids)

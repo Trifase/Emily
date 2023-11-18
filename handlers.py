@@ -22,6 +22,7 @@ from admin import (
     cancella,
     check_temp,
     clean_db,
+    clean_persistence,
     commandlist,
     count_lines,
     del_ban,
@@ -256,6 +257,7 @@ def generate_handlers_dict() -> dict:
         )
     ]
     h[13] = [CommandHandler("clean_db", clean_db, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
+    h[131] = [CommandHandler("clean_persistence", clean_persistence, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
 
     # asphalto.py
     h[14] = [CommandHandler(["azzurro", "azz"], azzurro, filters=~filters.UpdateType.EDITED)]

@@ -5,7 +5,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import config
-from utils import no_can_do, printlog
+from utils import no_can_do, printlog, get_user_settings
 
 
 async def ora(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -68,20 +68,28 @@ async def prometeo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     if await no_can_do(update, context):
         return
     citta = ""
+    user_settings = get_user_settings(context, user_id=update.effective_user.id)
+    citta = user_settings.get("prometeo_city", None)
+    print(user_settings)
+    print(citta)
     if not context.args:
+        print("no context args")
         if "default_meteo_city" in context.user_data:
-            citta = context.user_data["default_meteo_city"]
-        else:
-            await update.message.reply_html(
-                "Inserisci una città.\nSe vuoi impostare una città di default puoi usare <code>-setdefault [città]</code>, ad esempio: <code>/prometeo -setdefault Napoli</code>"
-            )
+            print(f"default_meteo_city presente in context.User_data: {context.user_data['default_meteo_city']}")
+            context.user_data['user_settings']['prometeo_city'] = context.user_data["default_meteo_city"]
+            del context.user_data["default_meteo_city"]
+            print('chiave rimossa')
+            print(f'nuova chiave in user_settings: {context.user_data["user_settings"]["prometeo_city"]}')
+            citta = context.user_data['user_settings']['prometeo_city']
+        if not citta:
+            await update.message.reply_html("Inserisci una città.\nSe vuoi impostare una città di default puoi usare <code>/settings</code> e impostarla.")
             return
-    else:
-        if context.args[0] == "-setdefault":
-            default_city = " ".join(context.args[1:])
-            context.user_data["default_meteo_city"] = default_city
-            await update.message.reply_text(f"Salvata: {default_city}")
-            return
+    # else:
+    #     if context.args[0] == "-setdefault":
+    #         default_city = " ".join(context.args[1:])
+    #         context.user_data["default_meteo_city"] = default_city
+    #         await update.message.reply_text(f"Salvata: {default_city}")
+    #         return
 
     API_KEY = config.OWM_API_KEY
     if not citta:
