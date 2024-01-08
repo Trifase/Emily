@@ -261,13 +261,18 @@ async def printlog(update, action, additional_data=None, error=False):
     else:
         user = update.effective_user
         chat_id = update.effective_chat.id
+    link_chat_id = str(chat_id).replace("-100", "")
+
+    if update.effective_message:
+        message_id = update.effective_message.message_id
 
     if additional_data:
         cprint(
             f"{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}: {additional_data}"
         )
         message_log = f"{await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}: {additional_data}"
-        message_bot = f"<code>{await get_display_name(user, tobot=True)}</code> in <code>{await get_chat_name(chat_id, tobot=True)}</code> {action}: <code>{additional_data}</code>"
+
+        message_bot = f'<a href="t.me/c/{link_chat_id}/{message_id}">🔗</a> <code>{await get_display_name(user, tobot=True)}</code> in <code>{await get_chat_name(chat_id, tobot=True)}</code> {action}: <code>{additional_data}</code>'
 
     else:
         cprint(f"{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}")
@@ -275,7 +280,7 @@ async def printlog(update, action, additional_data=None, error=False):
             f"{await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}"
         )
         message_bot = (
-            f"<code>{await get_display_name(user, tobot=True)}</code> in <code>{await get_chat_name(chat_id, tobot=True)}</code> {action}"
+            f'<a href="t.me/c/{link_chat_id}/{message_id}">🔗</a> <code>{await get_display_name(user, tobot=True)}</code> in <code>{await get_chat_name(chat_id, tobot=True)}</code> {action}'
         )
 
     logging.info(message_log)

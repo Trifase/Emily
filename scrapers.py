@@ -1068,7 +1068,7 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                 if submission.url.startswith("https://v.redd"):
                     # v.redd.it ha audio e video separati. Alternativamente bisogna scaricare l'audio a parte e unirli via ffmpeg.
                     # import pprint
-                    # pprint.pprint(submission)
+                    pprint.pprint(submission)
                     url = submission.media["reddit_video"]["fallback_url"]
                     url = url.replace("?source=fallback", "")
                     url_audio = url.replace("1080", "audio")

@@ -67,40 +67,19 @@ async def ora(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def prometeo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
-    citta = ""
-    user_settings = get_user_settings(context, user_id=update.effective_user.id)
-    citta = user_settings.get("prometeo_city", None)
-    print(user_settings)
-    print(citta)
-    if not context.args:
-        print("no context args")
-        if "default_meteo_city" in context.user_data:
-            print(f"default_meteo_city presente in context.User_data: {context.user_data['default_meteo_city']}")
-            context.user_data['user_settings']['prometeo_city'] = context.user_data["default_meteo_city"]
-            del context.user_data["default_meteo_city"]
-            print('chiave rimossa')
-            print(f'nuova chiave in user_settings: {context.user_data["user_settings"]["prometeo_city"]}')
-            citta = context.user_data['user_settings']['prometeo_city']
-        if not citta:
-            await update.message.reply_html("Inserisci una città.\nSe vuoi impostare una città di default puoi usare <code>/settings</code> e impostarla.")
-            return
-    # else:
-    #     if context.args[0] == "-setdefault":
-    #         default_city = " ".join(context.args[1:])
-    #         context.user_data["default_meteo_city"] = default_city
-    #         await update.message.reply_text(f"Salvata: {default_city}")
-    #         return
+
+    if len(context.args) == 1:
+        citta = context.args[0]
+    elif len(context.args) > 1:
+        citta = " ".join(context.args)
+    else: 
+        citta = ""
+        user_settings = get_user_settings(context, user_id=update.effective_user.id)
+        pref_city = user_settings.get("prometeo_city", None)
+        citta = pref_city
 
     API_KEY = config.OWM_API_KEY
-    if not citta:
-        if len(context.args) == 1:
-            citta = context.args[0]
-        elif len(context.args) > 1:
-            citta = " ".join(context.args)
-        else:
-            await update.message.reply_text("Devi inserire una città.")
-            return
-    # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} chiede il meteo di oggi: {citta}')
+
     await printlog(update, "chiede prometeo di oggi", citta)
     # citta += ",,it"
     geocoding_url = "http://api.openweathermap.org/geo/1.0/direct"

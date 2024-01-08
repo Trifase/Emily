@@ -297,7 +297,7 @@ async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     SESSION = config.AOC_SESSION
 
-    url = f"https://adventofcode.com/2022/leaderboard/private/view/{LB_ID}.json"
+    url = f"https://adventofcode.com/2023/leaderboard/private/view/{LB_ID}.json"
     headers = {"Cookie": f"session={SESSION}"}
 
     cache = FileBackend(cache_name="aiohttp_cache", use_temp=True, expire_after=900)
@@ -323,7 +323,7 @@ async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     top5 = sorted(leaderboard, reverse=True)[:10]
 
     for i, value in enumerate(top5, start=1):
-        classifica += f"{i: >2})\t[{value[0]}] {value[2]: >2} ⭐️ {value[1]}\n"
+        classifica += f"{i: >2})\t[{int(value[0]): >3}] {int(value[2]): >2} ⭐️ {value[1]}\n"
 
     await update.message.reply_html(f"<code>{classifica}</code>")
 
