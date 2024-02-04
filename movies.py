@@ -368,7 +368,7 @@ async def doveguardo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         except Exception:
                 await update.message.reply_html(message, disable_web_page_preview=True, reply_markup=reply_markup)
     except ValueError:
-        await update.message.reply_html("Non ho trovato niente")
+        await update.message.reply_html(f"Non trovo un cazzo di niente per {query} in {country}, scusa amicə.")
 
 
 async def doveguardo_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

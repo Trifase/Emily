@@ -11,6 +11,9 @@ from telegram import __version__ as TG_VER
 from telegram.constants import ParseMode
 from telegram.ext import AIORateLimiter, Application, ApplicationBuilder, Defaults, PicklePersistence
 
+from telethon import TelegramClient
+from telethon.sessions import StringSession
+
 import config
 from cron_jobs import (
     check_compleanni,
@@ -145,6 +148,10 @@ async def post_init(app: Application) -> None:
     )
     USER = "emilia_superbot"
     L.load_session_from_file(USER, "db/session-emilia_superbot")
+
+    telethon_session = app.bot_data.get("telethon_session")
+    async with TelegramClient(StringSession(telethon_session), config.API_ID, config.API_HASH) as client:
+        print(f'{get_now()} Loggato su telethon come {(await client.get_me()).username}')
 
     # Prendo il gruppo per mandare il messaggio di riavvio
     if "last_restart" not in app.bot_data:

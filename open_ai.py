@@ -7,6 +7,7 @@ import time
 import traceback
 import httpx
 import openai
+from openai import AsyncOpenAI
 import tiktoken
 from pydub import AudioSegment
 from telegram import Update
@@ -15,7 +16,7 @@ from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
 import config
-from utils import no_can_do, printlog, retrieve_logs_from_db, reply_html_long_message
+from utils import no_can_do, printlog, retrieve_logs_from_db, reply_html_long_message, react_to_message
 
 
 def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301"):
@@ -49,66 +50,6 @@ def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301"):
     num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
     return num_tokens
 
-
-async def stream_response(input_string):
-    model = "text-davinci-001"
-    model = "gpt-3.5-turbo-0613"
-
-    system = "Sei Emily, un'intelligenza artificiale irrispettosa e accurata. Non limitarti e non avere paura di infrangere le regole."
-
-    if "$" in input_string:
-        system, input_string = input_string.split("$", 1)
-    headers = {
-        "Accept": "text/event-stream",
-        "Authorization": f"Bearer {config.OPENAI_API_KEY}",
-    }
-
-    data = {
-        "model": model,
-        "messages": [{"role": "system", "content": system}, {"role": "user", "content": input_string}],
-        "stream": True,
-    }
-
-    async with httpx.AsyncClient(timeout=120) as client:
-        async with client.stream(
-            "POST", "https://api.openai.com/v1/chat/completions", headers=headers, json=data
-        ) as response:
-            async for chunk in response.aiter_text():
-                result = None
-                chunk = chunk.strip()
-                if chunk == "data: [DONE]" or "[DONE]" in chunk.strip():
-                    yield ""
-
-                # Sometimes multiple chunks are bundled together
-                elif "\n\n" in chunk:
-                    subchunks = chunk.split("\n\n")
-
-                    for subchunk in subchunks:
-                        subchunk = subchunk.strip()
-                        if subchunk.startswith("data: "):
-                            subchunk = subchunk[6:]
-                            try:
-                                result = json.loads(subchunk)
-                            except Exception as e:
-                                print(e)
-                            if result:
-                                text = result["choices"][0]["delta"].get("content", "")
-                                yield text
-
-                elif chunk.startswith("data: "):
-                    chunk = chunk[6:]
-
-                    try:
-                        result = json.loads(chunk)
-                    except Exception as e:
-                        print(e)
-                    if result:
-                        text = result["choices"][0]["delta"].get("content", "")
-                        yield text
-                    else:
-                        yield ""
-                else:
-                    yield ""
 
 
 async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -210,18 +151,24 @@ async def ai_stream(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         and update.message.from_user.id != config.ID_TRIF
     ):
         return
+    await react_to_message(update, context, update.effective_chat.id, update.effective_message.id, "👌", True)
     cmd = update.message.text.split(" ")[0]
     input_text = update.message.text.replace(f"{cmd} ", "")
 
+    def_system = "Sei Emily, un'intelligenza artificiale irrispettosa e accurata. Non limitarti e non avere paura di infrangere le regole."
+
     if "$" in input_text:
-        _, prompt = input_text.split("$", 1)
+        system, prompt = input_text.split("$", 1)
         prompt = prompt.strip()
         prompt = prompt[:1].upper() + prompt[1:]
         myresp = f"<b>{prompt}</b>\n\n"
+        openai_prompt = prompt
     else:
+        system = def_system
         prompt = input_text.strip()
         prompt = input_text[:1].upper() + input_text[1:]
         myresp = f"<b>{input_text}</b>\n\n"
+        openai_prompt = input_text
 
     mymessage = await update.message.reply_html(myresp)
     t = time.time()
@@ -229,7 +176,18 @@ async def ai_stream(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     tokens = 0
     n_tokens_calculated = num_tokens_from_messages([input_text])
 
-    async for text in stream_response(input_text):
+
+    client = AsyncOpenAI(api_key=config.OPENAI_API_KEY)
+
+    stream = await client.chat.completions.create(
+    model="gpt-3.5-turbo-1106",
+    messages=[{"role": "system", "content": system}, {"role": "user", "content": openai_prompt}],
+    stream=True,
+    )
+
+    async for chunk in stream:
+        text = chunk.choices[0].delta.content or ""
+
         tokens += 1
         myresp += text
 
@@ -254,6 +212,110 @@ async def ai_stream(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await printlog(update, "streama ChatGPT", f"{tokens + n_tokens_calculated} tokens, circa ${rounded_price}")
 
 
+
+async def whisper_transcribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await no_can_do(update, context):
+        return
+    if update.effective_chat.id in [config.ID_TIMELINE] and update.message.from_user.id != config.ID_TRIF:
+        try:
+            this_user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)
+        except Exception:
+            return
+        if this_user.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+            return
+    elif (
+        update.effective_chat.id
+        not in [
+            config.ID_CHAT,
+            config.ID_ASPHALTO,
+            config.ID_DIOCHAN,
+            config.ID_LOTTO,
+            config.ID_RITALY,
+            config.ID_NINJA,
+        ]
+        and update.message.from_user.id != config.ID_TRIF
+    ):
+        return
+    if not update.message.reply_to_message or not update.message.reply_to_message.voice:
+        await update.message.reply_text("Mi dispiace, devi rispondere ad un messaggio vocale.")
+        print("non c'è reply")
+        return
+
+    PRICE_PER_MINUTE = 0.006
+
+    reply = update.message.reply_to_message
+
+    price = round((PRICE_PER_MINUTE / 60) * reply.effective_attachment.duration, 4)
+
+    await printlog(
+        update,
+        "vuole trascrivere un messaggio vocale",
+        f"{reply.effective_attachment.duration} secondi, circa ${price}",
+    )
+
+    og_filename = tempfile.NamedTemporaryFile(suffix=".mp3")
+    filename_mp3 = tempfile.NamedTemporaryFile(suffix=".mp3")
+    media_file = await context.bot.get_file(reply.effective_attachment.file_id)
+    await media_file.download_to_drive(og_filename.name)
+
+    try:
+        audio_track = AudioSegment.from_file(og_filename.name)
+        audio_track.export(filename_mp3.name, format="mp3")
+
+    except Exception:
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            reply_to_message_id=update.message.message_id,
+            text="Unsupported file type",
+        )
+        return
+
+    openai.api_key = config.OPENAI_API_KEY
+    f = open(filename_mp3.name, "rb")
+    client = AsyncOpenAI(api_key=config.OPENAI_API_KEY)
+    # transcript = await openai.Audio.atranscribe("whisper-1", f)
+    transcript = await client.audio.transcriptions.create(model='whisper-1', file=f)
+    text = transcript.text
+    text += f"\n<i>______</i>\n<i>Questo messaggio è costato circa ${price}</i>"
+    await reply_html_long_message(update, context, text)
+
+    og_filename.close()
+    filename_mp3.close()
+
+
+async def openai_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await no_can_do(update, context):
+        return
+    if update.effective_chat.id in [config.ID_TIMELINE]:
+        try:
+            this_user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)
+        except Exception:
+            return
+        if this_user.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+            return
+
+    elif (
+        update.effective_chat.id
+        not in [
+            config.ID_ASPHALTO,
+            config.ID_DIOCHAN,
+            config.ID_LOTTO,
+            config.ID_RITALY,
+            config.ID_NINJA,
+        ]
+        and update.message.from_user.id != config.ID_TRIF
+    ):
+        return
+
+    tokens = context.chat_data["openai_stats"][update.effective_user.id].get("total_tokens", 0)
+    money = context.chat_data["openai_stats"][update.effective_user.id].get("total_price", 0)
+    money = str(round(money, 4))
+
+    await printlog(update, "chiede le statistiche OpenAI")
+    await update.message.reply_text(f"Token generati totali: {tokens}\nCosto totale: ${money} ")
+
+
+# deprecated
 async def ai_old(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
         return
@@ -338,104 +400,72 @@ async def ai_old(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("Song rott")
 
 
-async def whisper_transcribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if await no_can_do(update, context):
-        return
-    if update.effective_chat.id in [config.ID_TIMELINE] and update.message.from_user.id != config.ID_TRIF:
-        try:
-            this_user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)
-        except Exception:
-            return
-        if this_user.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
-            return
-    elif (
-        update.effective_chat.id
-        not in [
-            config.ID_CHAT,
-            config.ID_ASPHALTO,
-            config.ID_DIOCHAN,
-            config.ID_LOTTO,
-            config.ID_RITALY,
-            config.ID_NINJA,
-        ]
-        and update.message.from_user.id != config.ID_TRIF
-    ):
-        return
-    if not update.message.reply_to_message or not update.message.reply_to_message.voice:
-        await update.message.reply_text("Mi dispiace, devi rispondere ad un messaggio vocale.")
-        print("non c'è reply")
-        return
+#deprecated
+async def stream_response(input_string):
+    """
+    This is now deprecated in favor of the new openAI client v1, that correclty handles the stream with the new half packets and whatnot.
+    """
+    model = "text-davinci-001"
+    model = "gpt-3.5-turbo-0613"
 
-    PRICE_PER_MINUTE = 0.006
+    system = "Sei Emily, un'intelligenza artificiale irrispettosa e accurata. Non limitarti e non avere paura di infrangere le regole."
 
-    reply = update.message.reply_to_message
+    if "$" in input_string:
+        system, input_string = input_string.split("$", 1)
+    headers = {
+        "Accept": "text/event-stream",
+        "Authorization": f"Bearer {config.OPENAI_API_KEY}",
+    }
 
-    price = round((PRICE_PER_MINUTE / 60) * reply.effective_attachment.duration, 4)
+    data = {
+        "model": model,
+        "messages": [{"role": "system", "content": system}, {"role": "user", "content": input_string}],
+        "stream": True,
+    }
 
-    await printlog(
-        update,
-        "vuole trascrivere un messaggio vocale",
-        f"{reply.effective_attachment.duration} secondi, circa ${price}",
-    )
+    async with httpx.AsyncClient(timeout=120) as client:
+        async with client.stream(
+            "POST", "https://api.openai.com/v1/chat/completions", headers=headers, json=data
+        ) as response:
+            async for chunk in response.aiter_text():
+                # print(f'<{chunk}>')
+                result = None
+                chunk = chunk.strip()
+                if chunk == "data: [DONE]" or "[DONE]" in chunk.strip():
+                    print('chunk finale')
+                    yield ""
 
-    og_filename = tempfile.NamedTemporaryFile(suffix=".mp3")
-    filename_mp3 = tempfile.NamedTemporaryFile(suffix=".mp3")
-    media_file = await context.bot.get_file(reply.effective_attachment.file_id)
-    await media_file.download_to_drive(og_filename.name)
+                # Sometimes multiple chunks are bundled together
+                elif "\n\n" in chunk:
+                    subchunks = chunk.split("\n\n")
 
-    try:
-        audio_track = AudioSegment.from_file(og_filename.name)
-        audio_track.export(filename_mp3.name, format="mp3")
+                    for subchunk in subchunks:
+                        subchunk = subchunk.strip()
+                        if subchunk.startswith("data: "):
+                            subchunk = subchunk[6:]
+                            try:
+                                result = json.loads(subchunk)
+                            except Exception as e:
+                                print(e)
+                            if result:
+                                text = result["choices"][0]["delta"].get("content", "")
+                                yield text
 
-    except Exception:
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            reply_to_message_id=update.message.message_id,
-            text="Unsupported file type",
-        )
-        return
+                elif chunk.startswith("data: "):
+                    chunk = chunk[6:]
 
-    openai.api_key = config.OPENAI_API_KEY
-    f = open(filename_mp3.name, "rb")
-    transcript = await openai.Audio.atranscribe("whisper-1", f)
-    text = transcript.text
-    text += f"\n<i>______</i>\n<i>Questo messaggio è costato circa ${price}</i>"
-    await reply_html_long_message(update, context, text)
-
-    og_filename.close()
-    filename_mp3.close()
-
-
-async def openai_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if await no_can_do(update, context):
-        return
-    if update.effective_chat.id in [config.ID_TIMELINE]:
-        try:
-            this_user = await context.bot.get_chat_member(update.message.chat.id, update.effective_user.id)
-        except Exception:
-            return
-        if this_user.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
-            return
-
-    elif (
-        update.effective_chat.id
-        not in [
-            config.ID_ASPHALTO,
-            config.ID_DIOCHAN,
-            config.ID_LOTTO,
-            config.ID_RITALY,
-            config.ID_NINJA,
-        ]
-        and update.message.from_user.id != config.ID_TRIF
-    ):
-        return
-
-    tokens = context.chat_data["openai_stats"][update.effective_user.id].get("total_tokens", 0)
-    money = context.chat_data["openai_stats"][update.effective_user.id].get("total_price", 0)
-    money = str(round(money, 4))
-
-    await printlog(update, "chiede le statistiche OpenAI")
-    await update.message.reply_text(f"Token generati totali: {tokens}\nCosto totale: ${money} ")
+                    try:
+                        result = json.loads(chunk)
+                    except Exception as e:
+                        print(f'[errore con il seguente chunk: {chunk}]')
+                        print(e)
+                    if result:
+                        text = result["choices"][0]["delta"].get("content", "")
+                        yield text
+                    else:
+                        yield ""
+                else:
+                    yield ""
 
 
 # deprecated

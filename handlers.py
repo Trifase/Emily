@@ -338,7 +338,7 @@ def generate_handlers_dict() -> dict:
     h[41] = [CommandHandler(["changemymind", "change"], change_my_mind, filters=~filters.UpdateType.EDITED)]
 
     # maps.py
-    h[42] = [CommandHandler(["loc", "localize", "location", "dove"], location, filters=~filters.UpdateType.EDITED)]
+    h[42] = [CommandHandler(["loc", "localize", "location"], location, filters=~filters.UpdateType.EDITED)]
     h[43] = [CommandHandler(["sw", "street", "streetview"], streetview, filters=~filters.UpdateType.EDITED)]
     h[44] = [CallbackQueryHandler(maps_buttons, pattern=r"^m_")]
 
@@ -406,7 +406,7 @@ def generate_handlers_dict() -> dict:
     h[68] = [CommandHandler("bombreact", bomb_react, filters=~filters.UpdateType.EDITED)]
 
     # movies.py
-    h[69] = [CommandHandler(["doveguardo", "dove_guardo"], doveguardo, filters=~filters.UpdateType.EDITED)]
+    h[69] = [CommandHandler(["doveguardo", "dove_guardo", "dove"], doveguardo, filters=~filters.UpdateType.EDITED)]
     h[70] = [CallbackQueryHandler(doveguardo_buttons, pattern=r"^dvg_")]
     h[71] = [CommandHandler(["imdb", "torrent"], imdb, filters=~filters.UpdateType.EDITED)]
 

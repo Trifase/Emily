@@ -6,6 +6,7 @@ import logging
 import logging.handlers
 import textwrap
 import time
+import httpx
 from typing import Callable, Optional, Tuple
 
 from aiohttp import web
@@ -263,8 +264,14 @@ async def printlog(update, action, additional_data=None, error=False):
         chat_id = update.effective_chat.id
     link_chat_id = str(chat_id).replace("-100", "")
 
-    if update.effective_message:
+    message_id = None
+
+    if update.effective_message and update.effective_message.message_id:
         message_id = update.effective_message.message_id
+
+    emoji_link = ''
+    if link_chat_id and message_id:
+        emoji_link = f'<a href="t.me/c/{link_chat_id}/{message_id}">🔗</a> '
 
     if additional_data:
         cprint(
@@ -272,7 +279,7 @@ async def printlog(update, action, additional_data=None, error=False):
         )
         message_log = f"{await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}: {additional_data}"
 
-        message_bot = f'<a href="t.me/c/{link_chat_id}/{message_id}">🔗</a> <code>{await get_display_name(user, tobot=True)}</code> in <code>{await get_chat_name(chat_id, tobot=True)}</code> {action}: <code>{additional_data}</code>'
+        message_bot = f'{emoji_link}<pre>{await get_display_name(user, tobot=True)} in {await get_chat_name(chat_id, tobot=True)} {action}: {additional_data}</pre>'
 
     else:
         cprint(f"{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}")
@@ -280,7 +287,7 @@ async def printlog(update, action, additional_data=None, error=False):
             f"{await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}"
         )
         message_bot = (
-            f'<a href="t.me/c/{link_chat_id}/{message_id}">🔗</a> <code>{await get_display_name(user, tobot=True)}</code> in <code>{await get_chat_name(chat_id, tobot=True)}</code> {action}'
+            f'{emoji_link}<pre>{await get_display_name(user, tobot=True)} in {await get_chat_name(chat_id, tobot=True)} {action}</pre>'
         )
 
     logging.info(message_log)
@@ -598,3 +605,24 @@ def user_default_settings() -> dict:
         s[chiave] = valore
     # print(f"user_default_settings: {s}")
     return s
+
+
+async def react_to_message(update, context, chat_id, message_id, reaction, is_big):
+    bot_token = config.BOT_TOKEN
+    api_url = f"https://api.telegram.org/bot{bot_token}/setMessageReaction"
+
+    dati = {
+        "chat_id": chat_id,
+        "message_id": message_id,
+        "reaction": [
+            {
+                "type": "emoji",
+                "emoji": reaction,
+            }
+        ],
+        "is_big": is_big
+    }
+
+    async with httpx.AsyncClient() as client:
+        risposta = await client.post(api_url, json=dati)
+        risposta_json = risposta.json()

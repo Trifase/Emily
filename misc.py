@@ -142,6 +142,22 @@ async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     chat_id = update.message.chat.id
+
+    if '-telethon' in context.args:
+        telethon_session = context.bot_data.get('telethon_session')
+        if not telethon_session:
+            await update.message.reply_text("Non ho una sessione di telethon")
+            return
+        from telethon import TelegramClient
+        from telethon.sessions import StringSession
+        # Show all user IDs in a chat
+        async with TelegramClient(StringSession(telethon_session), config.API_ID, config.API_HASH) as client:
+            # You can print the message history of any chat:
+            chat = await client.get_entity(chat_id)
+            async for user in client.iter_participants(chat):
+                print(f"{user.id} - {user.first_name}")
+        return
+
     if "timestamps" not in context.bot_data:
         context.bot_data["timestamps"] = {}
     if chat_id not in context.bot_data["timestamps"]:
@@ -171,16 +187,16 @@ async def lurkers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     listona = ["LURKERS_LIST"]
     messaggio_automatico = ""
     # print(deltas)
-    allmembers = await get_all_chatmembers(chat_id)
+    # allmembers = await get_all_chatmembers(chat_id)
     for lurker in sorted(deltas.items(), key=lambda x: x[1], reverse=True):
         if lurker[1] > max_secs:
-            for u in allmembers:
-                if u.user.id == lurker[0]:
-                    mylurker = u
-                    break
-                else:
+            # for u in allmembers:
+                # if u.user.id == lurker[0]:
+                    # mylurker = u
+                    # break
+                # else:
                     # try:
-                    mylurker = await context.bot.get_chat_member(chat_id, lurker[0])
+            mylurker = await context.bot.get_chat_member(chat_id, lurker[0])
             if mylurker and mylurker.status in ["left", "kicked"]:
                 context.bot_data["timestamps"][chat_id].pop(lurker[0])
                 continue

@@ -203,3 +203,4 @@ movies.py
 .gitignore
 db/pyrogramsession.session-old
 db/pyro-session-trifase.session.session.old
+telethon-session.session
