@@ -2,6 +2,7 @@ import datetime
 import html
 import os
 import shutil
+import json
 import time
 import zipfile
 
@@ -16,6 +17,7 @@ from telegram.ext import ContextTypes
 import config
 from database import Chatlog, Compleanni, Reminders
 from pyrog import get_all_chatmembers
+from acqua import get_links, analyze_day
 from space import StelleResult, make_solar_system
 from utils import get_now
 
@@ -278,6 +280,7 @@ async def autolurkers(context: ContextTypes.DEFAULT_TYPE) -> None:
         if messaggio_automatico:
             print(f"{get_now()} [AUTO] trovati lurkers da kickare nel gruppo {chat_id}")
             await context.bot.send_message(chat_id, messaggio_automatico, reply_markup=reply_markup)
+
 
 
 # Runs every minute

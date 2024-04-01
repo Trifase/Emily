@@ -15,11 +15,12 @@ from telethon import TelegramClient
 from telethon.sessions import StringSession
 
 import config
+from acqua import update_acqua_db
 from cron_jobs import (
     check_compleanni,
     delete_yesterday_chatlog,
     do_global_backup,
-    lotto_member_count,
+    # lotto_member_count,
     parse_diochan,
     # parse_niuchan,
     post_solarsystem_mastodon,
@@ -72,6 +73,7 @@ def main():
     j.run_daily(check_compleanni, datetime.time(hour=12, minute=00, tzinfo=pytz.timezone("Europe/Rome")), data=None)
     j.run_daily(check_compleanni, datetime.time(hour=20, minute=00, tzinfo=pytz.timezone("Europe/Rome")), data=None)
     j.run_daily(do_global_backup, datetime.time(hour=2, minute=00, tzinfo=pytz.timezone("Europe/Rome")), data=None)
+    j.run_daily(update_acqua_db, datetime.time(hour=3, minute=00, tzinfo=pytz.timezone("Europe/Rome")), data=None)
     j.run_daily(
         delete_yesterday_chatlog, datetime.time(hour=1, minute=00, tzinfo=pytz.timezone("Europe/Rome")), data=None
     )

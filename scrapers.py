@@ -155,7 +155,8 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str, debug: bool
         "User-Agent": "com.ss.android.ugc.trill/494+Mozilla/5.0+(Linux;+Android+12;+2112123G+Build/SKQ1.211006.001;+wv)+AppleWebKit/537.36+(KHTML,+like+Gecko)+Version/4.0+Chrome/107.0.5304.105+Mobile+Safari/537.36"
     }
 
-    api_url = f"https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/?aweme_id={video_ID}"
+    # https://github.com/Evil0ctal/Douyin_TikTok_Download_API/blob/main/scraper.py#L459
+    api_url = f"https://api22-normal-c-useast2a.tiktokv.com/aweme/v1/feed/?aweme_id={video_ID}"
 
     async with httpx.AsyncClient() as session:
         r = await session.get(api_url, headers=tiktok_api_headers, timeout=10)

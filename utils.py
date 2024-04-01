@@ -273,13 +273,15 @@ async def printlog(update, action, additional_data=None, error=False):
     if link_chat_id and message_id:
         emoji_link = f'<a href="t.me/c/{link_chat_id}/{message_id}">🔗</a> '
 
+
+
     if additional_data:
         cprint(
             f"{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}: {additional_data}"
         )
         message_log = f"{await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}: {additional_data}"
 
-        message_bot = f'{emoji_link}<pre>{await get_display_name(user, tobot=True)} in {await get_chat_name(chat_id, tobot=True)} {action}: {additional_data}</pre>'
+        message_bot = f'{emoji_link}{await get_display_name(user, tobot=True)}\nin <a href="t.me/c/{link_chat_id}">{await get_chat_name(chat_id, tobot=True)}</a>\n{action}: <code>{additional_data}</code>'
 
     else:
         cprint(f"{get_now()} {await get_display_name(user)} in {await get_chat_name(chat_id)} {action}")
@@ -287,7 +289,7 @@ async def printlog(update, action, additional_data=None, error=False):
             f"{await get_display_name(user, tolog=True)} in {await get_chat_name(chat_id, tolog=True)} {action}"
         )
         message_bot = (
-            f'{emoji_link}<pre>{await get_display_name(user, tobot=True)} in {await get_chat_name(chat_id, tobot=True)} {action}</pre>'
+            f'{emoji_link}{await get_display_name(user, tobot=True)}\nin <a href="t.me/c/{link_chat_id}">{await get_chat_name(chat_id, tobot=True)}</a>\n{action}'
         )
 
     logging.info(message_log)

@@ -15,6 +15,7 @@ from telegram.ext import (
 )
 
 import config
+from acqua import manual_update_acqua_db, acqua_stats
 from admin import (
     _eval,
     add_ban,
@@ -426,7 +427,7 @@ def generate_handlers_dict() -> dict:
     h[78] = [CommandHandler("trivia", make_poll, filters=~filters.UpdateType.EDITED)]
     h[79] = [PollAnswerHandler(ricevi_risposta_quiz)]
     h[80] = [CommandHandler("punteggio", punteggio, filters=~filters.UpdateType.EDITED)]
-    h[81] = [CommandHandler("classifica", classifica, filters=~filters.UpdateType.EDITED)]
+    # h[81] = [CommandHandler("classifica", classifica, filters=~filters.UpdateType.EDITED)]
 
     # reddit.py
     h[82] = [CommandHandler(["redd", "reddit"], reddit, filters=~filters.UpdateType.EDITED)]
@@ -554,6 +555,10 @@ def generate_handlers_dict() -> dict:
 
     # zoom.py
     h[120] = [CommandHandler(["zoom", "zoomlink", "zoomlinks"], zoom_link, filters=~filters.UpdateType.EDITED)]
+
+    # acqua.py
+    h[122] = [CommandHandler("update_acqua_db", manual_update_acqua_db, filters=~filters.UpdateType.EDITED)]
+    h[123] = [CommandHandler("acqua", acqua_stats, filters=~filters.UpdateType.EDITED)]
 
     # DEPRECATED
     # parse_everything.py   CallbackQueryHandler(admin_buttons, pattern=r'^cmd:')

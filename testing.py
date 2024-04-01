@@ -4,7 +4,7 @@ import time
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from utils import printlog, react_to_message
+from utils import printlog
 
 
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -16,7 +16,8 @@ async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} testa tantissimo!')
     await printlog(update, "testa tantissimo")
 
-    await react_to_message(update, context, update.effective_chat.id, update.effective_message.id, "👌", True)
+    await update.message.set_reaction(reaction='👌')
+    # await react_to_message(update, context, update.effective_chat.id, update.effective_message.id, "👌", True)
     # im = ImageGrab.grab()
     # tempphoto = tempfile.NamedTemporaryFile(suffix='.jpg')
     # im.save(tempphoto.name, quality=100, subsampling=0)
