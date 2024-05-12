@@ -1,341 +1,135 @@
-import json
-import os.path
-import threading
-from http.server import BaseHTTPRequestHandler, HTTPServer
-
-import requests
-from requests.models import HTTPError
-from requests.structures import CaseInsensitiveDict
-from rich import box
-from rich.table import Table
 from telegram import Update
 from telegram.ext import ContextTypes
 
 import config
 from utils import printlog
+from requests import HTTPError
 
-# BANK_ID = "BANCA_CARIGE_CRGEITGG"
+from nordigen import NordigenClient
+from uuid import uuid4
+
 BANK_ID = "BPER_RETAIL_BPMOIT22"
 SECRET_ID = config.SECRET_ID
 SECRET_KEY = config.SECRET_KEY
-redirect = "http://www.morsmordre.it"
 
-# refresh token → token
-# se il refresh token è scaduto:
-#     secret_id/secret key → token e refresh token
+def create_new_requisition(client: NordigenClient):
+    ref_id = str(uuid4())
+    init = client.initialize_session(
+        # institution id
+        institution_id=BANK_ID,
+        # redirect url after successful authentication
+        redirect_uri="http://localhost",
+        access_valid_for_days=180,
+        max_historical_days=90,
+        # additional layer of unique ID defined by you
+        reference_id=ref_id
+    )
+
+    link = init.link # bank authorization link
+    requisition_id = init.requisition_id
+    return requisition_id, link
+
+
+async def get_account(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    # prendi il refresh token: se è generato meno di 2592000 secondi, usalo per prendere un nuovo token con new_token = client.exchange_token(token_data["refresh"])
+    # altrimenti, genera entrambi i token e salva il refresh token con client.generate_token()
+    # OPPURE
+    # genera il token direttamente chi se ne frega lmao
+
+    # prendi il requisition_id se lo hai e prova a prendere gli account. se non lo hai, o è scaduto, crea un nuovo requisition di 180gg, manda il link all'utente e salva il requisition id.
+    # vedi tu se fare il webserver per continuare automaticamente o chiedere all'utente di riprovare.
+
+    # con il requisition_id, prendi gli account. prendi l'account_id e usalo per generare un account da cui chiedere il balance, con account = client.account_api(id=account_id) e balances = account.get_balances()
+
+    client = NordigenClient(
+        secret_id=SECRET_ID,
+        secret_key=SECRET_KEY
+    )
+
+    client.generate_token()
+
+    # prendere il requisition_id precedentemente salvato
+    requisition_id = context.bot_data.get('banca_requisition_id', None)
+
+    if not requisition_id:
+        await printlog(update, "chiede il saldo della banca ma non c'è un requisition ID")
+
+        requisition_id, link = create_new_requisition(client)
+        # salvare il requisition_id per la prossima volta
+        context.bot_data['banca_requisition_id'] = requisition_id
+
+        message = 'Non ho un requisition ID, ne creo uno nuovo, cliccalo e rimanda il comando quando finisci.'
+        await update.message.reply_text(message)
+        await update.message.reply_text(link)
+        return
+
+    try:
+        accounts = client.requisition.get_requisition_by_id(requisition_id=requisition_id)
+    except HTTPError as e:
+        #TODO: capire quale status_code restituisce una requisition scaduta, non lo trovo nella documentazione
+        if e.response.status_code == 404 or e.response.status_code == 400:
+            await printlog(update, "chiede il saldo della banca ma non c'è un requisition ID")
+
+            # salvare il requisition_id per la prossima volta
+            requisition_id, link = create_new_requisition(client)
+            context.bot_data['banca_requisition_id'] = requisition_id
+
+            message = 'Il requisition ID è scaduto, ne creo uno nuovo, cliccalo e rimanda il comando quando finisci.'
+            await update.message.reply_text(message)
+            await update.message.reply_text(link)
+            return
 
-# token + requisition_id (valido, 90gg) → account_id
-# se il requisition_id è scaduto o non c'è:
-#     token + bank_id (che è sempre lo stesso) → requisition_id e url
-#     clicchi url e ti autorizzi
-
-# token + account_id → saldo/movimenti
-
-
-def get_new_token(secret_id, secret_key):
-    headers = {
-        "accept": "application/json",
-        "Content-Type": "application/json",
-    }
-
-    data = {"secret_id": secret_id, "secret_key": secret_key}
-
-    response = requests.post("https://ob.nordigen.com/api/v2/token/new/", headers=headers, json=data)
-
-    if response.status_code == 200:
-        return response.json()
-    else:
-        response.raise_for_status()
-
-
-def refresh_token(refresh_token):
-    url = "https://ob.nordigen.com/api/v2/token/refresh/"
-
-    headers = CaseInsensitiveDict()
-    headers["accept"] = "application/json"
-    headers["Content-Type"] = "application/json"
-
-    data = {"refresh": refresh_token}
-
-    response = requests.post(url, headers=headers, json=data)
-
-    if response.status_code == 200:
-        return response.json()
-    else:
-        response.raise_for_status()
-
-
-def get_or_refresh_token(SECRET_ID, SECRET_KEY):
-    if os.path.isfile(f"banca/{SECRET_ID}.json"):  # c'è già un file token con questo ID
-        with open(f"banca/{SECRET_ID}.json") as json_file:
-            data = json.load(json_file)
-
-        refresh = data["refresh"]  # refresho
-        try:
-            newdata = refresh_token(refresh)
-            data["access"] = newdata["access"]
-            with open(f"banca/{SECRET_ID}.json", "w") as outfile:  # scrivo il nuovo token
-                json.dump(data, outfile)
-        except HTTPError:  # il refresh token è scaduto/invalido
-            print("Errore. Refresh token scaduto. Genero tutto da capo..")
-            data = get_new_token(SECRET_ID, SECRET_KEY)
-            with open(f"banca/{SECRET_ID}.json", "w") as outfile:
-                json.dump(data, outfile)
-
-    else:  # non c'è un file token
-        data = get_new_token(SECRET_ID, SECRET_KEY)  # ne creo uno
-
-        with open(f"banca/{SECRET_ID}.json", "w") as outfile:
-            json.dump(data, outfile)
-
-    return data["access"]  # in ogni caso ritorna il token refreshato o nuovo
-
-
-def build_requisition(token, BANK_ID, redirect_url="http://www.google.com"):  # returns link, requisition_id
-    url = "https://ob.nordigen.com/api/v2/requisitions/"
-
-    headers = CaseInsensitiveDict()
-    headers["accept"] = "application/json"
-    headers["Content-Type"] = "application/json"
-    headers["Authorization"] = f"Bearer {token}"
-
-    data = {"redirect": redirect_url, "institution_id": BANK_ID}
-
-    response = requests.post(url, headers=headers, json=data)
-
-    if response.ok:
-        response = response.json()
-        # print("====")
-        # print(response)
-        # print("====")
-        link = response["link"]
-        requisition_id = response["id"]
-        return link, requisition_id
-    else:
-        print(f"Errore! {response.status_code}")
-        raise HTTPError
-
-
-def get_requisition_list(token):
-    url = "https://ob.nordigen.com/api/v2/requisitions/"
-
-    headers = CaseInsensitiveDict()
-    headers["accept"] = "application/json"
-    headers["Authorization"] = f"Bearer {token}"
-
-    response = requests.get(url, headers=headers)
-    if response.ok:
-        return response.json()
-    else:
-        print(f"Errore! {response.status_code}")
-        response.raise_for_status()
-        raise HTTPError
-
-
-def delete_requisition(token, uuid):
-    url = f"https://ob.nordigen.com/api/v2/requisitions/{uuid}"
-
-    headers = CaseInsensitiveDict()
-    headers["accept"] = "application/json"
-    headers["Authorization"] = f"Bearer {token}"
-
-    response = requests.delete(url, headers=headers)
-    if response.ok:
-        return response.json()
-    else:
-        print(f"Errore! {response.status_code}")
-        response.raise_for_status()
-        raise HTTPError
-
-
-def get_account_id_from_api(token, requisition_id):
-    url = f"https://ob.nordigen.com/api/v2/requisitions/{requisition_id}/"
-    headers = CaseInsensitiveDict()
-    headers["accept"] = "application/json"
-    headers["Authorization"] = f"Bearer {token}"
-
-    response = requests.get(url, headers=headers)
-
-    if response.status_code == 200:
-        response = response.json()
-        # account_id = response['accounts'][0]
-        return response
-    else:
-        response.raise_for_status()
-
-
-def get_banks(token, country_code="it"):
-    url = f"https://ob.nordigen.com/api/v2/institutions/?country={country_code}"
-
-    headers = CaseInsensitiveDict()
-    headers["accept"] = "application/json"
-    headers["Authorization"] = f"Bearer {token}"
-
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        response.raise_for_status()
-
-
-def refresh_requisition(token):
-    with open("banca/accounts.json") as account_file:
-        data = json.load(account_file)
-        bank_id = data["bank_id"]
-        account_dict = dict()
-        link, requisition_id = build_requisition(token, bank_id, "http://127.0.0.1:12666")  # creo un agreement
-
-        class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
-            def do_GET(self):
-                self.wfile.write(b"Grazie, puoi chiudere!")
-
-                # threading.Thread(target=httpd.shutdown, daemon=True).start()
-
-        httpd = HTTPServer(("localhost", 12666), SimpleHTTPRequestHandler)
-
-        print("Apri il seguente link, segui la procedura per autenticarti con la banca:")
-        print(link)
-        # httpd.serve_forever()
-        httpd.handle_request()
-        print("Fatto!")
-        print(bank_id)
-        print(requisition_id)
-        account_dict["bank_id"] = bank_id
-        account_dict["requisition_id"] = requisition_id
-        response = get_account_id_from_api(token, requisition_id)
-
-        acc_id = response["accounts"][0]
-        account_dict["acc_id"] = acc_id
-        with open("banca/accounts.json", "w") as outfile:
-            json.dump(account_dict, outfile)
-        return acc_id
-
-
-def get_account_id(token, BANK_ID, redirect):
-    if os.path.isfile("banca/accounts.json"):  # c'è già un file per gli account
-        with open("banca/accounts.json") as json_file:
-            data = json.load(json_file)
-
-        acc_id = data["acc_id"]
-        requisition_id = data["requisition_id"]
-        return acc_id
-    else:  # non c'è un file accounts
-        account_dict = dict()
-        link, requisition_id = build_requisition(token, BANK_ID, "http://127.0.0.1:12666")  # creo un agreement
-
-        class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
-            def do_GET(self):
-                self.wfile.write(b"Grazie, puoi chiudere!")
-
-                threading.Thread(target=httpd.shutdown, daemon=True).start()
-
-        httpd = HTTPServer(("localhost", 12666), SimpleHTTPRequestHandler)
-
-        print("Apri il seguente link, segui la procedura per autenticarti con la banca (user: 11082651):")
-        print(link)
-        httpd.serve_forever()
-        print("Fatto!")
-        account_dict["bank_id"] = BANK_ID
-        account_dict["requisition_id"] = requisition_id
-        response = get_account_id_from_api(token, requisition_id)
-
-        acc_id = response["accounts"][0]
-        account_dict["acc_id"] = acc_id
-        with open("banca/accounts.json", "w") as outfile:
-            json.dump(account_dict, outfile)
-        return acc_id
-
-
-def get_transactions(token, acc_id):
-    url = f"https://ob.nordigen.com/api/v2/accounts/{acc_id}/transactions/"
-
-    headers = CaseInsensitiveDict()
-    headers["accept"] = "application/json"
-    headers["Authorization"] = f"Bearer {token}"
-
-    response = requests.get(url, headers=headers)
-    if response.ok:
-        return response.json()
-    elif response.status_code == 400:  # requisition scaduta
-        new_acc_id = refresh_requisition(token)
-        return get_transactions(token, new_acc_id)
-    else:
-        response.raise_for_status()
-
-
-def get_saldo(token, acc_id, just_the_number=1):
-    url = f"https://ob.nordigen.com/api/v2/accounts/{acc_id}/balances/"
-
-    headers = CaseInsensitiveDict()
-    headers["accept"] = "application/json"
-    headers["Authorization"] = f"Bearer {token}"
-
-    response = requests.get(url, headers=headers)
-    if response.ok:
-        if just_the_number == 1:
-            response = response.json()
-            return response["balances"][1]["balanceAmount"]["amount"]
         else:
-            return response.json()
-    elif response.status_code == 400:  # requisition scaduta
-        new_acc_id = refresh_requisition(token)
-        return get_transactions(token, new_acc_id)
-    else:
-        response.raise_for_status()
+            print(e)
+            print(e.response)
+            print(e.response.status_code)
+            raise e
 
+    mymessage = await update.message.reply_text("Controllo, un secondo...")
 
-def transactions_nice_table(token, acc_id):
-    table = Table(title="Lista Transazioni", box=box.SQUARE_DOUBLE_HEAD)
+    account_id = accounts["accounts"][0]
 
-    table.add_column("Data")
-    table.add_column("Importo", justify="right")
-    table.add_column("Causale")
+    account = client.account_api(id=account_id)
 
-    for t in get_transactions(token, acc_id)["transactions"]["booked"]:
-        # print(f"{t['bookingDate']}\t{t['transactionAmount']['amount']}€\t{t['remittanceInformationUnstructured']}")
-        table.add_row(t["bookingDate"], f"{t['transactionAmount']['amount']}€", t["remittanceInformationUnstructured"])
-
-    return table
+    return (account, mymessage)
 
 
 async def bot_get_saldo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:
         return
-    # print("saldo")
-    # BANK_ID = "BANCA_CARIGE_CRGEITGG"
-    BANK_ID = "BPER_RETAIL_BPMOIT22"
-    SECRET_ID = config.SECRET_ID
-    SECRET_KEY = config.SECRET_KEY
-    redirect = "http://www.morsmordre.it"
 
-    token = get_or_refresh_token(SECRET_ID, SECRET_KEY)
-    # print("token ok")
-    acc_id = get_account_id(token, BANK_ID, redirect)
-    # print("acc_id ok")
     await printlog(update, "chiede il saldo della banca")
-    await update.message.reply_text(f"{get_saldo(token, acc_id, 1)} €")
 
+    account, mymessage = await get_account(update, context)
+
+    balances = account.get_balances()
+
+    saldo = balances['balances'][0]['balanceAmount']['amount']
+    ref_date = balances['balances'][0]['referenceDate']
+
+    message = f'Saldo al {ref_date}: <code>{float(saldo):,}</code> EUR'
+    await mymessage.edit_text(message)
 
 async def bot_get_transazioni(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:
         return
-    # print("saldo")
-    # BANK_ID = "BANCA_CARIGE_CRGEITGG"
-    BANK_ID = "BPER_RETAIL_BPMOIT22"
-    SECRET_ID = config.SECRET_ID
-    SECRET_KEY = config.SECRET_KEY
-    redirect = "http://www.morsmordre.it"
-    messaggio = ""
-    token = get_or_refresh_token(SECRET_ID, SECRET_KEY)
-    # print("token ok")
-    acc_id = get_account_id(token, BANK_ID, redirect)
-    try:
-        n = int(context.args[0])
-    except IndexError:
-        n = 5
-    # print("acc_id ok")
-    messaggio += f"Ultime {n} transazioni:\n"
-    for t in get_transactions(token, acc_id)["transactions"]["booked"][:n]:
-        messaggio += f"[{t['transactionAmount']['amount']} €] {t['remittanceInformationUnstructured']}\n------\n"
-    await printlog(update, "chiede i movimenti bancari")
-    await update.message.reply_text(messaggio)
+
+    await printlog(update, "chiede le transazioni")
+
+    account, mymessage = await get_account(update, context)
+
+    dict_transactions = account.get_transactions()
+
+    list_transactions = dict_transactions['transactions']['booked']
+    message = 'Transazioni:\n\n'
+    for transaction in list_transactions[:10]:
+        t_date = transaction['bookingDate']
+        t_amount = transaction['transactionAmount']['amount']
+        t_desc = transaction['remittanceInformationUnstructured']
+        if len(t_desc) > 100:
+            t_desc = t_desc[:97] + '...'
+        message += f"{t_date}{t_amount:>8}€ {t_desc}\n"
+
+    message = f'<pre><code class="language-python">{message}</code></pre>'
+    await mymessage.edit_text(message)

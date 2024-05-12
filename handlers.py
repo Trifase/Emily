@@ -47,7 +47,6 @@ from admin import (
 )
 from asphalto import azzurro
 from banca import bot_get_saldo, bot_get_transazioni
-from banca2 import bot_get_saldo2
 from best_timeline import deleta_if_channel, permasilenzia, silenzia  # , scrape_tweet_bt
 from compleanni import compleanni_add, compleanni_list, compleanni_manual_check, compleanno_del
 from conversations import end_conversation, settings, settings_change_actual, settings_change_show
@@ -269,13 +268,11 @@ def generate_handlers_dict() -> dict:
     h[-101] = [CallbackQueryHandler(lurkers_callbackqueryhandlers, pattern=is_lurkers_list)]
 
     # banca.py
-    h[16] = [CommandHandler(["saldo", "carige_saldo"], bot_get_saldo, filters=~filters.UpdateType.EDITED),
-             CommandHandler(["saldo2", "carige_saldo2"], bot_get_saldo2, filters=~filters.UpdateType.EDITED)
-    ]
+    h[16] = [CommandHandler("saldo", bot_get_saldo, filters=~filters.UpdateType.EDITED)]
 
     h[17] = [
         CommandHandler(
-            ["movimenti", "transazioni", "carige_movimenti"], bot_get_transazioni, filters=~filters.UpdateType.EDITED
+            ["movimenti", "transazioni"], bot_get_transazioni, filters=~filters.UpdateType.EDITED
         )
     ]
 
