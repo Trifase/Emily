@@ -191,11 +191,11 @@ async def ispirami(update: Update, context: ContextTypes.DEFAULT_TYPE):
     first_name = ""
     last_name = ""
     username = ""
-    if update.message.reply_to_message.forward_date:  # è un forward
+    if update.message.reply_to_message.forward_origin:  # è un forward
         try:
-            first_name = update.message.reply_to_message.forward_from.first_name
-            last_name = update.message.reply_to_message.forward_from.last_name
-            username = update.message.reply_to_message.forward_from.username
+            first_name = update.message.reply_to_message.forward_origin.sender_user.first_name
+            last_name = update.message.reply_to_message.forward_origin.sender_user.last_name
+            username = update.message.reply_to_message.forward_origin.sender_user.username
             if first_name and last_name:
                 nickname = f"{first_name} {last_name}"
             elif first_name and not last_name:
@@ -204,12 +204,12 @@ async def ispirami(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 nickname = f"@{username}"
 
         except AttributeError:  # Privacy Forward
-            nickname = update.message.reply_to_message.forward_sender_name
+            nickname = update.message.reply_to_message.forward_origin.sender_user_name
 
         if nickname:
-            nickname += f", {update.message.reply_to_message.forward_date.strftime('%-d %B %Y')}"
+            nickname += f", {update.message.reply_to_message.forward_origin.date.strftime('%-d %B %Y')}"
         else:
-            nickname = f"Anonimo, {update.message.reply_to_message.forward_date.strftime('%-d %B %Y')}"
+            nickname = f"Anonimo, {update.message.reply_to_message.forward_origin.date.strftime('%-d %B %Y')}"
     else:
         first_name = update.message.reply_to_message.from_user.first_name
         last_name = update.message.reply_to_message.from_user.last_name

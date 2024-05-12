@@ -5,7 +5,8 @@ from typing import Optional, Tuple
 
 from database import Chatlog
 import pytz
-from telegram import Chat, ChatMember, ChatMemberUpdated, InlineKeyboardButton, InlineKeyboardMarkup, Update
+import random
+from telegram import Chat, ChatMember, ChatMemberUpdated, InlineKeyboardButton, InlineKeyboardMarkup, Update, Message
 from telegram.constants import ChatMemberStatus
 from telegram.ext import ApplicationHandlerStop, ContextTypes
 
@@ -431,6 +432,25 @@ async def save_messages_stats(update: Update, context: ContextTypes.DEFAULT_TYPE
     context.chat_data["stats"][day][hour] += 1
     context.chat_data["stats"][day]["total"] += 1
 
+async def auto_pagliaccia_luca_veronese(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Schedules a pagliaccio reaction to Luca Veronese's messages. Time is random, between 10 secs to 120 secs."""
+    # print(f"{update.effective_user.id} == {config.ID_TRIF}")
+    if update.effective_user.id == config.ID_LUCA_VERONESE:
+        # print('up')
+        seconds: int = random.randint(10, 120)
+        await printlog(update, "Pagliacciamo Luca Veronese", seconds)
+        message: Message = update.effective_message
+        context.job_queue.run_once(
+            pagliaccia, seconds, data=message, name=f"pagliaccia_luca_veronese_{str(update.effective_message.id)}"
+        )
+
+
+async def pagliaccia(context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Seds a pagliaccio reaction to the message."""
+    message: Message = context.job.data
+    # Send a pagliaccio reaction
+    # print('sending pagliacciament')
+    await message.set_reaction(reaction="🤡")
 
 # Tensor
 async def log_message(update: Update, context: ContextTypes.DEFAULT_TYPE):

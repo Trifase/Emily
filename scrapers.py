@@ -152,14 +152,25 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str, debug: bool
 
     infos = {}
     tiktok_api_headers = {
-        "User-Agent": "com.ss.android.ugc.trill/494+Mozilla/5.0+(Linux;+Android+12;+2112123G+Build/SKQ1.211006.001;+wv)+AppleWebKit/537.36+(KHTML,+like+Gecko)+Version/4.0+Chrome/107.0.5304.105+Mobile+Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0"
     }
 
-    # https://github.com/Evil0ctal/Douyin_TikTok_Download_API/blob/main/scraper.py#L459
-    api_url = f"https://api22-normal-c-useast2a.tiktokv.com/aweme/v1/feed/?aweme_id={video_ID}"
+    # https://github.com/Evil0ctal/Douyin_TikTok_Download_API/blob/main/scraper.py#L459ù
+    params = {
+        "iid": "7318518857994389254",
+        "device_id": "7318517321748022790",
+        "channel": "googleplay",
+        "app_name": "musical_ly",
+        "version_code": "300904",
+        "device_platform": "android",
+        "device_type": "ASUS_Z01QD",
+        "os_version": "9",
+        "aweme_id": f"{video_ID}",
+    }
+    api_url = "https://api22-normal-c-alisg.tiktokv.com/aweme/v1/feed/"
 
     async with httpx.AsyncClient() as session:
-        r = await session.get(api_url, headers=tiktok_api_headers, timeout=10)
+        r = await session.get(api_url, headers=tiktok_api_headers, params=params, timeout=10)
     response = r.json()
 
     if debug:

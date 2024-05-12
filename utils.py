@@ -6,11 +6,13 @@ import logging
 import logging.handlers
 import textwrap
 import time
-import httpx
+from io import BytesIO
 from typing import Callable, Optional, Tuple
 
+import httpx
 from aiohttp import web
 from dataclassy import dataclass
+from PIL import Image
 from rich import print as cprint
 from telegram import (
     Bot,
@@ -608,6 +610,21 @@ def user_default_settings() -> dict:
     # print(f"user_default_settings: {s}")
     return s
 
+async def code_screenshot(code: str, filename: str):
+    data = {
+        'code': code,
+        'fontFamily': 'Fira Code',
+        'paddingVertical': '26px',
+        'paddingHorizontal': '26px'
+    }
+    headers = {
+    'Content-Type': 'application/json',
+    }
+    async with httpx.AsyncClient() as session:
+        r = await session.post("https://carbonara.solopov.dev/api/cook", headers=headers, json=data, timeout=30)
+    i = Image.open(BytesIO(r.content))
+    i.save(filename)
+    return filename
 
 async def react_to_message(update, context, chat_id, message_id, reaction, is_big):
     bot_token = config.BOT_TOKEN

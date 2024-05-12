@@ -47,6 +47,7 @@ from admin import (
 )
 from asphalto import azzurro
 from banca import bot_get_saldo, bot_get_transazioni
+from banca2 import bot_get_saldo2
 from best_timeline import deleta_if_channel, permasilenzia, silenzia  # , scrape_tweet_bt
 from compleanni import compleanni_add, compleanni_list, compleanni_manual_check, compleanno_del
 from conversations import end_conversation, settings, settings_change_actual, settings_change_show
@@ -88,6 +89,7 @@ from misc import (
 from movies import doveguardo, doveguardo_buttons, imdb
 from open_ai import ai_old, ai_stream, openai_stats, riassuntone, whisper_transcribe
 from parse_everything import (
+    auto_pagliaccia_luca_veronese,
     check_for_sets,
     drop_update_from_banned_users,
     exit_from_banned_groups,
@@ -158,6 +160,7 @@ def generate_handlers_dict() -> dict:
     h[-15] = [MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, check_for_sets)]
     h[-14] = [MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL, save_messages_stats)]
     h[-13] = [ChatMemberHandler(track_chats, ChatMemberHandler.MY_CHAT_MEMBER)]
+    h[-132] = [MessageHandler(~filters.UpdateType.EDITED, auto_pagliaccia_luca_veronese)]
 
     # admin.py
     h[-12] = [
@@ -266,7 +269,10 @@ def generate_handlers_dict() -> dict:
     h[-101] = [CallbackQueryHandler(lurkers_callbackqueryhandlers, pattern=is_lurkers_list)]
 
     # banca.py
-    h[16] = [CommandHandler(["saldo", "carige_saldo"], bot_get_saldo, filters=~filters.UpdateType.EDITED)]
+    h[16] = [CommandHandler(["saldo", "carige_saldo"], bot_get_saldo, filters=~filters.UpdateType.EDITED),
+             CommandHandler(["saldo2", "carige_saldo2"], bot_get_saldo2, filters=~filters.UpdateType.EDITED)
+    ]
+
     h[17] = [
         CommandHandler(
             ["movimenti", "transazioni", "carige_movimenti"], bot_get_transazioni, filters=~filters.UpdateType.EDITED

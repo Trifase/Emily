@@ -3,19 +3,21 @@ import datetime
 # import datetime
 import json
 import locale
+import tempfile
 
 import httpx
 from bs4 import BeautifulSoup
 from dateparser.search import search_dates
 
 # from pprint import pprint
+from carbon import Carbon
 from rich import print
 from telegram import Update
 from telegram.ext import ContextTypes
-from uniplot import plot
+from uniplot import plot_to_string
 
 import config
-from utils import get_now, no_can_do, printlog
+from utils import get_now, no_can_do, printlog, code_screenshot
 
 locale.setlocale(locale.LC_ALL, "it_IT.utf8")
 
@@ -176,23 +178,28 @@ def fancy_stats(erogazioni: list, print_plot=True, limit_erogazioni=150, rolling
 
     # print()
     # print(roll_avg)
-    if print_plot and not only_data:
-        plot(
-            roll_avg[5:],
-            erogazioni[5:],
-            title=f"Media mobile ({rolling_avg} erogazioni) - ultime {limit_erogazioni} erogazioni",
-            width=150,
-            lines=True,
-        )
+    plot_roll_avg = plot_to_string(
+        roll_avg[-50:],
+        erogazioni[-50:],
+        title=f"Media mobile ({rolling_avg} erogazioni) - ultime 50 erogazioni",
+        width=70,
+        lines=True,
+    )
 
-        # print()
-        plot(
-            avg[5:],
-            erogazioni[5:],
-            title=f"Media erogazioni - ultime {limit_erogazioni} erogazioni",
-            width=150,
-            lines=True,
-        )
+    # plot_avg = plot_to_string(
+    #     avg[-100:],
+    #     erogazioni[-100:],
+    #     title="Media erogazioni - ultime 100 erogazioni",
+    #     width=100,
+    #     lines=True,
+    # )
+
+    # print(plot_roll_avg)
+
+    data['plot_roll_avg'] = '\n'.join(plot_roll_avg)
+
+    # print(data['plot_roll_avg'])
+    # data['plot_avg'] = '\n'.join(plot_avg)
 
     if only_data:
         return data
@@ -207,6 +214,7 @@ async def acqua_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     quartiere = "Garda"
     rolling_avg = 5
+    send_plot = False
 
     await printlog(update, "chiede informazioni sui turni dell'acqua", quartiere)
 
@@ -214,13 +222,22 @@ async def acqua_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     stats = fancy_stats(erogazioni, print_plot=False, limit_erogazioni=1000, rolling_avg=rolling_avg)
 
     message = ""
-    message += f"Totale erogazioni analizzate: <code>{stats['n_erogazioni']}</code>, dal <code>{stats['first_erogazione']}</code>.\n"
-    message += f"Ultima erogazione <code>{stats['delta_ultima_erogazione']}</code> giorni fa, il <code>{stats['last_erogazione']}</code>.\n"
-    message += f"Massima distanza tra due erogazioni: <code>{stats['max_erogazione_delta']}</code> giorni il <code>{stats['max_erogazione_date']}</code>.\n"
+    
+    message += f"Ultima erogazione il <code>{stats['last_erogazione']}</code>, dopo <code>{stats['delta_ultima_erogazione']}</code> giorni.\n\n"
     message += f"Media mobile (<code>{rolling_avg}</code> erogazioni) all'ultima erogazione: <code>{round(stats['rolling_avg_last'], 2)}</code> giorni.\n"
-    message += f"Media assoluta di tutte le erogazioni: <code>{round(stats['avg_last'], 2)}</code> giorni."
+    message += f"Media assoluta di tutte le erogazioni: <code>{round(stats['avg_last'], 2)}</code> giorni.\n\n"
+    message += f"Massima distanza tra due erogazioni: <code>{stats['max_erogazione_delta']}</code> giorni il <code>{stats['max_erogazione_date']}</code>.\n"
+    message += f"Totale erogazioni analizzate: <code>{stats['n_erogazioni']}</code>, dal <code>{stats['first_erogazione']}</code>."
 
     await update.message.reply_html(message)
+
+    if send_plot:
+        code: str = stats['plot_roll_avg']
+
+        with tempfile.NamedTemporaryFile(suffix=".png") as f:
+            # This can take 10-20 seconds, sadly
+            await code_screenshot(code, f.name)
+            await update.message.reply_photo(photo=open(f.name, "rb"))
 
 
 async def manual_update_acqua_db(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -255,3 +272,9 @@ async def update_acqua_db(context: ContextTypes.DEFAULT_TYPE) -> None:
         f.write(j)
 
     print(f"{get_now()} [AUTO] Turni acqua aggiornati.")
+
+
+# quartiere = 'Garda'
+# erogazioni = get_erogazioni(json_file=config.DB_ACQUA, quartiere=quartiere)
+# stats = fancy_stats(erogazioni, print_plot=False, limit_erogazioni=1000, only_data=False)
+# print(stats)

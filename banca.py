@@ -20,6 +20,17 @@ SECRET_ID = config.SECRET_ID
 SECRET_KEY = config.SECRET_KEY
 redirect = "http://www.morsmordre.it"
 
+# refresh token → token
+# se il refresh token è scaduto:
+#     secret_id/secret key → token e refresh token
+
+# token + requisition_id (valido, 90gg) → account_id
+# se il requisition_id è scaduto o non c'è:
+#     token + bank_id (che è sempre lo stesso) → requisition_id e url
+#     clicchi url e ti autorizzi
+
+# token + account_id → saldo/movimenti
+
 
 def get_new_token(secret_id, secret_key):
     headers = {
@@ -178,14 +189,17 @@ def refresh_requisition(token):
             def do_GET(self):
                 self.wfile.write(b"Grazie, puoi chiudere!")
 
-                threading.Thread(target=httpd.shutdown, daemon=True).start()
+                # threading.Thread(target=httpd.shutdown, daemon=True).start()
 
         httpd = HTTPServer(("localhost", 12666), SimpleHTTPRequestHandler)
 
-        print("Apri il seguente link, segui la procedura per autenticarti con la banca (user: 11082651):")
+        print("Apri il seguente link, segui la procedura per autenticarti con la banca:")
         print(link)
-        httpd.serve_forever()
+        # httpd.serve_forever()
+        httpd.handle_request()
         print("Fatto!")
+        print(bank_id)
+        print(requisition_id)
         account_dict["bank_id"] = bank_id
         account_dict["requisition_id"] = requisition_id
         response = get_account_id_from_api(token, requisition_id)

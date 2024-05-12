@@ -278,6 +278,16 @@ async def tg_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             if context.args[0] == "-raw":
                 # pprint.pprint(update.message.__str__())
                 rawtext = pprint.pformat(update.message.reply_to_message.to_dict())
+                rawtext = html.escape(rawtext)
+                if len(rawtext) > 4096:
+                    for x in range(0, len(rawtext), 4096):
+                        await update.message.reply_html(
+                            f'<pre><code class="language-python">{rawtext[x:x + 4096]}</code></pre>'
+                        )
+                else:
+                    await update.message.reply_html(f'<pre><code class="language-python">{rawtext}</code></pre>')
+            elif context.args[0] == "-rawfull":
+                rawtext = pprint.pformat(update.to_dict())
                 # print(rawtext)
                 rawtext = html.escape(rawtext)
                 if len(rawtext) > 4096:
