@@ -1,7 +1,8 @@
 from telegram import Update
 from telegram.ext import ContextTypes
-
+import random
 import config
+from datetime import date
 from utils import printlog
 from requests import HTTPError
 
@@ -97,6 +98,11 @@ async def get_account(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def bot_get_saldo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id not in config.ADMINS:
+        saldo = random.randint(0, 100000)
+        dec = random.randint(00, 99)
+        ref_date = date.today().isoformat()
+        message = f'Saldo al {ref_date}: <code>{(saldo):,}.{dec}</code> EUR'
+        await update.effective_message.reply_html(message)
         return
 
     await printlog(update, "chiede il saldo della banca")

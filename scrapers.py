@@ -163,7 +163,7 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str, debug: bool
         "app_name": "musical_ly",
         "version_code": "300904",
         "device_platform": "android",
-        "device_type": "ASUS_Z01QD",
+        "device_type": "SM-ASUS_Z01QD",
         "os_version": "9",
         "aweme_id": f"{video_ID}",
     }
@@ -171,7 +171,10 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str, debug: bool
 
     async with httpx.AsyncClient() as session:
         r = await session.get(api_url, headers=tiktok_api_headers, params=params, timeout=10)
-    response = r.json()
+    try:
+        response = r.json()
+    except json.decoder.JSONDecodeError:
+        return None
 
     if debug:
         with open("debug.json", "w") as outfile:
@@ -358,7 +361,8 @@ async def tiktok_long(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     video_info = await get_tiktok_video_infos_aweme(username, tt_id)
 
     if not video_info:
-        await update.message.reply_text("Non riesco, forse tiktok è rotto, o forse sono programmata male.")
+        # await update.message.reply_text("Non riesco, forse tiktok è rotto, o forse sono programmata male.")
+        await printlog(update, "scraping del tiktok fallito")
         return
 
     info = requests.head(video_info["video_url"])
@@ -1019,7 +1023,12 @@ async def parse_reddit_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     reddit = asyncpraw.Reddit(client_id=config.REDDIT_ID, client_secret=config.REDDIT_SECRET, user_agent="Emily Bot")
 
     url = context.match.group(0)
-    submission = await reddit.submission(url=url, fetch=True)
+    try:
+        submission = await reddit.submission(url=url, fetch=True)
+    except asyncpraw.exceptions.InvalidURL:
+        # await update.message.reply_html("Non riesco ad accedere a questo link")
+        await printlog(update, "posta un link a reddit ma c'è un errore", url)
+        return
 
     if hasattr(submission, "crosspost_parent"):  # controllo se è un crosspost
         submission = await reddit.submission(id=submission.crosspost_parent.split("_")[1])
