@@ -10,7 +10,6 @@ from bs4 import BeautifulSoup
 from dateparser.search import search_dates
 
 # from pprint import pprint
-from carbon import Carbon
 from rich import print
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -265,6 +264,16 @@ async def update_acqua_db(context: ContextTypes.DEFAULT_TYPE) -> None:
         else:
             db[data.strftime("%Y-%m-%d")] = {"quartieri": celle}
 
+            if 'Garda' in celle:
+                try:
+                    data_str = data.strftime("%Y-%m-%d")
+                    date_obj = datetime.datetime.strptime(data_str, "%Y-%m-%d")
+                    unix_timestamp = datetime.datetime.timestamp(date_obj)
+                    fixed_timestamp = int(unix_timestamp) + 10
+                    await send_date_to_infludb(fixed_timestamp)
+                except Exception as e:
+                    print(f"{get_now()} [AUTO] C'era garda ma si è spaccato")
+
     # Sorta il db per data, lo salva di nuovo sul json
     db = dict(sorted(db.items()))
     j = json.dumps(db)
@@ -274,7 +283,32 @@ async def update_acqua_db(context: ContextTypes.DEFAULT_TYPE) -> None:
     print(f"{get_now()} [AUTO] Turni acqua aggiornati.")
 
 
-# quartiere = 'Garda'
-# erogazioni = get_erogazioni(json_file=config.DB_ACQUA, quartiere=quartiere)
-# stats = fancy_stats(erogazioni, print_plot=False, limit_erogazioni=1000, only_data=False)
-# print(stats)
+async def send_date_to_infludb(timestamp):
+    import influxdb_client
+    from influxdb_client import Point, WritePrecision
+    from influxdb_client.client.write_api import SYNCHRONOUS
+    token = config.INFLUXDB_TOKEN
+    org = "Casa Trifase"
+    url = "http://192.168.1.222:8086"
+
+    write_client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
+    bucket="turni-acqua"
+    write_api = write_client.write_api(write_options=SYNCHRONOUS)
+    point = Point("erogazione").field("fieldKey", True).time(timestamp, write_precision=WritePrecision.S)
+    write_api.write(bucket=bucket, org="Casa Trifase", record=point)
+
+
+if __name__ == "__main__":
+    quartiere = 'Garda'
+    erogazioni = get_erogazioni(json_file=config.DB_ACQUA, quartiere=quartiere)
+    for erogazione in erogazioni:
+        #convert a YYYY-MM-DD string into a nanosecond timestamp
+        date_obj = datetime.datetime.strptime(erogazione, "%Y-%m-%d")
+
+        # Step 2: Convert the datetime object to a Unix timestamp in seconds
+        unix_timestamp = datetime.datetime.timestamp(date_obj)
+
+        # Step 3: Convert the Unix timestamp to nanoseconds
+        print(f'erogazione fieldKey=TRUE {int(unix_timestamp) + 10}')
+    # stats = fancy_stats(erogazioni, print_plot=False, limit_erogazioni=1000, only_data=False)
+    # print(stats)

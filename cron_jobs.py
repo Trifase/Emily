@@ -326,6 +326,8 @@ async def plot_boiler_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
     bridge_mac = config.bridge_mac
     therm_mac = config.therm_mac
 
+    print(r_token)
+
     async def refresh_token(refresh_token):
         client_id = config.NETATMO_CLIENT_ID
         client_secret = config.NETATMO_CLIENT_SECRET

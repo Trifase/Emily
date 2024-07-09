@@ -40,7 +40,7 @@ async def ora(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     name = geodata[0]["name"]
     print(f"[Open Weather Map] Cerco: {name}, {country} [{lat}, {lon}]")
 
-    weather_url = "https://api.openweathermap.org/data/2.5/onecall"
+    weather_url = "https://api.openweathermap.org/data/3.0/onecall"
     weather_query = {
         "lon": lon,
         "lat": lat,
@@ -97,7 +97,7 @@ async def prometeo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     name = geodata[0]["name"]
     # print(f"[Open Weather Map] Cerco: {name}, {country} [{lat}, {lon}]")
 
-    weather_url = "https://api.openweathermap.org/data/2.5/onecall"
+    weather_url = "https://api.openweathermap.org/data/3.0/onecall"
     weather_query = {
         "lon": lon,
         "lat": lat,
@@ -235,7 +235,7 @@ async def meteo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     name = geodata[0]["name"]
     # print(f"[Open Weather Map] Cerco: {name}, {country} [{lat}, {lon}]")
 
-    weather_url = "https://api.openweathermap.org/data/2.5/onecall"
+    weather_url = "https://api.openweathermap.org/data/3.0/onecall"
     weather_query = {
         "lon": lon,
         "lat": lat,
@@ -246,7 +246,6 @@ async def meteo_oggi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     }
     weather = requests.get(weather_url, weather_query)
     data = weather.json()
-
     try:
         meteo = data["current"]
     except KeyError:
@@ -300,7 +299,7 @@ async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     print(f"[Open Weather Map] Cerco: {name}, {country} [{lat}, {lon}]")
 
-    weather_url = "https://api.openweathermap.org/data/2.5/onecall"
+    weather_url = "https://api.openweathermap.org/data/3.0/onecall"
     weather_query = {
         "lon": lon,
         "lat": lat,

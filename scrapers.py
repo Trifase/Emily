@@ -152,20 +152,31 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str, debug: bool
 
     infos = {}
     tiktok_api_headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0"
+        # "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0"
+        'User-Agent': 'com.ss.android.ugc.trill/494+Mozilla/5.0+(Linux;+Android+12;+2112123G+Build/SKQ1.211006.001;+wv)+AppleWebKit/537.36+(KHTML,+like+Gecko)+Version/4.0+Chrome/107.0.5304.105+Mobile+Safari/537.36'
     }
 
-    # https://github.com/Evil0ctal/Douyin_TikTok_Download_API/blob/main/scraper.py#L459ù
+    # https://github.com/Evil0ctal/Douyin_TikTok_Download_API/blob/main/scraper.py#L459
     params = {
-        "iid": "7318518857994389254",
-        "device_id": "7318517321748022790",
-        "channel": "googleplay",
-        "app_name": "musical_ly",
-        "version_code": "300904",
-        "device_platform": "android",
-        "device_type": "SM-ASUS_Z01QD",
-        "os_version": "9",
+        "device_platform": "webapp",
+        "aid": "6383",
+        "channel": "channel_pc_web",
         "aweme_id": f"{video_ID}",
+        "pc_client_type": "1",
+        "version_code": "190500",
+        "version_name": "19.5.0",
+        "cookie_enabled": "true",
+        "platform": "PC",
+        "downlink": "10",
+        # "iid": "7318518857994389254",
+        # "device_id": "7318517321748022790",
+        # "channel": "googleplay",
+        # "app_name": "musical_ly",
+        # "version_code": "300904",
+        # "device_platform": "android",
+        # "device_type": "SM-ASUS_Z01QD",
+        # # "os_version": "9",
+        # "aweme_id": f"{video_ID}",
     }
     api_url = "https://api22-normal-c-alisg.tiktokv.com/aweme/v1/feed/"
 
@@ -174,6 +185,7 @@ async def get_tiktok_video_infos_aweme(username: str, video_ID: str, debug: bool
     try:
         response = r.json()
     except json.decoder.JSONDecodeError:
+        print('JSONDecodeError')
         return None
 
     if debug:

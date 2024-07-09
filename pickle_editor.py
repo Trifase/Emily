@@ -21,7 +21,7 @@ def pickle_persistence():
     )
 
 PROCESS_CHAT_DATA = False
-PROCESS_USER_DATA = True
+PROCESS_USER_DATA = False
 
 REMOVE_EMPTY_KEYS = False
 REMOVE_EMPTY_SUBKEYS = False
@@ -31,12 +31,17 @@ SAVE = False
 
 
 async def main():
-    # data = await pickle_persistence().get_chat_data()
-    # bot_data = await pickle_persistence().get_bot_data()
-    data = await pickle_persistence().get_user_data()
+    chat_data = await pickle_persistence().get_chat_data()
+    bot_data = await pickle_persistence().get_bot_data()
+    user_data = await pickle_persistence().get_user_data()
+    
+    #save each data in a json file:
+    dump_json_custom(chat_data, "persistence_chat_data.json")
+    dump_json_custom(bot_data, "persistence_bot_data.json")
+    dump_json_custom(user_data, "persistence_user_data.json")
 
-    for key, value in data.items():
-        print(key, value)
+    # for key, value in user_data.items():
+    #     print(key, value)
 
         #         print(f'user_data[{user}] = {user_value}')
             # this_user_value = user_value
