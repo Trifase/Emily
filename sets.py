@@ -128,6 +128,11 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     textlist = []
     medialist = defaultdict(list)
+    usage_list = {}
+
+
+    if 'sets_usage' in context.chat_data:
+        usage_list = context.chat_data['sets_usage']
 
     if "-listona" in context.args:
         for key in sorted(chatdict.keys()):
@@ -145,6 +150,9 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     for key in chatdict.keys():
         comando = chatdict[key]
+        usage_stat = ''
+        if usage_list and key in usage_list:
+            usage_stat = f" ({usage_list[key]}) "
 
         if comando.startswith("media:"):
             medialist[comando.split(":")[1]].append(key)
@@ -153,7 +161,7 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             if comando.lower().startswith("nsfw"):
                 comando = "[NSFW whitespace]"
 
-            textlist.append(f"{key} → {(comando[:25] + '...') if len(comando) > 25 else comando}")
+            textlist.append(f"{key} {usage_stat}→ {(comando[:25] + '...') if len(comando) > 25 else comando}")
 
     for line in sorted(textlist):
         message += f"{line}\n"
@@ -163,7 +171,13 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     for cat in cat_names.keys():
         if medialist.get(cat):
             message += f"{cat_names[cat]}:\n"
-            message += f"{' · '.join(sorted(medialist[cat]))}\n\n"
+            trigger_word_list = []
+            for key in medialist[cat]:
+                if usage_list and key in usage_list:
+                    trigger_word_list.append(f"{key} ({usage_list[key]})")
+                else:
+                    trigger_word_list.append(key)
+            message += f"{' · '.join(sorted(trigger_word_list))}\n\n"
 
     await update.message.reply_text(
         f"{message}", disable_notification=True, disable_web_page_preview=True, reply_markup=make_delete_button(update)

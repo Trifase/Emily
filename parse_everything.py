@@ -231,6 +231,17 @@ async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     if messaggio.lower() in chatdict:
         await printlog(update, "triggera", messaggio)
+
+        # usage stats
+        triggerword = messaggio
+        if 'sets_usage' not in context.chat_data:
+            context.chat_data['sets_usage'] = {}
+        usage_dict = context.chat_data['sets_usage']
+        if triggerword not in usage_dict:
+            usage_dict[triggerword] = 0
+        usage_dict[triggerword] += 1
+        context.chat_data['sets_usage'] = usage_dict
+
         set_text: str = chatdict[messaggio.lower()]
         is_reply = False
         if update.message.reply_to_message:
