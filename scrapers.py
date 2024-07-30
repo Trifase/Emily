@@ -410,6 +410,9 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     # (\b\S+(:?instagram\.com|instagr\.am)\S+\b)
     if await no_can_do(update, context):
         return
+    if update.message.from_user.id == 90135506:
+        await update.message.reply_text("noo")
+        return
 
     url = context.match.group(1)
     url_path = parse.urlsplit(url).path[1:].split("/")
@@ -655,6 +658,9 @@ async def new_instagram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 async def instagram_stories(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await no_can_do(update, context):
+        return
+    if update.message.from_user.id == 90135506:
+        await update.message.reply_text("noo")
         return
     L = instaloader.Instaloader(
         dirname_pattern="ig/{target}",
