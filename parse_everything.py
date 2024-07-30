@@ -229,83 +229,76 @@ async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if messaggio.lower().endswith("@emilia_superbot"):
         messaggio = messaggio[:-16]
 
-    delete_message = False
-
-    for k_ in chatdict.keys():
-        if k_.startswith("/") and messaggio.startswith("/") and len(messaggio.split()) == 1: 
-            delete_message = True
-        if k_.lower() in messaggio.lower() and not messaggio.lower().startswith("http"):
-            await printlog(update, "triggera", k_)
-            set_text: str = chatdict[k_]
-            is_reply = False
-            if update.message.reply_to_message:
-                is_reply = True
-                reply_id = update.message.reply_to_message.message_id
-            if set_text.startswith("media:"):  # 'media:media_type:media_id'
-                media_type = set_text.split(":")[1]
-                media_id = set_text.split(":")[2]
-                try:
-                    if media_type == "photo":
-                        if is_reply:
-                            await context.bot.send_photo(chat_id, media_id, reply_to_message_id=reply_id)
-                        else:
-                            await context.bot.send_photo(chat_id, media_id)
-                    elif media_type == "video":
-                        if is_reply:
-                            await context.bot.send_video(chat_id, media_id, reply_to_message_id=reply_id)
-                        else:
-                            await context.bot.send_video(chat_id, media_id)
-                    elif media_type == "sticker":
-                        if is_reply:
-                            await context.bot.send_sticker(chat_id, media_id, reply_to_message_id=reply_id)
-                        else:
-                            await context.bot.send_sticker(chat_id, media_id)
-                    elif media_type == "audio":
-                        if is_reply:
-                            await context.bot.send_audio(chat_id, media_id, reply_to_message_id=reply_id)
-                        else:
-                            await context.bot.send_audio(chat_id, media_id)
-                    elif media_type == "voice":
-                        if is_reply:
-                            await context.bot.send_voice(chat_id, media_id, reply_to_message_id=reply_id)
-                        else:
-                            await context.bot.send_voice(chat_id, media_id)
-                    elif media_type == "document":
-                        if is_reply:
-                            await context.bot.send_document(chat_id, media_id, reply_to_message_id=reply_id)
-                        else:
-                            await context.bot.send_document(chat_id, media_id)
-                    elif media_type == "animation":
-                        if is_reply:
-                            await context.bot.send_animation(chat_id, media_id, reply_to_message_id=reply_id)
-                        else:
-                            await context.bot.send_animation(chat_id, media_id)
-                    elif media_type == "video_note":
-                        if is_reply:
-                            await context.bot.send_video_note(chat_id, media_id, reply_to_message_id=reply_id)
-                        else:
-                            await context.bot.send_video_note(chat_id, media_id)
+    if messaggio.lower() in chatdict:
+        await printlog(update, "triggera", messaggio)
+        set_text: str = chatdict[messaggio.lower()]
+        is_reply = False
+        if update.message.reply_to_message:
+            is_reply = True
+            reply_id = update.message.reply_to_message.message_id
+        if set_text.startswith("media:"):  # 'media:media_type:media_id'
+            media_type = set_text.split(":")[1]
+            media_id = set_text.split(":")[2]
+            try:
+                if media_type == "photo":
+                    if is_reply:
+                        await context.bot.send_photo(chat_id, media_id, reply_to_message_id=reply_id)
                     else:
-                        await update.message.reply_text("Tipo di media non riconosciuto")
-
-                except Exception as e:
-                    await update.message.reply_html(f"<b>Errore:</b> {e}")
-                    return
-            else:
-                for k, v in replacers.items():
-                    set_text = set_text.replace(k, v)
-                if is_reply:
-                    await update.message.reply_text(
-                        f"{set_text}", quote=False, disable_web_page_preview=True, reply_to_message_id=reply_id
-                    )
+                        await context.bot.send_photo(chat_id, media_id)
+                elif media_type == "video":
+                    if is_reply:
+                        await context.bot.send_video(chat_id, media_id, reply_to_message_id=reply_id)
+                    else:
+                        await context.bot.send_video(chat_id, media_id)
+                elif media_type == "sticker":
+                    if is_reply:
+                        await context.bot.send_sticker(chat_id, media_id, reply_to_message_id=reply_id)
+                    else:
+                        await context.bot.send_sticker(chat_id, media_id)
+                elif media_type == "audio":
+                    if is_reply:
+                        await context.bot.send_audio(chat_id, media_id, reply_to_message_id=reply_id)
+                    else:
+                        await context.bot.send_audio(chat_id, media_id)
+                elif media_type == "voice":
+                    if is_reply:
+                        await context.bot.send_voice(chat_id, media_id, reply_to_message_id=reply_id)
+                    else:
+                        await context.bot.send_voice(chat_id, media_id)
+                elif media_type == "document":
+                    if is_reply:
+                        await context.bot.send_document(chat_id, media_id, reply_to_message_id=reply_id)
+                    else:
+                        await context.bot.send_document(chat_id, media_id)
+                elif media_type == "animation":
+                    if is_reply:
+                        await context.bot.send_animation(chat_id, media_id, reply_to_message_id=reply_id)
+                    else:
+                        await context.bot.send_animation(chat_id, media_id)
+                elif media_type == "video_note":
+                    if is_reply:
+                        await context.bot.send_video_note(chat_id, media_id, reply_to_message_id=reply_id)
+                    else:
+                        await context.bot.send_video_note(chat_id, media_id)
                 else:
-                    await update.message.reply_text(f"{set_text}", quote=False, disable_web_page_preview=True)
+                    await update.message.reply_text("Tipo di media non riconosciuto")
 
-            myself = await context.bot.get_chat_member(update.message.chat.id, config.ID_EMILY)
-            if delete_message and myself.status == ChatMemberStatus.ADMINISTRATOR and myself.can_delete_messages:
-                await update.message.delete()
-            break
+            except Exception as e:
+                await update.message.reply_html(f"<b>Errore:</b> {e}")
+                return
+        else:
+            for k, v in replacers.items():
+                set_text = set_text.replace(k, v)
+            if is_reply:
+                await update.message.reply_text(
+                    f"{set_text}", quote=False, disable_web_page_preview=True, reply_to_message_id=reply_id
+                )
+            else:
+                await update.message.reply_text(f"{set_text}", quote=False, disable_web_page_preview=True)
 
+        myself = await context.bot.get_chat_member(update.message.chat.id, config.ID_EMILY)
+        if myself.status == ChatMemberStatus.ADMINISTRATOR and myself.can_delete_messages:
+            await update.message.delete()
 
 async def new_admin_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
