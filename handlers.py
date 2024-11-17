@@ -464,21 +464,21 @@ def generate_handlers_dict() -> dict:
 
     h[87] = [CommandHandler(["wikipedia", "wiki"], wikipedia, filters=~filters.UpdateType.EDITED)]
     h[88] = [CommandHandler("ninofrassica", ninofrassica, filters=~filters.UpdateType.EDITED)]
-    h[89] = [
-        MessageHandler(
-            ~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_instagram, re.IGNORECASE)), new_instagram
-        )
-    ]
-    h[90] = [CommandHandler(["stories", "storie"], instagram_stories, filters=~filters.UpdateType.EDITED)]
-    h[91] = [InlineQueryHandler(tiktok_inline)]
-    h[92] = [
-        MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_tiktok, re.IGNORECASE)), tiktok)
-    ]
-    h[93] = [
-        MessageHandler(
-            ~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_tiktok_long, re.IGNORECASE)), tiktok_long
-        )
-    ]
+    # h[89] = [
+    #     MessageHandler(
+    #         ~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_instagram, re.IGNORECASE)), new_instagram
+    #     )
+    # ]
+    # h[90] = [CommandHandler(["stories", "storie"], instagram_stories, filters=~filters.UpdateType.EDITED)]
+    # h[91] = [InlineQueryHandler(tiktok_inline)]
+    # h[92] = [
+    #     MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_tiktok, re.IGNORECASE)), tiktok)
+    # ]
+    # h[93] = [
+    #     MessageHandler(
+    #         ~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_tiktok_long, re.IGNORECASE)), tiktok_long
+    #     )
+    # ]
     # h[94] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_tweet_media, re.IGNORECASE)), scrape_tweet_media)]
     # h[95] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_youtube_alts, re.IGNORECASE)), youtube_alts)]
     # h[96] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_fb_video, re.IGNORECASE)), facebook_video)]

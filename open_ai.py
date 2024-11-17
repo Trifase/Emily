@@ -48,7 +48,7 @@ async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     if context.args:
         chat_id = int(context.args[0])
 
-    system = "Dato il seguente log di una chat di gruppo, riassumi in maniera esaustiva e dettagliata la discussione avvenuta. Attieniti alle cose dette, senza esprimere opinioni o giudizi. Se opportuno, sottolinea l'argomento che ha scatenato le opinioni più discordanti.\n"
+    system = "Dato il seguente log di una chat di gruppo, riassumi in maniera esaustiva e dettagliata la discussione avvenuta. Attieniti alle cose dette, senza esprimere opinioni o giudizi. Se opportuno, sottolinea l'argomento che ha scatenato le opinioni più discordanti. Dai anche un titolo contestuale al riassunto, accattivante e ironico all'inizio, come se fosse il titolo di un episodio o di un capitolo, lungo non più di dieci parole.\n"
 
     hours = int(datetime.datetime.now().hour) + 1
     max_time = datetime.datetime.timestamp(datetime.datetime.now())

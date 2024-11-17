@@ -2,9 +2,11 @@ import tempfile
 import traceback
 
 import tweepy
+from atproto import AsyncClient, client_utils
 from mastodon import Mastodon
 from telegram import Update
 from telegram.ext import ContextTypes
+
 
 import config
 from utils import crea_sondaggino, no_can_do, printlog
@@ -27,8 +29,14 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
     if await no_can_do(update, context):
         return
 
-    MASTODON = True
+    MASTODON = False
     TWITTER = True
+    BLUESKY = True
+
+    # Set up Bluesky
+    bluesky = AsyncClient()
+    await bluesky.login(config.BS_HANDLE, config.BS_PASS)
+
 
     #   Set up Mastodon
     mastodon = Mastodon(access_token="db/mastodon.token", api_base_url="https://botsin.space/")
@@ -76,6 +84,7 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
 
     tw_url = ""
     mast_url = ""
+    bs_url = ""
     try:
         if update.message.reply_to_message.photo:
             if update.message.reply_to_message.caption:
@@ -110,10 +119,23 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                     mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
                 except Exception:
                     print(traceback.format_exc())
-            # print([tw_url, mast_url])
-            if tw_url or mast_url:
+
+            if BLUESKY:
+                try:
+                    with open(tempphoto.name, 'rb') as f:
+                        img_data = f.read()
+                    bs_response = await bluesky.send_image(text=message, image=img_data, image_alt=message)
+                    bs_post_id = bs_response.uri.split('/')[-1]
+                    bluesky_url = f'https://bsky.app/profile/{config.BS_HANDLE}/post/{bs_post_id}'
+                    bs_url = f'<a href="{bluesky_url}">Bluesky</a>'
+
+                    # bs_url = f'<a href="{bs_response.get("url")}">Bluesky</a>'
+                except Exception:
+                    print(traceback.format_exc())
+
+            if tw_url or mast_url or bs_url:
                 await update.message.reply_html(
-                    f"Postato su {', '.join([x for x in [tw_url, mast_url] if x])}!", disable_web_page_preview=True
+                    f"Postato su {', '.join([x for x in [tw_url, mast_url, bs_url] if x])}!", disable_web_page_preview=True
                 )
                 await printlog(update, "vuole inviare un tweet con una foto")
 
@@ -154,11 +176,25 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 except Exception:
                     print(traceback.format_exc())
 
-            if tw_url or mast_url:
+            if BLUESKY:
+                try:
+                    with open(tempvideo.name, 'rb') as f:
+                        vid_data = f.read()
+                    bs_response = await bluesky.send_video(text=message, video=vid_data, video_alt=message)
+                    bs_post_id = bs_response.uri.split('/')[-1]
+                    bluesky_url = f'https://bsky.app/profile/{config.BS_HANDLE}/post/{bs_post_id}'
+                    bs_url = f'<a href="{bluesky_url}">Bluesky</a>'
+
+                except Exception:
+                    print(traceback.format_exc())
+
+            if tw_url or mast_url or bs_url:
                 await update.message.reply_html(
-                    f"Postato su {', '.join([x for x in [tw_url, mast_url] if x])}!", disable_web_page_preview=True
+                    f"Postato su {', '.join([x for x in [tw_url, mast_url, bs_url] if x])}!", disable_web_page_preview=True
                 )
                 await printlog(update, "vuole inviare un tweet con un video")
+
+
 
             else:
                 await update.message.reply_html("Qualcosa è andato storto, scusa")
@@ -191,10 +227,19 @@ async def tweet(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=
                 mast_url = f'<a href="{mastodon_url}">Mastodon</a>'
             except Exception:
                 print(traceback.format_exc())
+            
+        if BLUESKY:
+            try:
+                bs_response = await bluesky.send_post(text=message)
+                bs_post_id = bs_response.uri.split('/')[-1]
+                bluesky_url = f'https://bsky.app/profile/{config.BS_HANDLE}/post/{bs_post_id}'
+                bs_url = f'<a href="{bluesky_url}">Bluesky</a>'
+            except Exception:
+                print(traceback.format_exc())
 
-        if tw_url or mast_url:
+        if tw_url or mast_url or bs_url:
             await update.message.reply_html(
-                f"Postato su {', '.join([x for x in [tw_url, mast_url] if x])}!", disable_web_page_preview=True
+                f"Postato su {', '.join([x for x in [tw_url, mast_url, bs_url] if x])}!", disable_web_page_preview=True
             )
             return
         else:

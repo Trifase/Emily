@@ -1,10 +1,14 @@
 import pprint
 import time
+import asyncio
+import traceback
 
 from telegram import Update
 from telegram.ext import ContextTypes
 
 from utils import printlog
+from atproto import AsyncClient, client_utils
+import config
 
 
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -41,3 +45,50 @@ async def getfile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     picture = update.message.reply_to_message.photo[-1]
     actual_picture = await picture.get_file()
     pprint.pprint(actual_picture.to_dict())
+
+
+# async def main():
+#     # Set up Bluesky
+#     bluesky = AsyncClient()
+#     await bluesky.login(config.BS_HANDLE, config.BS_PASS)
+
+#     message = 'yo we rollin 2'
+#     post = await bluesky.send_post(text=message)
+#     print(post.model_dump_json())
+#     bs_post_id = post.uri.split('/')[-1]
+#     bs_post_id = f'https://bsky.app/profile/{config.BS_HANDLE}/post/{bs_post_id}'
+#     bluesky_url = f'https://bsky.app/profile/{config.BS_HANDLE}/post/{bs_post_id}'
+#     bs_url = f'<a href="{bluesky_url}">Bluesky</a>'
+
+#     try:
+#         message = 'this is fire yo'
+#         with open('test.png', 'rb') as f:
+#             img_data = f.read()
+#         bs_response = await bluesky.send_image(text=message, image=img_data, image_alt=message)
+#         print('Post reference:', bs_response)
+#         bs_post_id = bs_response.uri.split('/')[-1]
+#         bluesky_url = f'https://bsky.app/profile/{config.BS_HANDLE}/post/{bs_post_id}'
+#         bs_url = f'<a href="{bluesky_url}">Bluesky</a>'
+
+#         # bs_url = f'<a href="{bs_response.get("url")}">Bluesky</a>'
+#     except Exception:
+#         print(traceback.format_exc())
+
+
+#     try:
+#         message = 'this is fire yo'
+#         with open('test.png', 'rb') as f:
+#             vid_data = f.read()
+#         bs_response = await bluesky.send_video(text=message, video=vid_data, video_alt=message)
+#         print('Post reference:', bs_response)
+#         bs_post_id = bs_response.uri.split('/')[-1]
+#         bluesky_url = f'https://bsky.app/profile/{config.BS_HANDLE}/post/{bs_post_id}'
+#         bs_url = f'<a href="{bluesky_url}">Bluesky</a>'
+
+#         # bs_url = f'<a href="{bs_response.get("url")}">Bluesky</a>'
+#     except Exception:
+#         print(traceback.format_exc())
+
+
+# # run main in async
+# asyncio.run(main())
