@@ -312,8 +312,8 @@ async def aoc_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         LB_ID = 8518
 
     SESSION = config.AOC_SESSION
-
-    url = f"https://adventofcode.com/2023/leaderboard/private/view/{LB_ID}.json"
+    current_year = datetime.datetime.now().year
+    url = f"https://adventofcode.com/{current_year}/leaderboard/private/view/{LB_ID}.json"
     headers = {"Cookie": f"session={SESSION}"}
 
     cache = FileBackend(cache_name="aiohttp_cache", use_temp=True, expire_after=900)
@@ -922,7 +922,7 @@ async def spongebob(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     newmessage = []
-    for index, character in message:
+    for index, character in enumerate(message):
         if index % 2 != 0:
             newmessage.append(character.lower())
         else:
