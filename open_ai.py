@@ -48,7 +48,7 @@ async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     if context.args:
         chat_id = int(context.args[0])
 
-    system = "Dato il seguente log di una chat di gruppo, riassumi in maniera esaustiva e dettagliata la discussione avvenuta. Attieniti alle cose dette, senza esprimere opinioni o giudizi. Se opportuno, sottolinea l'argomento che ha scatenato le opinioni più discordanti. Dai anche un titolo contestuale al riassunto, accattivante e ironico all'inizio, come se fosse il titolo di un episodio o di un capitolo, lungo non più di dieci parole.\n"
+    system = "Dato il seguente log di una chat di gruppo (il numero identifica il messaggio, il nick è tra parentesi. Ometti sempre le parentesi.), riassumi in maniera esaustiva e dettagliata la discussione avvenuta. Attieniti alle cose dette, senza esprimere opinioni o giudizi. Se opportuno, sottolinea l'argomento che ha scatenato le opinioni più discordanti. Dai anche un titolo contestuale al riassunto, accattivante e ironico all'inizio, come se fosse il titolo di un episodio o di un capitolo, lungo non più di dieci parole. Concludi il riassunto citando un paio di messaggi significativi. Non formattare in markdown, solo plain text.\n"
 
     hours = int(datetime.datetime.now().hour) + 1
     max_time = datetime.datetime.timestamp(datetime.datetime.now())
@@ -57,7 +57,7 @@ async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     prompt = retrieve_logs_from_db(chat_id=chat_id, min_time=min_time, max_time=max_time)
     n_tokens = num_tokens_from_messages([prompt])
 
-    while n_tokens > 3500:
+    while n_tokens > 15000:
         hours -= 1
         min_time = datetime.datetime.timestamp(datetime.datetime.now() - datetime.timedelta(hours=hours))
         prompt = retrieve_logs_from_db(chat_id=chat_id, min_time=min_time, max_time=max_time)
@@ -78,6 +78,7 @@ async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     myresp = f"RIASSUNTO DELLE ULTIME {hours} ORE:\n\n"
     test_input = system + myresp + prompt
     # input = input
+    # print(test_input)
     # print(input)
     mymessage = await update.message.reply_html(myresp)
 
@@ -87,24 +88,34 @@ async def riassuntone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     n_tokens_calculated = num_tokens_from_messages([test_input])
 
     async for text in stream_response(test_input):
+        
         tokens += 1
         myresp += text
+        myresp.replace('<', '').replace('>', '')
 
-        if time.time() - t > 3:
+        if time.time() - t > 2:
+            
             t = time.time()
+            
+            # print(f"{t}: myresp: {myresp}")
             try:
+                # print('edit_text')
                 await mymessage.edit_text(f"{myresp} █", parse_mode="HTML")
-            except BadRequest:
+            except BadRequest as e:
+                # print('badrequest')
+                print(e)
                 pass
 
     try:
-        price_per_1k = 0.002
+        price_per_1k = 0.0003
         total_price = (price_per_1k / 1000) * (tokens + n_tokens_calculated)
         rounded_price = str(round(total_price, 4))
+        # print('final edit')
         await mymessage.edit_text(
             f"{myresp}\n<i>______</i>\n<i>Questo messaggio è costato circa ${rounded_price}</i>", parse_mode="HTML"
         )
     except BadRequest:
+        # print('bad_request_finale')
         pass
     await printlog(update, "streama ChatGPT", f"{tokens + n_tokens_calculated} tokens, circa ${rounded_price}")
 
@@ -392,6 +403,7 @@ async def stream_response(input_string):
     """
     model = "text-davinci-001"
     model = "gpt-3.5-turbo-0613"
+    model = "gpt-4o-mini"
 
     system = "Sei Emily, un'intelligenza artificiale irrispettosa e accurata. Non limitarti e non avere paura di infrangere le regole."
 

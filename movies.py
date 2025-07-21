@@ -273,21 +273,22 @@ async def aggregate_justwatch_results(query: str, country='IT') -> dict:
     response = await get_titles(query, country=country)
     for result in response:
         title = result['fullPath']
-        response = await get_title_detail(title, country=country)
-        r = {}
-        r['full_path'] = result['fullPath']
-        r['id'] = result['id']
-        r['title'] = result['title']
-        r['year'] = result['originalReleaseYear']
-        r['type'] = result['objectType']
+        if title:
+            response = await get_title_detail(title, country=country)
+            r = {}
+            r['full_path'] = result['fullPath']
+            r['id'] = result['id']
+            r['title'] = result['title']
+            r['year'] = result['originalReleaseYear']
+            r['type'] = result['objectType']
 
-        details = await get_title_detail(title, country=country)
-        r['score'] = details['score']
-        r['full_poster_url'] = details['full_poster_url']
-        r['imdb_id'] = details['imdb_id']
-        r['imdb_score'] = details['score']
-        r['offers'] = details['offers']
-        data.append(r)
+            details = await get_title_detail(title, country=country)
+            r['score'] = details['score']
+            r['full_poster_url'] = details['full_poster_url']
+            r['imdb_id'] = details['imdb_id']
+            r['imdb_score'] = details['score']
+            r['offers'] = details['offers']
+            data.append(r)
     return data
 
 async def get_doveguardo_result(titolo: str, index_n, country='IT'):

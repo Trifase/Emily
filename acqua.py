@@ -244,21 +244,44 @@ async def manual_update_acqua_db(update: Update, context: ContextTypes.DEFAULT_T
         return
     if update.message.from_user.id not in config.ADMINS:
         return
-    return await update_acqua_db(context)
+    year = None
+    month = None
+    if context.args and len(context.args) == 2:
+        year = int(context.args[0])
+        month = int(context.args[1])
+
+    elif context.args and len(context.args) == 1:
+        data_str = context.args[0]
+        print(f"{get_now()} [AUTO] Aggiungo erogazione manuale in Garda il {data_str}")
+        date_obj = datetime.datetime.strptime(data_str, "%Y-%m-%d")
+        unix_timestamp = datetime.datetime.timestamp(date_obj)
+        fixed_timestamp = int(unix_timestamp) + 10
+        print(f"{get_now()} [AUTO] Erogazione in Garda il {data_str}")
+        await send_date_to_infludb(fixed_timestamp)
+        return
+    return await update_acqua_db(context, year=year, month=month)
 
 
 # Runs every morning at 3:00 (Europe/Rome)
-async def update_acqua_db(context: ContextTypes.DEFAULT_TYPE) -> None:
+async def update_acqua_db_cron(context: ContextTypes.DEFAULT_TYPE) -> None:
+    today = datetime.datetime.today()
+    return await update_acqua_db(context, year=today.year, month=today.month)
+
+
+async def update_acqua_db(context: ContextTypes.DEFAULT_TYPE, year, month) -> None:
     print(f"{get_now()} [AUTO] Aggiorno turni acqua dal sito del comune")
     today = datetime.datetime.today()
-    year = today.year
-    month = today.month
+    year = year if year is not None else today.year
+    month = month if month is not None else today.month
+    print(f"{get_now()} [AUTO] Anno: {year}, Mese: {month}")
 
     db = json.load(open(config.DB_ACQUA, "r"))
     links = get_links(year=year, month=month)
 
     for link in links:
+        # print(f"{get_now()} [AUTO] Analizzo il link: {link}")
         data, celle = analyze_day(link, debug=False)
+        # print(f"{get_now()} [AUTO] Data: {data}, Quartieri: {', '.join(celle)}")
         if data.strftime("%Y-%m-%d") in db:
             continue
         else:
@@ -270,6 +293,7 @@ async def update_acqua_db(context: ContextTypes.DEFAULT_TYPE) -> None:
                     date_obj = datetime.datetime.strptime(data_str, "%Y-%m-%d")
                     unix_timestamp = datetime.datetime.timestamp(date_obj)
                     fixed_timestamp = int(unix_timestamp) + 10
+                    print(f"{get_now()} [AUTO] Erogazione in Garda il {data_str}")
                     await send_date_to_infludb(fixed_timestamp)
                 except Exception as e:
                     print(f"{get_now()} [AUTO] C'era garda ma si è spaccato")

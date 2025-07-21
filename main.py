@@ -15,7 +15,7 @@ from telethon import TelegramClient
 from telethon.sessions import StringSession
 
 import config
-from acqua import update_acqua_db
+from acqua import update_acqua_db_cron
 from cron_jobs import (
     check_compleanni,
     delete_yesterday_chatlog,
@@ -66,14 +66,12 @@ def main():
     # j.run_repeating(parse_niuchan, interval=1800, data=None, job_kwargs={'misfire_grace_time': 25})
 
     # j.run_daily(lotto_member_count, datetime.time(hour=9, minute=0, tzinfo=pytz.timezone("Europe/Rome")), data=None)
-    j.run_daily(
-        post_solarsystem_mastodon, datetime.time(hour=8, minute=30, tzinfo=pytz.timezone("Europe/Rome")), data=None
-    )
+    # j.run_daily(post_solarsystem_mastodon, datetime.time(hour=8, minute=30, tzinfo=pytz.timezone("Europe/Rome")), data=None)
     j.run_daily(check_compleanni, datetime.time(hour=0, minute=0, tzinfo=pytz.timezone("Europe/Rome")), data=None)
     j.run_daily(check_compleanni, datetime.time(hour=12, minute=00, tzinfo=pytz.timezone("Europe/Rome")), data=None)
     j.run_daily(check_compleanni, datetime.time(hour=20, minute=00, tzinfo=pytz.timezone("Europe/Rome")), data=None)
     j.run_daily(do_global_backup, datetime.time(hour=2, minute=00, tzinfo=pytz.timezone("Europe/Rome")), data=None)
-    j.run_daily(update_acqua_db, datetime.time(hour=3, minute=00, tzinfo=pytz.timezone("Europe/Rome")), data=None)
+    j.run_daily(update_acqua_db_cron, datetime.time(hour=3, minute=00, tzinfo=pytz.timezone("Europe/Rome")), data=None)
     j.run_daily(
         delete_yesterday_chatlog, datetime.time(hour=1, minute=00, tzinfo=pytz.timezone("Europe/Rome")), data=None
     )
@@ -151,9 +149,9 @@ async def post_init(app: Application) -> None:
     USER = "emilia_superbot"
     L.load_session_from_file(USER, "db/session-emilia_superbot")
 
-    telethon_session = app.bot_data.get("telethon_session")
-    async with TelegramClient(StringSession(telethon_session), config.API_ID, config.API_HASH) as client:
-        print(f'{get_now()} Loggato su telethon come {(await client.get_me()).username}')
+    # telethon_session = app.bot_data.get("telethon_session")
+    # async with TelegramClient(StringSession(telethon_session), config.API_ID, config.API_HASH) as client:
+    #     print(f'{get_now()} Loggato su telethon come {(await client.get_me()).username}')
 
     # Prendo il gruppo per mandare il messaggio di riavvio
     if "last_restart" not in app.bot_data:

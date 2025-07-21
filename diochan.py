@@ -115,9 +115,15 @@ async def search_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             mymessage += f"{quote.quote_text}\n-----\n"
 
         URL = "https://hastebin.com"
-        response = requests.post(URL + "/documents", mymessage.encode("utf-8"))
+        token = 'e720c74005f148ba90a3395dd22132a2256cfd08351554c967ad41e6598a6ccf93e1750f50dc9d7a2006f4bb4cadece6f49f7683f2cc3456aafba803372b6eda'
+        headers = {
+            "Authorization": "Bearer " + token
+        }
+        print(mymessage)
+        response = requests.post(URL + "/documents", mymessage.encode("utf-8"), headers=headers)
 
         r = json.loads(response.text)
+        print(r)
 
         pastebin_url = f"{URL}/raw/{r['key']}"
         await update.message.reply_html(f'<a href="{pastebin_url}">Ecco a te</a>', quote=False)
