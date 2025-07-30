@@ -24,6 +24,7 @@ from cron_jobs import (
     parse_diochan,
     # parse_niuchan,
     post_solarsystem_mastodon,
+    heartbeat
 )
 from database import Chatlog, Compleanni, Quote, Reminders, TensorMessage
 from error_handler import error_handler
@@ -63,6 +64,7 @@ def main():
     j = app.job_queue
 
     j.run_repeating(parse_diochan, interval=1800, data=None, job_kwargs={"misfire_grace_time": 25})
+    j.run_repeating(heartbeat, interval=900, data=None, job_kwargs={"misfire_grace_time": 25})
     # j.run_repeating(parse_niuchan, interval=1800, data=None, job_kwargs={'misfire_grace_time': 25})
 
     # j.run_daily(lotto_member_count, datetime.time(hour=9, minute=0, tzinfo=pytz.timezone("Europe/Rome")), data=None)

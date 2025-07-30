@@ -612,3 +612,17 @@ async def check_compleanni(context: ContextTypes.DEFAULT_TYPE):
                         await context.bot.send_message(row.chat_id, f"Auguri {nickname}! Oggi compi {anni} anni!")
                 else:
                     await context.bot.send_message(row.chat_id, f"Auguri {nickname}! Buon compleanno!")
+
+async def heartbeat(context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Make a GET to betterstack
+    """
+    hb_id = config.BETTERSTACK_HEARTBEAT
+    url = f"https://uptime.betterstack.com/api/v1/heartbeat/{hb_id}"
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        if response.status_code == 200:
+            print(f"{get_now()} [AUTO] Heartbeat sent successfully.")
+        else:
+            print(f"{get_now()} [AUTO] Failed to send heartbeat. Status code: {response.status_code}")
