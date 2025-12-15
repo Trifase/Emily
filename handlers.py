@@ -6,10 +6,10 @@ from telegram.ext import (
     ChatMemberHandler,
     CommandHandler,
     ConversationHandler,
-    InlineQueryHandler,
+    # InlineQueryHandler,
     MessageHandler,
-    PollAnswerHandler,
-    PreCheckoutQueryHandler,
+    # PollAnswerHandler,
+    # PreCheckoutQueryHandler,
     TypeHandler,
     filters,
 )
@@ -37,58 +37,58 @@ from admin import (
     listen_to,
     parla,
     restart,
-    screenshot,
+    # screenshot,
     send_custom_media,
     set_group_picture,
     set_title,
     tg_info,
     trigger_backup,
-    wakeup,
+    # wakeup,
 )
 from asphalto import azzurro
-from banca import bot_get_saldo, bot_get_transazioni
-from best_timeline import deleta_if_channel, permasilenzia, silenzia  # , scrape_tweet_bt
+# from banca import bot_get_saldo, bot_get_transazioni
+# from best_timeline import deleta_if_channel, permasilenzia, silenzia  # , scrape_tweet_bt
 from compleanni import compleanni_add, compleanni_list, compleanni_manual_check, compleanno_del
 from conversations import end_conversation, settings, settings_change_actual, settings_change_show
 from diochan import add_quote, ascendi, diochan, get_thread_from_dc, random_tensor, save_tensor, search_quote
-from donazioni import donazioni, precheckout_callback, successful_payment_callback
-from games import sassocartaforbici
-from lotto import elenco_maesta, maesta_primo, stat_maesta
+# from donazioni import donazioni, precheckout_callback, successful_payment_callback
+# from games import sassocartaforbici
+# from lotto import elenco_maesta, maesta_primo, stat_maesta
 from macros import change_my_mind, ispirami
-from maps import location, maps_buttons, streetview
+# from maps import location, maps_buttons, streetview
 from meteo import forecast, meteo_oggi, ora, prometeo_oggi
 from misc import (
-    alexa,
+    # alexa,
     aoc_leaderboard,
     bioritmo,
-    bomb_react,
-    condominioweb,
+    # bomb_react,
+    # condominioweb,
     fascio,
-    fatfingers,
+    # fatfingers,
     get_user_info,
-    greet_BT_user,
+    # greet_BT_user,
     lurkers,
     lurkers_callbackqueryhandlers,
-    markovs,
-    movie,
+    # markovs,
+    # movie,
     polls_callbackqueryhandlers,
-    random_trifase,
-    scacchi,
+    # random_trifase,
+    # scacchi,
     self_delete,
-    send_auto_reaction,
+    # send_auto_reaction,
     # settings,
-    set_auto_reaction,
+    # set_auto_reaction,
     spongebob,
-    square,
+    # square,
     start,
-    traduci,
-    voice,
-    wikihow,
+    # traduci,
+    # voice,
+    # wikihow,
 )
-from movies import doveguardo, doveguardo_buttons, imdb
+from movies import doveguardo, doveguardo_buttons #, imdb
 from open_ai import ai_old, ai_stream, openai_stats, riassuntone, whisper_transcribe
 from parse_everything import (
-    auto_pagliaccia_luca_veronese,
+    # auto_pagliaccia_luca_veronese,
     check_for_sets,
     drop_update_from_banned_users,
     exit_from_banned_groups,
@@ -100,37 +100,38 @@ from parse_everything import (
     track_chats,
     update_timestamps_asphalto,
 )
-from pyrog import reaction_karma
-from quiz import classifica, make_poll, punteggio, ricevi_risposta_quiz
-from reddit import reddit
+# from pyrog import reaction_karma
+# from quiz import classifica, make_poll, punteggio, ricevi_risposta_quiz
+# from reddit import reddit
 from reminders import remindelete, reminder_helper, reminders_list, remindme
-from scrapers import (
-    # facebook_video,
-    instagram_stories,
-    new_instagram,
-    ninofrassica,
-    parse_reddit_link,
-    # scrape_tweet_media,
-    tiktok,
-    tiktok_inline,
-    tiktok_long,
-    twitch_clips,
-    wikipedia,
-)
+# from scrapers import (
+#     # facebook_video,
+#     instagram_stories,
+#     new_instagram,
+#     ninofrassica,
+#     parse_reddit_link,
+#     # scrape_tweet_media,
+#     tiktok,
+#     tiktok_inline,
+#     tiktok_long,
+#     twitch_clips,
+#     wikipedia,
+# )
 
 # youtube_alts,
 from sets import addset, deleteset, jukebox, listaset
-from smarthome import consumo, luci_status, purificatore, riscaldamento_stats, toggle_light
-from space import launches, solarsystem
-from spotify import spoty
+# from smarthome import consumo, luci_status, purificatore, riscaldamento_stats, toggle_light
+# from space import launches, solarsystem
+# from spotify import spoty
 from stats import send_stats
 from tarots import tarot, tarotschema
-from testing import getfile, test
+# from testing import getfile, test
+from testing import  test
 from torrent import lista_torrent
 from twitter import lista_tweets, tweet
 from utils import is_forged_command, is_inline_button, is_lurkers_list
-from videogiochi import giochino
-from zoom import zoom_link
+# from videogiochi import giochino
+# from zoom import zoom_link
 
 
 def generate_handlers_dict() -> dict:
@@ -159,7 +160,7 @@ def generate_handlers_dict() -> dict:
     h[-15] = [MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT, check_for_sets)]
     h[-14] = [MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL, save_messages_stats)]
     h[-13] = [ChatMemberHandler(track_chats, ChatMemberHandler.MY_CHAT_MEMBER)]
-    h[-132] = [MessageHandler(~filters.UpdateType.EDITED, auto_pagliaccia_luca_veronese)]
+    # h[-132] = [MessageHandler(~filters.UpdateType.EDITED, auto_pagliaccia_luca_veronese)]
 
     # admin.py
     h[-12] = [
@@ -170,13 +171,13 @@ def generate_handlers_dict() -> dict:
         )
     ]
     h[-11] = [CommandHandler("flush_arbitrary_callback_data", flush_arbitrary_callback_data)]
-    h[-10] = [
-        CommandHandler(
-            ["screenshot", "ss"], screenshot, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)
-        )
-    ]
+    # h[-10] = [
+    #     CommandHandler(
+    #         ["screenshot", "ss"], screenshot, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF)
+    #     )
+    # ]
     h[-9] = [CommandHandler(["parla", "say"], parla, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
-    h[-8] = [CommandHandler("restart", restart, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
+    # h[-8] = [CommandHandler("restart", restart, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
     h[-7] = [CommandHandler("print", _eval, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
     h[-6] = [
         CommandHandler(
@@ -215,7 +216,7 @@ def generate_handlers_dict() -> dict:
     ]
     h[3] = [CommandHandler("esci", esci, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
     h[4] = [CommandHandler(["ip", "myip"], ip, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
-    h[5] = [CommandHandler("wakeup", wakeup, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
+    # h[5] = [CommandHandler("wakeup", wakeup, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
     h[6] = [
         CommandHandler(
             ["listaban", "ban_list", "banlist"],
@@ -268,26 +269,26 @@ def generate_handlers_dict() -> dict:
     h[-101] = [CallbackQueryHandler(lurkers_callbackqueryhandlers, pattern=is_lurkers_list)]
 
     # banca.py
-    h[16] = [CommandHandler("saldo", bot_get_saldo, filters=~filters.UpdateType.EDITED)]
+    # h[16] = [CommandHandler("saldo", bot_get_saldo, filters=~filters.UpdateType.EDITED)]
 
-    h[17] = [
-        CommandHandler(
-            ["movimenti", "transazioni"], bot_get_transazioni, filters=~filters.UpdateType.EDITED
-        )
-    ]
+    # h[17] = [
+    #     CommandHandler(
+    #         ["movimenti", "transazioni"], bot_get_transazioni, filters=~filters.UpdateType.EDITED
+    #     )
+    # ]
 
     # best_timeline.py
     # best_timeline_twitter_regex = r"(?:(?:http|https):\/\/)?(?:www.|mobile.)?(?:twitter.com)\/(?:\w+)\/status\/(\w+)"
     # h[-201] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(best_timeline_twitter_regex, re.IGNORECASE)), scrape_tweet_bt)]
-    h[18] = [CommandHandler(["silenzia", "silenzio", "taci", "shhh"], silenzia, filters=~filters.UpdateType.EDITED)]
-    h[19] = [
-        CommandHandler(
-            ["permasilenzia", "permasilenzio", "permataci", "shhhhhhhh", "permamute"],
-            permasilenzia,
-            filters=~filters.UpdateType.EDITED,
-        )
-    ]
-    h[20] = [MessageHandler(filters.SenderChat.CHANNEL, deleta_if_channel)]
+    # h[18] = [CommandHandler(["silenzia", "silenzio", "taci", "shhh"], silenzia, filters=~filters.UpdateType.EDITED)]
+    # h[19] = [
+    #     CommandHandler(
+    #         ["permasilenzia", "permasilenzio", "permataci", "shhhhhhhh", "permamute"],
+    #         permasilenzia,
+    #         filters=~filters.UpdateType.EDITED,
+    #     )
+    # ]
+    # h[20] = [MessageHandler(filters.SenderChat.CHANNEL, deleta_if_channel)]
     h[21] = [CommandHandler(["aoc", "leaderboard"], aoc_leaderboard, filters=~filters.UpdateType.EDITED)]
 
     # compleanni.py
@@ -319,32 +320,32 @@ def generate_handlers_dict() -> dict:
     ]
     h[32] = [CommandHandler("get_thread", get_thread_from_dc, filters=~filters.UpdateType.EDITED)]
 
-    # donazioni.py
-    h[33] = [CommandHandler("donazione", donazioni)]
-    h[34] = [PreCheckoutQueryHandler(precheckout_callback)]
-    h[35] = [MessageHandler(filters.SUCCESSFUL_PAYMENT, successful_payment_callback)]
+    # # donazioni.py
+    # h[33] = [CommandHandler("donazione", donazioni)]
+    # h[34] = [PreCheckoutQueryHandler(precheckout_callback)]
+    # h[35] = [MessageHandler(filters.SUCCESSFUL_PAYMENT, successful_payment_callback)]
 
     # games.py
-    h[36] = [CommandHandler(["sassocartaforbici", "scf", "morracinese", "morra"], sassocartaforbici)]
+    # h[36] = [CommandHandler(["sassocartaforbici", "scf", "morracinese", "morra"], sassocartaforbici)]
 
     # lotto.py
-    h[-401] = [
-        MessageHandler(
-            ~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT & filters.Chat(config.ID_LOTTO),
-            maesta_primo,
-        )
-    ]
-    h[38] = [CommandHandler("maesta", elenco_maesta)]
-    h[39] = [CommandHandler(["stats_maesta", "maesta_stats", "maestats", "maestat"], stat_maesta)]
+    # h[-401] = [
+    #     MessageHandler(
+    #         ~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL & filters.TEXT & filters.Chat(config.ID_LOTTO),
+    #         maesta_primo,
+    #     )
+    # ]
+    # h[38] = [CommandHandler("maesta", elenco_maesta)]
+    # h[39] = [CommandHandler(["stats_maesta", "maesta_stats", "maestats", "maestat"], stat_maesta)]
 
     # macros.py
     h[40] = [CommandHandler("ispirami", ispirami, filters=~filters.UpdateType.EDITED)]
     h[41] = [CommandHandler(["changemymind", "change"], change_my_mind, filters=~filters.UpdateType.EDITED)]
 
     # maps.py
-    h[42] = [CommandHandler(["loc", "localize", "location"], location, filters=~filters.UpdateType.EDITED)]
-    h[43] = [CommandHandler(["sw", "street", "streetview"], streetview, filters=~filters.UpdateType.EDITED)]
-    h[44] = [CallbackQueryHandler(maps_buttons, pattern=r"^m_")]
+    # h[42] = [CommandHandler(["loc", "localize", "location"], location, filters=~filters.UpdateType.EDITED)]
+    # h[43] = [CommandHandler(["sw", "street", "streetview"], streetview, filters=~filters.UpdateType.EDITED)]
+    # h[44] = [CallbackQueryHandler(maps_buttons, pattern=r"^m_")]
 
     # meteo.py
     h[45] = [CommandHandler("ora", ora, filters=~filters.UpdateType.EDITED)]
@@ -354,21 +355,21 @@ def generate_handlers_dict() -> dict:
 
     # misc.py
     h[49] = [CallbackQueryHandler(self_delete, pattern=r"^deleteme_")]
-    h[491] = [CommandHandler("movie", movie, filters=~filters.UpdateType.EDITED)]
-    h[50] = [CommandHandler("wikihow", wikihow, filters=~filters.UpdateType.EDITED)]
-    h[51] = [CommandHandler("markov", markovs, filters=~filters.UpdateType.EDITED)]
-    h[52] = [
-        CommandHandler(["trifase", "randomtrif", "randomtrifase"], random_trifase, filters=~filters.UpdateType.EDITED)
-    ]
-    h[53] = [MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, greet_BT_user)]
+    # h[491] = [CommandHandler("movie", movie, filters=~filters.UpdateType.EDITED)]
+    # h[50] = [CommandHandler("wikihow", wikihow, filters=~filters.UpdateType.EDITED)]
+    # h[51] = [CommandHandler("markov", markovs, filters=~filters.UpdateType.EDITED)]
+    # h[52] = [
+    #     CommandHandler(["trifase", "randomtrif", "randomtrifase"], random_trifase, filters=~filters.UpdateType.EDITED)
+    # ]
+    # h[53] = [MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, greet_BT_user)]
     h[-501] = [CallbackQueryHandler(polls_callbackqueryhandlers, pattern=is_inline_button)]
-    h[54] = [CommandHandler("condominioweb", condominioweb, filters=~filters.UpdateType.EDITED)]
+    # h[54] = [CommandHandler("condominioweb", condominioweb, filters=~filters.UpdateType.EDITED)]
     h[55] = [CommandHandler(["start"], start, filters=filters.ChatType.PRIVATE)]
     h[56] = [CommandHandler(["bioritmo", "bio", "biorhythm"], bioritmo, filters=~filters.UpdateType.EDITED)]
-    h[57] = [CommandHandler("traduci", traduci, filters=~filters.UpdateType.EDITED)]
+    # h[57] = [CommandHandler("traduci", traduci, filters=~filters.UpdateType.EDITED)]
     h[58] = [CommandHandler("get_user_info", get_user_info, filters=~filters.UpdateType.EDITED)]
     h[59] = [CommandHandler("spongebob", spongebob, filters=~filters.UpdateType.EDITED)]
-    h[60] = [CommandHandler("square", square, filters=~filters.UpdateType.EDITED)]
+    # h[60] = [CommandHandler("square", square, filters=~filters.UpdateType.EDITED)]
     # h[601] = [CommandHandler("settings", settings, filters=~filters.UpdateType.EDITED)]
     h[-21] = [
         ConversationHandler(
@@ -395,24 +396,24 @@ def generate_handlers_dict() -> dict:
     # timeout a 30secondi con conversation end
 
     h[61] = [CommandHandler("fascio", fascio, filters=~filters.UpdateType.EDITED)]
-    h[62] = [CommandHandler(["lichess", "lichness"], scacchi, filters=~filters.UpdateType.EDITED)]
-    h[63] = [CommandHandler("voice", voice, filters=~filters.UpdateType.EDITED)]
-    h[64] = [CommandHandler(["fatfinger", "fatfingers"], fatfingers, filters=~filters.UpdateType.EDITED)]
-    h[65] = [
-        MessageHandler(
-            ~filters.UpdateType.EDITED
-            & filters.Regex(re.compile(r"[Aa]lexa (?:[Pp]lay|[Rr]iproduci) (.+)", re.IGNORECASE)),
-            alexa,
-        )
-    ]
-    h[66] = [CommandHandler("autoreaction", set_auto_reaction, filters=~filters.UpdateType.EDITED)]
-    h[67] = [MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL, send_auto_reaction)]
-    h[68] = [CommandHandler("bombreact", bomb_react, filters=~filters.UpdateType.EDITED)]
+    # h[62] = [CommandHandler(["lichess", "lichness"], scacchi, filters=~filters.UpdateType.EDITED)]
+    # h[63] = [CommandHandler("voice", voice, filters=~filters.UpdateType.EDITED)]
+    # h[64] = [CommandHandler(["fatfinger", "fatfingers"], fatfingers, filters=~filters.UpdateType.EDITED)]
+    # h[65] = [
+    #     MessageHandler(
+    #         ~filters.UpdateType.EDITED
+    #         & filters.Regex(re.compile(r"[Aa]lexa (?:[Pp]lay|[Rr]iproduci) (.+)", re.IGNORECASE)),
+    #         alexa,
+    #     )
+    # ]
+    # h[66] = [CommandHandler("autoreaction", set_auto_reaction, filters=~filters.UpdateType.EDITED)]
+    # h[67] = [MessageHandler(~filters.UpdateType.EDITED & ~filters.ChatType.CHANNEL, send_auto_reaction)]
+    # h[68] = [CommandHandler("bombreact", bomb_react, filters=~filters.UpdateType.EDITED)]
 
     # movies.py
     h[69] = [CommandHandler(["doveguardo", "dove_guardo", "dove"], doveguardo, filters=~filters.UpdateType.EDITED)]
     h[70] = [CallbackQueryHandler(doveguardo_buttons, pattern=r"^dvg_")]
-    h[71] = [CommandHandler(["imdb", "torrent"], imdb, filters=~filters.UpdateType.EDITED)]
+    # h[71] = [CommandHandler(["imdb", "torrent"], imdb, filters=~filters.UpdateType.EDITED)]
 
     # openai.py
     h[72] = [CommandHandler(["aistatic", "oldai", "aiold", "ai_old"], ai_old)]
@@ -422,18 +423,18 @@ def generate_handlers_dict() -> dict:
     h[76] = [CommandHandler(["riassunto", "riassuntone"], riassuntone)]
 
     # pyrog.py
-    h[77] = [
-        CommandHandler(["karma", "reactionlist", "reactkarma"], reaction_karma, filters=~filters.UpdateType.EDITED)
-    ]
+    # h[77] = [
+    #     CommandHandler(["karma", "reactionlist", "reactkarma"], reaction_karma, filters=~filters.UpdateType.EDITED)
+    # ]
 
     # quiz.py
-    h[78] = [CommandHandler("trivia", make_poll, filters=~filters.UpdateType.EDITED)]
-    h[79] = [PollAnswerHandler(ricevi_risposta_quiz)]
-    h[80] = [CommandHandler("punteggio", punteggio, filters=~filters.UpdateType.EDITED)]
+    # h[78] = [CommandHandler("trivia", make_poll, filters=~filters.UpdateType.EDITED)]
+    # h[79] = [PollAnswerHandler(ricevi_risposta_quiz)]
+    # h[80] = [CommandHandler("punteggio", punteggio, filters=~filters.UpdateType.EDITED)]
     # h[81] = [CommandHandler("classifica", classifica, filters=~filters.UpdateType.EDITED)]
 
     # reddit.py
-    h[82] = [CommandHandler(["redd", "reddit"], reddit, filters=~filters.UpdateType.EDITED)]
+    # h[82] = [CommandHandler(["redd", "reddit"], reddit, filters=~filters.UpdateType.EDITED)]
 
     # reminders.py
     h[83] = [CommandHandler(["reminder", "remindhelp"], reminder_helper, filters=~filters.UpdateType.EDITED)]
@@ -452,18 +453,18 @@ def generate_handlers_dict() -> dict:
     ]
 
     # scrapers.py
-    regex_instagram = r"(\b\S+(:?instagram\.com|instagr\.am)\S+\b)"
-    regex_tiktok = r"(?:https?://vm.tiktok.com\/(\w+))"
-    regex_tiktok_long = r"(?:(?:http|https):\/\/)?(?:www.)?(?:tiktok.com)\/(@[a-zA-Z0-9_.]+)\/video\/(\w+)"
+    # regex_instagram = r"(\b\S+(:?instagram\.com|instagr\.am)\S+\b)"
+    # regex_tiktok = r"(?:https?://vm.tiktok.com\/(\w+))"
+    # regex_tiktok_long = r"(?:(?:http|https):\/\/)?(?:www.)?(?:tiktok.com)\/(@[a-zA-Z0-9_.]+)\/video\/(\w+)"
     # regex_tweet_media = r"(?:(?:http|https):\/\/)?(?:www.|mobile.)?(?:twitter.com)\/(?:\w+)\/status\/(\w+)"
     # regex_youtube_alts = r"(?:(?:http:\/\/)?|(?:https:\/\/)?)?(?:yewtu.be|utew.be)\/(?:watch\?v=)?([a-zA-Z0-9_-]{6,11})"
     # regex_fb_video = r"(?:(?:http|https):\/\/)?(?:www\.|fb\.watch)\/([^\/]{10})"
     # regex_facebok_video = r"(?:(?:http|https):\/\/)?(?:www.|fb.|m.)?(?:watch|facebook.com)(?:\/[\w.]+)(?:\/videos|\/watch)\/([\w.]+)"
-    regex_reddit = r"http(?:s)?:\/\/(?:[\w-]+?\.)?reddit\.com(\/r\/|\/user\/)?([\w:\.]{2,21})(\/comments\/)?(\w{5,9}(?:\/[\w%\\-]+)?)?(\/\w{7})?\/?(\?)?(\S+)?"
-    regex_twitch_clip = r"(?:https:\/\/)?clips\.twitch\.tv\/(\S+)"
+    # regex_reddit = r"http(?:s)?:\/\/(?:[\w-]+?\.)?reddit\.com(\/r\/|\/user\/)?([\w:\.]{2,21})(\/comments\/)?(\w{5,9}(?:\/[\w%\\-]+)?)?(\/\w{7})?\/?(\?)?(\S+)?"
+    # regex_twitch_clip = r"(?:https:\/\/)?clips\.twitch\.tv\/(\S+)"
 
-    h[87] = [CommandHandler(["wikipedia", "wiki"], wikipedia, filters=~filters.UpdateType.EDITED)]
-    h[88] = [CommandHandler("ninofrassica", ninofrassica, filters=~filters.UpdateType.EDITED)]
+    # h[87] = [CommandHandler(["wikipedia", "wiki"], wikipedia, filters=~filters.UpdateType.EDITED)]
+    # h[88] = [CommandHandler("ninofrassica", ninofrassica, filters=~filters.UpdateType.EDITED)]
     # h[89] = [
     #     MessageHandler(
     #         ~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_instagram, re.IGNORECASE)), new_instagram
@@ -483,16 +484,16 @@ def generate_handlers_dict() -> dict:
     # h[95] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_youtube_alts, re.IGNORECASE)), youtube_alts)]
     # h[96] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_fb_video, re.IGNORECASE)), facebook_video)]
     # h[97] = [MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_facebok_video, re.IGNORECASE)), facebook_video)]
-    h[98] = [
-        MessageHandler(
-            ~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_reddit, re.IGNORECASE)), parse_reddit_link
-        )
-    ]
-    h[99] = [
-        MessageHandler(
-            ~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_twitch_clip, re.IGNORECASE)), twitch_clips
-        )
-    ]
+    # h[98] = [
+    #     MessageHandler(
+    #         ~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_reddit, re.IGNORECASE)), parse_reddit_link
+    #     )
+    # ]
+    # h[99] = [
+    #     MessageHandler(
+    #         ~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_twitch_clip, re.IGNORECASE)), twitch_clips
+    #     )
+    # ]
 
     # sets.py
     h[100] = [CommandHandler(["addset", "set"], addset, filters=~filters.UpdateType.EDITED)]
@@ -501,27 +502,27 @@ def generate_handlers_dict() -> dict:
     h[103] = [CommandHandler(["jukebox", "audio"], jukebox, filters=~filters.UpdateType.EDITED)]
 
     # smarthome.py
-    h[104] = [
-        CommandHandler(
-            ["status_luci", "statusluci", "luci", "luci_status"], luci_status, filters=~filters.UpdateType.EDITED
-        )
-    ]
-    h[105] = [CommandHandler(["toggle", "luce", "toggla"], toggle_light, filters=~filters.UpdateType.EDITED)]
-    h[106] = [CommandHandler(["consumo"], consumo, filters=~filters.UpdateType.EDITED)]
-    h[107] = [CommandHandler(["purificatore", "purifier"], purificatore, filters=~filters.UpdateType.EDITED)]
-    h[108] = [
-        CommandHandler(["riscaldamento", "boiler", "caldaia"], riscaldamento_stats, filters=~filters.UpdateType.EDITED)
-    ]
+    # h[104] = [
+    #     CommandHandler(
+    #         ["status_luci", "statusluci", "luci", "luci_status"], luci_status, filters=~filters.UpdateType.EDITED
+    #     )
+    # ]
+    # h[105] = [CommandHandler(["toggle", "luce", "toggla"], toggle_light, filters=~filters.UpdateType.EDITED)]
+    # h[106] = [CommandHandler(["consumo"], consumo, filters=~filters.UpdateType.EDITED)]
+    # h[107] = [CommandHandler(["purificatore", "purifier"], purificatore, filters=~filters.UpdateType.EDITED)]
+    # h[108] = [
+    #     CommandHandler(["riscaldamento", "boiler", "caldaia"], riscaldamento_stats, filters=~filters.UpdateType.EDITED)
+    # ]
 
     # space.py
-    h[109] = [CommandHandler(["solarsystem", "stelle", "stars"], solarsystem, filters=~filters.UpdateType.EDITED)]
-    h[110] = [CommandHandler(["lanci", "launches"], launches, filters=~filters.UpdateType.EDITED)]
+    # h[109] = [CommandHandler(["solarsystem", "stelle", "stars"], solarsystem, filters=~filters.UpdateType.EDITED)]
+    # h[110] = [CommandHandler(["lanci", "launches"], launches, filters=~filters.UpdateType.EDITED)]
 
     # spotify.py
-    regex_spotify = r"(?:(?:http|https):\/\/)?(?:open\.)(?:spotify\.com)\/(?:track|album)\/(?:\S+)"
-    h[111] = [
-        MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_spotify, re.IGNORECASE)), spoty)
-    ]
+    # regex_spotify = r"(?:(?:http|https):\/\/)?(?:open\.)(?:spotify\.com)\/(?:track|album)\/(?:\S+)"
+    # h[111] = [
+    #     MessageHandler(~filters.UpdateType.EDITED & filters.Regex(re.compile(regex_spotify, re.IGNORECASE)), spoty)
+    # ]
 
     # stats.py
     h[112] = [CommandHandler(["stats", "statistiche"], send_stats, filters=~filters.UpdateType.EDITED)]
@@ -534,7 +535,7 @@ def generate_handlers_dict() -> dict:
 
     # testing.py
     h[115] = [CommandHandler(["test", "ping"], test, filters=~filters.UpdateType.EDITED)]
-    h[116] = [CommandHandler("getfile", getfile, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
+    # h[116] = [CommandHandler("getfile", getfile, filters=~filters.UpdateType.EDITED & filters.User(config.ID_TRIF))]
 
     # torrent.py
     h[117] = [
@@ -554,10 +555,10 @@ def generate_handlers_dict() -> dict:
     ]
 
     # videogiochi.py
-    h[121] = [CommandHandler(["giochino", "game"], giochino, filters=~filters.UpdateType.EDITED)]
+    # h[121] = [CommandHandler(["giochino", "game"], giochino, filters=~filters.UpdateType.EDITED)]
 
     # zoom.py
-    h[120] = [CommandHandler(["zoom", "zoomlink", "zoomlinks"], zoom_link, filters=~filters.UpdateType.EDITED)]
+    # h[120] = [CommandHandler(["zoom", "zoomlink", "zoomlinks"], zoom_link, filters=~filters.UpdateType.EDITED)]
 
     # acqua.py
     h[122] = [CommandHandler("update_acqua_db", manual_update_acqua_db, filters=~filters.UpdateType.EDITED)]

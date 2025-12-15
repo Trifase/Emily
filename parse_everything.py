@@ -302,10 +302,10 @@ async def check_for_sets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 set_text = set_text.replace(k, v)
             if is_reply:
                 await update.message.reply_text(
-                    f"{set_text}", quote=False, disable_web_page_preview=True, reply_to_message_id=reply_id
+                    f"{set_text}", do_quote=False, disable_web_page_preview=True, reply_to_message_id=reply_id
                 )
             else:
-                await update.message.reply_text(f"{set_text}", quote=False, disable_web_page_preview=True)
+                await update.message.reply_text(f"{set_text}", do_quote=False, disable_web_page_preview=True)
 
         myself = await context.bot.get_chat_member(update.message.chat.id, config.ID_EMILY)
         if myself.status == ChatMemberStatus.ADMINISTRATOR and myself.can_delete_messages:

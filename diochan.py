@@ -55,7 +55,7 @@ async def random_tensor(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tensors = TensorMessage.select()
     tensor_message = random.choice(tensors).tensor_text
 
-    await update.message.reply_text(tensor_message, quote=False)
+    await update.message.reply_text(tensor_message, do_quote=False)
 
 
 # Quotes
@@ -126,27 +126,27 @@ async def search_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         print(r)
 
         pastebin_url = f"{URL}/raw/{r['key']}"
-        await update.message.reply_html(f'<a href="{pastebin_url}">Ecco a te</a>', quote=False)
+        await update.message.reply_html(f'<a href="{pastebin_url}">Ecco a te</a>', do_quote=False)
         return
 
     quote = get_quotes(searchquery)  # ('1', '8', 'text')
     if quote[0] == "0":  # random quote
         myquote = parsequote(quote[2])
-        await update.message.reply_html(myquote, quote=False)
+        await update.message.reply_html(myquote, do_quote=False)
 
     elif quote[0] == "-1":  # Nessun risultato
-        await update.message.reply_html("Nessun risultato trovato", quote=False)
+        await update.message.reply_html("Nessun risultato trovato", do_quote=False)
 
     elif quote[0] == quote[1]:  # ultima quote
         myquote = parsequote(quote[2])
         message_text = f"Quote {quote[0]} di {quote[1]}: ultima\n{myquote}"
-        await update.message.reply_html(message_text, quote=False)
+        await update.message.reply_html(message_text, do_quote=False)
         last_search = ""
 
     else:
         myquote = parsequote(quote[2])
         message_text = f"Quote {quote[0]} di {quote[1]}\n{myquote}"
-        await update.message.reply_html(message_text, quote=False)
+        await update.message.reply_html(message_text, do_quote=False)
 
 
 async def add_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -183,7 +183,7 @@ async def add_quote(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     newquote = Quote.create(quote_text=quote_to_add)
     newquote.save()
 
-    await update.message.reply_text("Fatto", quote=False)
+    await update.message.reply_text("Fatto", do_quote=False)
 
 
 # Diochan
@@ -317,7 +317,7 @@ async def ascendi(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     newmessage = "```\n" + expand(message.upper()) + "\n```"
 
     string = "".join(newmessage)
-    await update.message.reply_markdown_v2(f"{string}", quote=False)
+    await update.message.reply_markdown_v2(f"{string}", do_quote=False)
     return
 
 
@@ -334,10 +334,10 @@ async def mon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     mon += 1
     context.bot_data["numero_di_mon"] = mon
 
-    await update.message.reply_html(f"<i>({mon})</i>", quote=False)
+    await update.message.reply_html(f"<i>({mon})</i>", do_quote=False)
 
     if mon % 100 == 0:
-        await update.message.reply_text("PEPPEREPÈ!!! - Si vede che vi manca, eh?!", quote=False)
+        await update.message.reply_text("PEPPEREPÈ!!! - Si vede che vi manca, eh?!", do_quote=False)
 
     await printlog(update, "ha nominato mon", mon)
 

@@ -14,7 +14,7 @@ async def reminder_helper(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         return
     await update.message.reply_markdown_v2(
         "Uso: \n`/remindme 3d15h25m messaggio`\n`/remindme 5m butta la pasta`\nUsa `/reminderlist` per la lista dei tuoi reminder e \n`/remindelete <ID>` per eliminare un reminder",
-        quote=True,
+        do_quote=True,
     )
     return
 
@@ -53,8 +53,8 @@ async def remindme(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if not context.args:
         await update.message.reply_markdown_v2(
-            "Devi inserire un lasso di tempo\.\nTempo relativo:\n`/remindme 3 giorni 15 ore messaggio`\n`/remindme 10m butta la pasta`\nTempo assoluto:\n`/remindme 23:59 vai a dormire`\n`/remindme 25/12/2024 Natale`\n`/remindme 31/12/2026 23:56 Capodanno!`\n\nUsa `/reminderlist` per la lista dei tuoi reminder e \n`/remindelete <ID>` per eliminare un reminder",
-            quote=True,
+            "Devi inserire un lasso di tempo\\.\nTempo relativo:\n`/remindme 3 giorni 15 ore messaggio`\n`/remindme 10m butta la pasta`\nTempo assoluto:\n`/remindme 23:59 vai a dormire`\n`/remindme 25/12/2024 Natale`\n`/remindme 31/12/2026 23:56 Capodanno!`\n\nUsa `/reminderlist` per la lista dei tuoi reminder e \n`/remindelete <ID>` per eliminare un reminder",
+            do_quote=True,
         )
         return
 
@@ -81,9 +81,9 @@ async def remindme(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     datenow = str(datetime.datetime.today().strftime("%d/%m/%Y %H:%M"))
 
     if not message:
-        await update.message.reply_markdown_v2(f"Tranquillo, ti avviso io il `{targetdate}`", quote=True)
+        await update.message.reply_markdown_v2(f"Tranquillo, ti avviso io il `{targetdate}`", do_quote=True)
     else:
-        await update.message.reply_markdown_v2(f"Il `{targetdate}` ti ricorderò questo: `{message}`", quote=True)
+        await update.message.reply_markdown_v2(f"Il `{targetdate}` ti ricorderò questo: `{message}`", do_quote=True)
 
     Reminders.create(
         reply_id=reply_id,
@@ -106,7 +106,7 @@ async def remindme(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         send_reminder, r["date_to_remind"], chat_id=chat_id, name=f"{chat_id}_{reply_id}", data=r
     )
 
-    await printlog(update, "vuole che ricordi qualcosa il", f"{targetdate} messaggio: \[{message}]")
+    await printlog(update, "vuole che ricordi qualcosa il", f"{targetdate} messaggio: [{message}]")
 
 
 async def reminders_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -127,7 +127,7 @@ async def reminders_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if counter:
         await context.bot.send_message(update.message.chat.id, reminders, parse_mode="MarkdownV2")
     else:
-        await update.message.reply_markdown_v2("Non trovo un cazzo onestamente", quote=True)
+        await update.message.reply_markdown_v2("Non trovo un cazzo onestamente", do_quote=True)
 
 
 async def remindelete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -160,9 +160,9 @@ async def remindelete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             for job in current_jobs:
                 job.schedule_removal()
 
-            await update.message.reply_html("Fatto", quote=True)
+            await update.message.reply_html("Fatto", do_quote=True)
         else:
-            await update.message.reply_html("Non trovo un cazzo onestamente", quote=True)
+            await update.message.reply_html("Non trovo un cazzo onestamente", do_quote=True)
 
 
 # # A LITT'L BIT OF CLEANIN'

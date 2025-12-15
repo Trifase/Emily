@@ -15,6 +15,8 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from uniplot import plot_to_string
 
+from questdb.ingress import Sender, TimestampNanos
+
 import config
 from utils import get_now, no_can_do, printlog, code_screenshot
 
@@ -72,7 +74,9 @@ def analyze_day(url: str, debug=False) -> tuple:
     # print(data)
     table = soup.find("table", id="blobTable-2")
     if table:
-        celle = table.find_all("td", headers="th_c_2_0")
+        celle = table.find_all("td", headers="th-2-col-0")
+        if len(celle) == 0:
+            celle = table.find_all("td", headers="th_c_2_0")
     else:
         table = soup.find("table", id="blobTable-3")
         celle = table.find_all("td", headers="th_c_3_0")
@@ -257,7 +261,7 @@ async def manual_update_acqua_db(update: Update, context: ContextTypes.DEFAULT_T
         unix_timestamp = datetime.datetime.timestamp(date_obj)
         fixed_timestamp = int(unix_timestamp) + 10
         print(f"{get_now()} [AUTO] Erogazione in Garda il {data_str}")
-        await send_date_to_infludb(fixed_timestamp)
+        await send_date_to_questdb(fixed_timestamp)
         return
     return await update_acqua_db(context, year=year, month=month)
 
@@ -281,20 +285,22 @@ async def update_acqua_db(context: ContextTypes.DEFAULT_TYPE, year, month) -> No
     for link in links:
         # print(f"{get_now()} [AUTO] Analizzo il link: {link}")
         data, celle = analyze_day(link, debug=False)
+        
+        celle = [cella.strip().lower() for cella in celle]
         # print(f"{get_now()} [AUTO] Data: {data}, Quartieri: {', '.join(celle)}")
         if data.strftime("%Y-%m-%d") in db:
             continue
         else:
             db[data.strftime("%Y-%m-%d")] = {"quartieri": celle}
 
-            if 'Garda' in celle:
+            if 'garda' in celle:
                 try:
                     data_str = data.strftime("%Y-%m-%d")
                     date_obj = datetime.datetime.strptime(data_str, "%Y-%m-%d")
                     unix_timestamp = datetime.datetime.timestamp(date_obj)
                     fixed_timestamp = int(unix_timestamp) + 10
                     print(f"{get_now()} [AUTO] Erogazione in Garda il {data_str}")
-                    await send_date_to_infludb(fixed_timestamp)
+                    await send_date_to_questdb(fixed_timestamp)
                 except Exception as e:
                     print(f"{get_now()} [AUTO] C'era garda ma si è spaccato")
 
@@ -304,35 +310,240 @@ async def update_acqua_db(context: ContextTypes.DEFAULT_TYPE, year, month) -> No
     with open(config.DB_ACQUA, "w") as f:
         f.write(j)
 
+    clean_and_compact_format(config.DB_ACQUA, config.DB_ACQUA)
+
     print(f"{get_now()} [AUTO] Turni acqua aggiornati.")
 
 
-async def send_date_to_infludb(timestamp):
-    import influxdb_client
-    from influxdb_client import Point, WritePrecision
-    from influxdb_client.client.write_api import SYNCHRONOUS
-    token = config.INFLUXDB_TOKEN
-    org = "Casa Trifase"
-    url = "http://192.168.1.222:8086"
 
-    write_client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
-    bucket="turni-acqua"
-    write_api = write_client.write_api(write_options=SYNCHRONOUS)
-    point = Point("erogazione").field("fieldKey", True).time(timestamp, write_precision=WritePrecision.S)
-    write_api.write(bucket=bucket, org="Casa Trifase", record=point)
+
+async def send_date_to_questdb(timestamp):
+    """
+    Writes a single data point to the QuestDB 'turni_acqua' table, 
+    initializing the Sender internally.
+    
+    Args:
+        timestamp (datetime.datetime): The time of the event.
+    """
+    
+    QUESTDB_HOST = "192.168.1.95" # Your QuestDB IP
+    QUESTDB_PORT = 9000          # QuestDB ILP over HTTP port
+    
+    # QuestDB table name (replaces 'turni-acqua' bucket and 'erogazione' measurement)
+    QUESTDB_TABLE_NAME = "turni_acqua"
+    
+    # Fields/Columns being sent (fieldKey=True)
+    fields = {"fieldKey": True} 
+    tags = {} 
+    print('timestamp: ', timestamp)
+
+# --- LOGIC FIX HERE ---
+    # Check if the input is already a number (int or float)
+    if isinstance(timestamp, (int, float)):
+        # Assume input is seconds, convert to nanoseconds
+        timestamp_ns_int = int(timestamp * 1_000_000_000)
+    # Check if the input is a datetime object
+    elif hasattr(timestamp, 'timestamp'):
+        # Call the method to get seconds, then convert to nanoseconds
+        timestamp_ns_int = int(timestamp.timestamp() * 1_000_000_000)
+    else:
+        print(f"Error: Unsupported timestamp format: {type(timestamp)}")
+        return
+    # ----------------------
+
+    qdb_timestamp = TimestampNanos(timestamp_ns_int)
+    QUESTDB_CONFIG = f"http::addr={QUESTDB_HOST}:{QUESTDB_PORT}"
+
+    try:
+        with Sender.from_conf(QUESTDB_CONFIG) as qdb_sender:
+            qdb_sender.row(
+                QUESTDB_TABLE_NAME,
+                symbols=tags,
+                columns=fields,
+                at=qdb_timestamp
+            )
+            qdb_sender.flush()
+            print(f"Successfully wrote row for: {qdb_timestamp}")
+            
+    except Exception as e:
+        print(f"Failed to write row to QuestDB: {e}")
+
+
+def clean_and_compact_format(input_file, output_file):
+    try:
+        with open(input_file, 'r', encoding='utf-8') as f:
+            raw_data = json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Could not find {input_file}")
+        return
+
+    cleaned_data = {}
+
+    # Separators to chop off notes
+    separators = [
+        " :", " - ", " (", " a completamento", 
+        " in erogazione", " apertura", " chiusa", " solo nelle"
+    ]
+
+    print(f"Processing {len(raw_data)} dates...")
+
+    for date_key, content in raw_data.items():
+        raw_list = content.get("quartieri", [])
+        clean_list = []
+
+        # 1. Flatten hidden newlines
+        flat_list = []
+        for item in raw_list:
+            if isinstance(item, str):
+                parts = item.replace('\r', '\n').split('\n')
+                flat_list.extend(parts)
+
+        # 2. Clean items
+        for text in flat_list:
+            text = text.strip().lower()
+
+            if not text: continue
+            if "serbatoio" in text: continue
+
+            # Remove notes
+            for sep in separators:
+                if sep in text:
+                    text = text.split(sep)[0].strip()
+
+            if text in [".", "-", ","]: continue
+
+            if text and text not in clean_list:
+                clean_list.append(text)
+
+        # Only add valid dates
+        if clean_list:
+            cleaned_data[date_key] = {
+                "quartieri": clean_list
+            }
+
+    # ---------------------------------------------------------
+    # CUSTOM SAVING LOGIC (Compact Lists)
+    # ---------------------------------------------------------
+    print(f"Saving compacted JSON to {output_file}...")
+    
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write("{\n")
+        
+        # iterate through keys to handle commas correctly
+        keys = list(cleaned_data.keys())
+        total_keys = len(keys)
+        
+        for i, date in enumerate(keys):
+            # Get the clean list
+            q_list = cleaned_data[date]["quartieri"]
+            
+            # Convert just the list to a JSON string (this keeps it on one line)
+            # ensure_ascii=False keeps Italian accents readable
+            list_str = json.dumps(q_list, ensure_ascii=False)
+            
+            # Determine if we need a comma at the end of the line
+            comma = "," if i < total_keys - 1 else ""
+            
+            # Write the line with the structure indented, but the list flat
+            # Format: "YYYY-MM-DD": { "quartieri": ["a", "b", "c"] },
+            f.write(f'  "{date}": {{ "quartieri": {list_str} }}{comma}\n')
+            
+        f.write("}")
+
+    print("Done!")
+
+def send_date_to_questdb_sync(timestamp):
+    """
+    Writes a single data point to the QuestDB 'turni_acqua' table, 
+    initializing the Sender internally.
+    
+    Args:
+        timestamp (datetime.datetime): The time of the event.
+    """
+    
+    QUESTDB_HOST = "192.168.1.95" # Your QuestDB IP
+    QUESTDB_PORT = 9000          # QuestDB ILP over HTTP port
+    
+    # QuestDB table name (replaces 'turni-acqua' bucket and 'erogazione' measurement)
+    QUESTDB_TABLE_NAME = "turni_acqua"
+    
+    # Fields/Columns being sent (fieldKey=True)
+    fields = {"fieldKey": True} 
+    tags = {} 
+    print('timestamp: ', timestamp)
+
+# --- LOGIC FIX HERE ---
+    # Check if the input is already a number (int or float)
+    if isinstance(timestamp, (int, float)):
+        # Assume input is seconds, convert to nanoseconds
+        timestamp_ns_int = int(timestamp * 1_000_000_000)
+    # Check if the input is a datetime object
+    elif hasattr(timestamp, 'timestamp'):
+        # Call the method to get seconds, then convert to nanoseconds
+        timestamp_ns_int = int(timestamp.timestamp() * 1_000_000_000)
+    else:
+        print(f"Error: Unsupported timestamp format: {type(timestamp)}")
+        return
+    # ----------------------
+
+    qdb_timestamp = TimestampNanos(timestamp_ns_int)
+    QUESTDB_CONFIG = f"http::addr={QUESTDB_HOST}:{QUESTDB_PORT}"
+
+    try:
+        with Sender.from_conf(QUESTDB_CONFIG) as qdb_sender:
+            qdb_sender.row(
+                QUESTDB_TABLE_NAME,
+                symbols=tags,
+                columns=fields,
+                at=qdb_timestamp
+            )
+            qdb_sender.flush()
+            print(f"Successfully wrote row for: {qdb_timestamp}")
+            
+    except Exception as e:
+        print(f"Failed to write row to QuestDB: {e}")
 
 
 if __name__ == "__main__":
-    quartiere = 'Garda'
-    erogazioni = get_erogazioni(json_file=config.DB_ACQUA, quartiere=quartiere)
-    for erogazione in erogazioni:
-        #convert a YYYY-MM-DD string into a nanosecond timestamp
-        date_obj = datetime.datetime.strptime(erogazione, "%Y-%m-%d")
+    # quartiere = 'Garda'
+    # erogazioni = get_erogazioni(json_file=config.DB_ACQUA, quartiere=quartiere)
+    # for erogazione in erogazioni:
+    #     #convert a YYYY-MM-DD string into a nanosecond timestamp
+    #     date_obj = datetime.datetime.strptime(erogazione, "%Y-%m-%d")
 
-        # Step 2: Convert the datetime object to a Unix timestamp in seconds
-        unix_timestamp = datetime.datetime.timestamp(date_obj)
+    #     # Step 2: Convert the datetime object to a Unix timestamp in seconds
+    #     unix_timestamp = datetime.datetime.timestamp(date_obj)
 
-        # Step 3: Convert the Unix timestamp to nanoseconds
-        print(f'erogazione fieldKey=TRUE {int(unix_timestamp) + 10}')
-    # stats = fancy_stats(erogazioni, print_plot=False, limit_erogazioni=1000, only_data=False)
-    # print(stats)
+    #     # Step 3: Convert the Unix timestamp to nanoseconds
+    #     print(f'erogazione fieldKey=TRUE {int(unix_timestamp) + 10}')
+    # # stats = fancy_stats(erogazioni, print_plot=False, limit_erogazioni=1000, only_data=False)
+    # # print(stats)
+
+
+    #MANUAL UPDATE - USING A SYNC VERSION OF send_date_to_questdb
+    # db = json.load(open(config.DB_ACQUA, "r"))
+    # YEAR = 2025
+    # MONTH = 11
+    # print('Updating acqua DB for year ', YEAR, ' month ', MONTH)
+    # links = get_links(year=YEAR, month=MONTH)
+    # for link in links:
+    #     data, celle = analyze_day(link, debug=False)
+    #     celle = [cella.strip().lower() for cella in celle]
+    #     db[data.strftime("%Y-%m-%d")] = {"quartieri": celle}
+    #     if 'garda' in celle:
+    #             data_str = data.strftime("%Y-%m-%d")
+    #             date_obj = datetime.datetime.strptime(data_str, "%Y-%m-%d")
+    #             unix_timestamp = datetime.datetime.timestamp(date_obj)
+    #             fixed_timestamp = int(unix_timestamp) + 10
+    #             print(f"{get_now()} [AUTO] Erogazione in Garda il {data_str}")
+    #             send_date_to_questdb_sync(fixed_timestamp)
+
+    # print('Saving updated DB')
+    # db = dict(sorted(db.items()))
+    # j = json.dumps(db)
+    # with open(config.DB_ACQUA, "w") as f:
+    #     f.write(j)
+
+
+    # CLEANUP
+    clean_and_compact_format(config.DB_ACQUA, 'db/erogazioni_cleaned.json')

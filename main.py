@@ -4,15 +4,15 @@ import locale
 import platform
 import warnings
 
-import instaloader
+# import instaloader
 import pytz
 from telegram import Update
 from telegram import __version__ as TG_VER
 from telegram.constants import ParseMode
 from telegram.ext import AIORateLimiter, Application, ApplicationBuilder, Defaults, PicklePersistence
 
-from telethon import TelegramClient
-from telethon.sessions import StringSession
+# from telethon import TelegramClient
+# from telethon.sessions import StringSession
 
 import config
 from acqua import update_acqua_db_cron
@@ -23,7 +23,7 @@ from cron_jobs import (
     # lotto_member_count,
     parse_diochan,
     # parse_niuchan,
-    post_solarsystem_mastodon,
+    # post_solarsystem_mastodon,
     heartbeat
 )
 from database import Chatlog, Compleanni, Quote, Reminders, TensorMessage
@@ -141,15 +141,15 @@ async def post_init(app: Application) -> None:
     # print(f'{get_now()} Server web inizializzato!')
 
     # Inizializzo la sessione di Instaloader per Instagram
-    L = instaloader.Instaloader(
-        dirname_pattern="ig/{target}",
-        quiet=True,
-        fatal_status_codes=[429],
-        save_metadata=False,
-        max_connection_attempts=1,
-    )
-    USER = "emilia_superbot"
-    L.load_session_from_file(USER, "db/session-emilia_superbot")
+    # L = instaloader.Instaloader(
+    #     dirname_pattern="ig/{target}",
+    #     quiet=True,
+    #     fatal_status_codes=[429],
+    #     save_metadata=False,
+    #     max_connection_attempts=1,
+    # )
+    # USER = "emilia_superbot"
+    # L.load_session_from_file(USER, "db/session-emilia_superbot")
 
     # telethon_session = app.bot_data.get("telethon_session")
     # async with TelegramClient(StringSession(telethon_session), config.API_ID, config.API_HASH) as client:

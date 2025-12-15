@@ -16,9 +16,9 @@ from telegram.ext import ContextTypes
 
 import config
 from database import Chatlog, Compleanni, Reminders
-from pyrog import get_all_chatmembers
+# from pyrog import get_all_chatmembers
 from acqua import get_links, analyze_day
-from space import StelleResult, make_solar_system
+# from space import StelleResult, make_solar_system
 from utils import get_now
 
 

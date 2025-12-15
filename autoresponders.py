@@ -36,7 +36,7 @@
 
 #     print(f'{get_now()} {await get_display_name(update.effective_user)} in {get_chat_name(update.message.chat.id)} ma che sei sordo??')
 #     if update.message.from_user.id == 208435168:
-#         update.message.reply_markdown_v2(f'Basta aurora', quote=True)
+#         update.message.reply_markdown_v2(f'Basta aurora', do_quote=True)
 #         return
 #     try:
 #         messaggio_originale = update.message.reply_to_message.text
@@ -45,7 +45,7 @@
 #         else:
 #             newmessage = messaggio_originale.upper()
 #         # print(newmessage)
-#         update.message.reply_html(f'{newmessage}', quote=True)
+#         update.message.reply_html(f'{newmessage}', do_quote=True)
 #     except AttributeError:
 #         print(f'{get_now()} {await get_display_name(update.effective_user)} in {get_chat_name(update.message.chat.id)} è sordo, ma parla da solo.')
 
@@ -124,5 +124,5 @@
 #         return
 #     num = random.randint(1, 1500)
 #     risp = random.choice(["", "Almeno ", "Credo che la cifra esatta sia ", "Più di ", "Meno di ", "Esattamente "])
-#     update.message.reply_text(f'{risp}{num}.', quote=False)
+#     update.message.reply_text(f'{risp}{num}.', do_quote=False)
 #     return

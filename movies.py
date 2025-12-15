@@ -1,7 +1,7 @@
 
 import requests
 from aiographql.client import GraphQLClient, GraphQLRequest, GraphQLResponse
-from imdb import Cinemagoer
+# from imdb import Cinemagoer
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.ext import ContextTypes
 

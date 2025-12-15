@@ -1,0 +1,43 @@
+[project]
+name = "emily"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiographql-client>=1.1.0",
+    "aiohttp-client-cache>=0.14.1",
+    "apscheduler>=3.11.0",
+    "atproto>=0.0.63",
+    "audioop-lts>=0.2.2",
+    "beautifulsoup4>=4.14.2",
+    "codetiming>=1.4.0",
+    "dataclassy>=1.0.1",
+    "dateparser>=1.2.2",
+    "deepl>=1.23.0",
+    "ffmpeg>=1.4",
+    "gtts>=2.5.4",
+    "humanize>=4.14.0",
+    "hurry>=1.1",
+    "hurry-filesize>=0.9",
+    "influxdb-client>=1.49.0",
+    "jsonlines>=4.0.0",
+    "mastodon-py>=2.1.4",
+    "matplotlib>=3.10.7",
+    "numpy>=2.3.4",
+    "openai>=2.6.1",
+    "peewee>=3.18.2",
+    "pillow>=12.0.0",
+    "pydub>=0.25.1",
+    "python-telegram-bot[all,rate-limiter]>=22.5",
+    "pytz>=2025.2",
+    "qbittorrent-api>=2025.7.0",
+    "questdb>=4.0.0",
+    "requests>=2.32.5",
+    "requests-html>=0.10.0",
+    "rich>=14.2.0",
+    "tiktoken>=0.12.0",
+    "tweepy>=4.16.0",
+    "uniplot>=0.21.4",
+    "upsidedown>=0.4",
+]

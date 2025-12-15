@@ -1,14 +1,14 @@
+import asyncio
 import pprint
 import time
-import asyncio
 import traceback
 
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from utils import printlog
-from atproto import AsyncClient, client_utils
+# from atproto import AsyncClient, client_utils
 import config
+from utils import printlog
 
 
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

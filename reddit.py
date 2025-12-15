@@ -347,7 +347,7 @@ async def reddit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                             gallery.append(submission.media_metadata[image]["s"]["u"])
 
                 message = f"<a href='{permalink}'>{sub}</a> | {upvotes} upvotes\n<a href='{url}'>{title}</a>"
-                reply_to = await update.message.reply_html(message, quote=False, disable_web_page_preview=True)
+                reply_to = await update.message.reply_html(message, do_quote=False, disable_web_page_preview=True)
                 await context.bot.send_media_group(
                     reply_to_message_id=reply_to.message_id,
                     chat_id=update.message.chat.id,

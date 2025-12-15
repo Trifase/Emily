@@ -4,6 +4,9 @@ from collections import defaultdict
 from telegram import Update
 from telegram.ext import ContextTypes
 
+
+import textwrap
+
 import config
 from utils import crea_sondaggino, get_now, make_delete_button, no_can_do, printlog
 
@@ -179,9 +182,14 @@ async def listaset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     trigger_word_list.append(key)
             message += f"{' · '.join(sorted(trigger_word_list))}\n\n"
 
-    await update.message.reply_text(
-        f"{message}", disable_notification=True, disable_web_page_preview=True, reply_markup=make_delete_button(update)
-    )
+
+    if len(message) > 4000:
+        lines = textwrap.wrap(message, 4000, break_long_words=False)
+        for line in lines:
+             await update.message.reply_text(f"{line}", disable_notification=True, disable_web_page_preview=True, reply_markup=make_delete_button(update))
+    else:
+         await update.message.reply_text(f"{message}", disable_notification=True, disable_web_page_preview=True, reply_markup=make_delete_button(update))
+
 
 
 async def deleteset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_passed=False) -> None:
@@ -208,7 +216,7 @@ async def deleteset(update: Update, context: ContextTypes.DEFAULT_TYPE, poll_pas
         try:
             del chatdict[trigger]
             print(f"{get_now()} Fatto!")
-            await update.message.reply_text("Fatto.", quote=False)
+            await update.message.reply_text("Fatto.", do_quote=False)
             json.dump(sets, open("db/sets.json", "w"), indent=4)
             # we refresh the in-memory copy of sets
             if "current_sets" not in context.bot_data:

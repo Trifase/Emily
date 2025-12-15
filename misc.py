@@ -12,14 +12,14 @@ import ffmpeg
 import httpx
 import humanize
 import jsonlines
-import lichess.api
-import markovify
+# import lichess.api
+# import markovify
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import requests
 import upsidedown
-import zstandard
+# import zstandard
 from aiohttp_client_cache import CachedSession, FileBackend
 from codetiming import Timer
 
@@ -29,13 +29,13 @@ from gtts import gTTS
 
 # from nudenet import NudeClassifier, NudeDetector
 from PIL import Image
-from pydub import AudioSegment
+# from pydub import AudioSegment
 from telegram import ChatMember, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.ext import ContextTypes
-from youtubesearchpython import VideosSearch
+# from youtubesearchpython import VideosSearch
 
 import config
-from pyrog import get_all_chatmembers, get_user_from_username, pyro_bomb_reaction, send_reaction
+# from pyrog import get_all_chatmembers, get_user_from_username, pyro_bomb_reaction, send_reaction
 from utils import expand, get_display_name, get_user_settings, no_can_do, print_progressbar, printlog
 
 
@@ -71,7 +71,7 @@ async def movie(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         ffmpeg.input(this_movie, ss=r).output(f"{tempphoto.name}", vframes=1, loglevel="quiet").run(
             overwrite_output=True
         )
-        await update.message.reply_photo(photo=open(tempphoto.name, "rb"), quote=False)
+        await update.message.reply_photo(photo=open(tempphoto.name, "rb"), do_quote=False)
 
 
 async def self_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -120,7 +120,7 @@ async def markovs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         markov_message = text_model.make_sentence_with_start(startword, strict=False, min_words=20)
     except Exception:
         markov_message = text_model.make_sentence()
-    await update.message.reply_text(markov_message, quote=False)
+    await update.message.reply_text(markov_message, do_quote=False)
 
     #
     # if markov_message.endswith('.'):

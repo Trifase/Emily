@@ -41,7 +41,7 @@ async def settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if "-help" in context.args:
         message = "<code>/settings</code> per vedere e cambiare i settings personali;\n<code>/settings [chiave] [valore]</code> per impostare una chiave direttamente."
-        await update.message.reply_html(message, quote=False, allow_sending_without_reply=True)
+        await update.message.reply_html(message, do_quote=False, allow_sending_without_reply=True)
         context.user_data.pop("conversation_settings", None)
         return ConversationHandler.END
     try:

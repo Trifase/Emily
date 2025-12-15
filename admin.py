@@ -177,7 +177,7 @@ async def count_lines(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             lines += sum(1 for line in open(file, "rb"))
     await update.message.reply_html(
         f"Emily <code>{config.VERSION}</code>\nUsing <code>python-telegram-bot v{TG_VER}</code> on Python <code>{platform.python_version()}</code>\nNumero totale di linee di codice: <code>{lines}</code>",
-        quote=False,
+        do_quote=False,
     )
 
 
@@ -652,7 +652,7 @@ async def set_title(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await printlog(update, "cambia titolo", title)
     # print(f'{get_now()} {await get_display_name(update.effective_user)} in {await get_chat_name(update.message.chat.id)} imposta il nome {title}')
     if 0 > len(title) > 255:
-        await update.message.reply_text("Troppo lungo.", quote=False)
+        await update.message.reply_text("Troppo lungo.", do_quote=False)
     else:
         await context.bot.set_chat_title(update.message.chat.id, title)
 
